@@ -55,6 +55,12 @@ class ProjectConfig
 		end
 		return @password
 	end
+
+	def jiraEndPoint
+		return @jiraEndPoint unless @jiraEndPoint.nil?
+		@jiraEndPoint = URI(self['.jira.url'] + '/rest/api/2/')
+		return @jiraEndPoint
+	end
 end
 
 # Load and merge config files.

@@ -9,28 +9,27 @@ command :status do |c|
 		options.defaults :t=>4
 
 		project = $cfg['.jira.project']
-		rest = URI( $cfg['.jira.url'] + '/rest/api/2/')
 	
-		Net::HTTP.start(rest.host, rest.port, :use_ssl=>true) do |http|
+		Net::HTTP.start($cfg.jiraEndPoint.host, $cfg.jiraEndPoint.port, :use_ssl=>true) do |http|
 			hh = '#' * options.t.to_i
 
 			puts "#{hh} Done"
-			query ="assignee = #{@username} AND project = #{project} AND status = 'Pending Release'" 
+			query ="assignee = #{$cfg.username} AND project = #{project} AND status = 'Pending Release'" 
 			keys = getIssueKeys(http, query)
 			keys.each {|k| puts "- #{k}"}
 
 			puts "#{hh} Testing"
-			query ="assignee = #{@username} AND project = #{project} AND status = Testing" 
+			query ="assignee = #{$cfg.username} AND project = #{project} AND status = Testing" 
 			keys = getIssueKeys(http, query)
 			keys.each {|k| puts "- #{k}"}
 
 			puts "#{hh} In Progress"
-			query ="assignee = #{@username} AND project = #{project} AND status = 'In Progress'" 
+			query ="assignee = #{$cfg.username} AND project = #{project} AND status = 'In Progress'" 
 			keys = getIssueKeys(http, query)
 			keys.each {|k| puts "- #{k}"}
 
 			puts "#{hh} To Do"
-			query ="assignee = #{@username} AND project = #{project} AND status = Open" 
+			query ="assignee = #{$cfg.username} AND project = #{project} AND status = Open" 
 			keys = getIssueKeys(http, query)
 			keys.each {|k| puts "- #{k}"}
 

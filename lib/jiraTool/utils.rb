@@ -19,7 +19,7 @@ def verbose(msg)
 end
 
 	def getIssueKeys(http, query)
-		request = Net::HTTP::Post.new(URI( $cfg['.jira.url'] + '/rest/api/2/') + 'search')
+		request = Net::HTTP::Post.new($cfg.jiraEndPoint + 'search')
 		request.content_type = 'application/json'
 		request.basic_auth($cfg.username, $cfg.password)
 		request.body = JSON.generate({
