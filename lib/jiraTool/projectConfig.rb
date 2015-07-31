@@ -27,40 +27,6 @@ class ProjectConfig
 	end
 
 
-	def username()
-		return @username unless @username.nil?
-		userpass = self['.jira.userpass']
-		if userpass.include? ':'
-			@username, @password = userpass.split(':')
-		else
-			@username = userpass
-			# if darwin
-			@password = `security 2>&1 >/dev/null find-internet-password -gs "#{self['.jira.url']}" -a "#{@username}"`
-			@password.strip!
-			@password.sub!(/^password: "(.*)"$/, '\1')
-		end
-		return @username
-	end
-	def password
-		return @password unless @username.nil?
-		userpass = self['.jira.userpass']
-		if userpass.include? ':'
-			@username, @password = userpass.split(':')
-		else
-			@username = userpass
-			# if darwin
-			@password = `security 2>&1 >/dev/null find-internet-password -gs "#{self['.jira.url']}" -a "#{@username}"`
-			@password.strip!
-			@password.sub!(/^password: "(.*)"$/, '\1')
-		end
-		return @password
-	end
-
-	def jiraEndPoint
-		return @jiraEndPoint unless @jiraEndPoint.nil?
-		@jiraEndPoint = URI(self['.jira.url'] + '/rest/api/2/')
-		return @jiraEndPoint
-	end
 end
 
 # Load and merge config files.
