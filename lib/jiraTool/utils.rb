@@ -133,7 +133,7 @@ class JiraUtils
 				request = Net::HTTP::Put.new(r + ('issue/' + key))
 				request.content_type = 'application/json'
 				request.basic_auth(username(), password())
-				request.body = update
+				request.body = JSON.generate({ 'update' => update }) 
 
 				verbose "Updating key #{key} with #{update}"
 				if not @ptions.dry
@@ -149,3 +149,14 @@ class JiraUtils
 	end
 
 end
+
+class GitUtils
+
+	def self.getVersion
+		tag = `git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags | tail -1`.chomp
+		version = tag.split('/').last
+		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
+		version = newver unless newver == ''
+	end
+end
+
