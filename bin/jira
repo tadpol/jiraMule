@@ -12,6 +12,25 @@ global_option '--config' # TODO
 
 require 'jiraTool/status'
 require 'jiraTool/testReady'
+# difference between testReady and release is two things:
+# 1. testReady also assigns
+# 2. release also transitions
+#
+# So, merge all that into one command and have the parts be --options
+
+command :query do |c|
+  c.syntax = 'jira query [options] query'
+  c.summary = 'Get the keys from a jira query'
+  c.description = ''
+  c.example 'description', 'command example'
+  c.action do |args, options|
+    # Do something or c.when_called Jira::Commands::Release
+		jira = JiraUtils.new(args, options)
+		q = args.join(' ')
+		keys = jira.getIssueKeys(q)
+		keys.each {|k| puts k}
+  end
+end
 
 command :release do |c|
   c.syntax = 'jira release [options]'
@@ -24,3 +43,4 @@ command :release do |c|
   end
 end
 
+#  vim: set sw=2 ts=2 :

@@ -78,6 +78,8 @@ class JiraUtils
 			when Net::HTTPSuccess
 				issues = JSON.parse(response.body)
 				keys = issues['issues'].map {|item| item['key'] + ' ' + item.access('fields.summary')}
+				#FIXME: this isn't what the other uses of this command expect.
+				#Really should just return issues.
 				return keys
 			else
 				return []
@@ -148,6 +150,50 @@ class JiraUtils
 		end
 	end
 
+	def transition(keys, to)
+		r = jiraEndPoint
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			# *sigh* Need to transition by ID, buts what's the ID? So look that up
+			request = Net::HTTP::Get.new(r + ('issue/' + keys.first + '/transitions'))
+			request.content_type = 'application/json'
+			request.basic_auth(username, password)
+			verbose "Fetching transition ID for #{to}"
+			response = http.request(request)
+			case response
+			when Net::HTTPSuccess
+				trans = JSON.parse(response.body)
+				closed = trans['transitions'].select {|item| item['name'] == to }
+			else
+				puts "failed because"
+				exit 1 # FIXME: return or throw instead
+			end
+
+			if closed.empty?
+				puts "Cannot find Transition to Closed!!!!"
+				exit 2 # FIXME: return or throw instead
+			end
+
+			printVars({:closedID=>closed[0]['id']})
+
+			update = JSON.generate({'transition'=>{'id'=> closed[0]['id'] }})
+			keys.each do |key|
+				request = Net::HTTP::Post.new(@rest2 + ('issue/' + key + '/transitions'))
+				request.content_type = 'application/json'
+				request.basic_auth(username, password)
+				request.body = update
+
+				verbose "Updating key #{key} with #{update}"
+				if not @options.dry
+					response = http.request(request)
+					case response
+					when Net::HTTPSuccess
+					else
+						puts "failed on #{key} because #{response}"
+					end
+				end
+			end
+		end
+	end
 end
 
 class GitUtils
