@@ -6,7 +6,8 @@ require 'jiraTool'
 
 program :version, '0.0.1'
 program :description, 'me'
-global_option '--verbose'
+global_option '--verbose', 'Be chatty'
+global_option '-n --dry', "Don't run actions that make changes"
 global_option '--config' # TODO
 
 require 'jiraTool/status'

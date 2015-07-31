@@ -5,6 +5,7 @@ command :testReady do |c|
 	c.description = ''
 	c.example 'description', 'command example'
 	c.option '-r --reassign', 'Also reassign to Default'
+#	c.option '-a --assign USER', 'Assign to '
 	c.action do |args, options|
 		# Do something or c.when_called Jira::Commands::Testready
 		options.defaults :reassign => true
