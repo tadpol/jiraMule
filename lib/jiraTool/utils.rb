@@ -18,8 +18,10 @@ def verbose(msg)
 	$stdout.print("\n")
 end
 
-	def getIssueKeys(http, query)
-		request = Net::HTTP::Post.new($cfg.jiraEndPoint + 'search')
+def getIssueKeys(query)
+	r = $cfg.jiraEndPoint
+	Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+		request = Net::HTTP::Post.new(r + 'search')
 		request.content_type = 'application/json'
 		request.basic_auth($cfg.username, $cfg.password)
 		request.body = JSON.generate({
@@ -38,4 +40,6 @@ end
 			return []
 		end
 	end
+end
+
 
