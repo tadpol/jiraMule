@@ -61,7 +61,7 @@ class JiraUtils
 		return @jiraEndPoint
 	end
 
-	def getIssueKeys(query)
+	def getIssues(query)
 		r = jiraEndPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + 'search')
@@ -77,10 +77,9 @@ class JiraUtils
 			case response
 			when Net::HTTPSuccess
 				issues = JSON.parse(response.body)
-				keys = issues['issues'].map {|item| item['key'] + ' ' + item.access('fields.summary')}
-				#FIXME: this isn't what the other uses of this command expect.
-				#Really should just return issues.
-				return keys
+				#return issues
+				return issues['issues']
+
 			else
 				return []
 			end

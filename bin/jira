@@ -27,7 +27,8 @@ command :query do |c|
     # Do something or c.when_called Jira::Commands::Release
 		jira = JiraUtils.new(args, options)
 		q = args.join(' ')
-		keys = jira.getIssueKeys(q)
+		issues = jira.getIssues(q)
+		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 		keys.each {|k| puts k}
   end
 end

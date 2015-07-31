@@ -19,7 +19,7 @@ command :testReady do |c|
 
 		### Find all unreleased issues
 		query ="assignee = #{jira.username} AND project = #{project} AND status = Testing" 
-		keys = jira.getIssueKeys(query)
+		keys = jira.getIssues(query).map {|item| item['key'] }
 		printVars({:keys=>keys})
 
 		### Mark issues as fixed by version

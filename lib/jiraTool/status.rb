@@ -11,26 +11,30 @@ command :status do |c|
 		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
 
-		hh = '#' * options.t.to_i
+		hh = '#' * options.t.to_i # FIXME: this isn't working.
 
 		puts "#{hh} Done"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = 'Pending Release'" 
-		keys = jira.getIssueKeys(query)
+		issues = jira.getIssues(query)
+		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 		keys.each {|k| puts "- #{k}"}
 
 		puts "#{hh} Testing"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = Testing" 
-		keys = jira.getIssueKeys(query)
+		issues = jira.getIssues(query)
+		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 		keys.each {|k| puts "- #{k}"}
 
 		puts "#{hh} In Progress"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = 'In Progress'" 
-		keys = jira.getIssueKeys(query)
+		issues = jira.getIssues(query)
+		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 		keys.each {|k| puts "- #{k}"}
 
 		puts "#{hh} To Do"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = Open" 
-		keys = jira.getIssueKeys(query)
+		issues = jira.getIssues(query)
+		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 		keys.each {|k| puts "- #{k}"}
 	end
 end
