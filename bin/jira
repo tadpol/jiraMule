@@ -12,6 +12,7 @@ global_option '--config' # TODO
 
 require 'jiraTool/status'
 require 'jiraTool/testReady'
+require 'jiraTool/release'
 # difference between testReady and release is two things:
 # 1. testReady also assigns
 # 2. release also transitions
@@ -30,17 +31,6 @@ command :query do |c|
 		issues = jira.getIssues(q)
 		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 		keys.each {|k| puts k}
-  end
-end
-
-command :release do |c|
-  c.syntax = 'jira release [options]'
-  c.summary = ''
-  c.description = ''
-  c.example 'description', 'command example'
-  c.option '--some-switch', 'Some switch that does something'
-  c.action do |args, options|
-    # Do something or c.when_called Jira::Commands::Release
   end
 end
 
