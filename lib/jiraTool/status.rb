@@ -11,6 +11,7 @@ command :status do |c|
 		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
 
+		puts "--- #{options.t} ---"
 		hh = '#' * options.t.to_i # FIXME: this isn't working.
 
 		puts "#{hh} Done"
