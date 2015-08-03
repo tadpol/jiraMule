@@ -11,6 +11,8 @@ command :testReady do |c|
 		options.defaults :reassign => true
 
 		version = GitUtils.getVersion
+		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
+		version = newver unless newver == ''
 
 		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
@@ -25,7 +27,7 @@ command :testReady do |c|
 		### Mark issues as fixed by version
 		updt = { 'fixVersions'=>[{'add'=>{'name'=>version}}] }
 		## assign to '-1' to have Jira automatically assign it
-		updt['assignee'] = [{'set'=>{'name'=>'-1'}}] if $args['--reassign']
+		updt['assignee'] = [{'set'=>{'name'=>'-1'}}] if options.reassign
 
 		jira.updateKeys(keys, updt)
 

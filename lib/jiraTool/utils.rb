@@ -198,10 +198,9 @@ end
 class GitUtils
 
 	def self.getVersion
-		tag = `git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags | tail -1`.chomp
-		version = tag.split('/').last
-		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
-		version = newver unless newver == ''
+		tag = `git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags | head -1`.chomp
+		return tag.split('/').last
 	end
 end
 
+#  vim: set sw=4 ts=4 :
