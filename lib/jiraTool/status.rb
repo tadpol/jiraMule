@@ -16,26 +16,22 @@ command :status do |c|
 		puts "#{hh} Done"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = 'Pending Release'" 
 		issues = jira.getIssues(query)
-		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
-		keys.each {|k| puts "- #{k}"}
+		issues.each {|item| puts "- #{item['key']} #{item.access('fields.summary')}" }
 
 		puts "#{hh} Testing"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = Testing" 
 		issues = jira.getIssues(query)
-		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
-		keys.each {|k| puts "- #{k}"}
+		issues.each {|item| puts "- #{item['key']} #{item.access('fields.summary')}" }
 
 		puts "#{hh} In Progress"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = 'In Progress'" 
 		issues = jira.getIssues(query)
-		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
-		keys.each {|k| puts "- #{k}"}
+		issues.each {|item| puts "- #{item['key']} #{item.access('fields.summary')}" }
 
 		puts "#{hh} To Do"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = Open" 
 		issues = jira.getIssues(query)
-		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
-		keys.each {|k| puts "- #{k}"}
+		issues.each {|item| puts "- #{item['key']} #{item.access('fields.summary')}" }
 	end
 end
 #  vim: set sw=2 ts=2 :
