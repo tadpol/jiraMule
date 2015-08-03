@@ -5,10 +5,20 @@ require 'commander/import'
 require 'jiraTool'
 
 program :version, '0.0.1'
-program :description, 'me'
+program :description, %{A collection of things that I do with jira.
+
+Many of which are either big batch operations, or need bits of info from
+the command line.  All of which turn out to be better handled as a command
+line app.
+
+This very specifically does not try to be a generic jira tool; those exist
+already.  Rather this is specific to things I need.
+}
 global_option '--verbose', 'Be chatty'
 global_option '-n', '--dry', "Don't run actions that make changes"
-global_option '--config' # TODO
+#global_option '--config' # TODO
+
+default_command :help
 
 require 'jiraTool/status'
 require 'jiraTool/testReady'
@@ -17,7 +27,7 @@ require 'jiraTool/release'
 # 1. testReady also assigns
 # 2. release also transitions
 #
-# So, merge all that into one command and have the parts be --options
+# So, merge all that into one command and have the parts be --options; maybe
 
 command :query do |c|
   c.syntax = 'jira query [options] query'
