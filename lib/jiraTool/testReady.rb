@@ -4,11 +4,11 @@ command :testReady do |c|
 	c.summary = 'Little tool for setting the fix version on testable issues'
 	c.description = ''
 	c.example 'description', 'command example'
-	c.option '-r --reassign', 'Also reassign to Default'
+	c.option '-r', '--reassign', 'Also reassign to Default'
 #	c.option '-a --assign USER', 'Assign to '
 	c.action do |args, options|
 		# Do something or c.when_called Jira::Commands::Testready
-		options.defaults :reassign => true
+		options.default :reassign => true
 
 		version = GitUtils.getVersion
 		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
@@ -17,7 +17,7 @@ command :testReady do |c|
 		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
 
-		jira.createVersion(version)
+		jira.createVersion(project, version)
 
 		### Find all unreleased issues
 		query ="assignee = #{jira.username} AND project = #{project} AND status = Testing" 

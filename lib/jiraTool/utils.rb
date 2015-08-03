@@ -86,7 +86,7 @@ class JiraUtils
 		end
 	end
 
-	def createVersion(version)
+	def createVersion(project, version)
 		r = jiraEndPoint
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			### Create new version
@@ -137,7 +137,7 @@ class JiraUtils
 				request.body = JSON.generate({ 'update' => update }) 
 
 				verbose "Updating key #{key} with #{update}"
-				if not @ptions.dry
+				if not @options.dry
 					response = http.request(request)
 					case response
 					when Net::HTTPSuccess
