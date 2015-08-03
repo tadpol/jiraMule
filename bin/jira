@@ -24,9 +24,13 @@ command :query do |c|
   c.summary = 'Get the keys from a jira query'
   c.description = ''
   c.example 'description', 'command example'
+	c.option '-u', '--[no-]assignedSelf', 'Prefix query with assignee test'
+	c.option '-p', '--[no-]project', 'Prefix query with project test'
   c.action do |args, options|
     # Do something or c.when_called Jira::Commands::Release
 		jira = JiraUtils.new(args, options)
+		args.unshift("assignee = #{jira.username} AND") if options.assignedSelf
+		args.unshift("project = #{$cfg['.jira.project']} AND") if options.project
 		q = args.join(' ')
 		issues = jira.getIssues(q)
 		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
