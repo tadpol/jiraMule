@@ -3,16 +3,15 @@ command :status do |c|
   c.syntax = 'jira status [options]'
   c.summary = 'List out the task status for including in Release Notes'
   c.description = ''
-	c.option '-t DEPTH', Integer, 'Header depth'
+	c.option '--depth DEPTH', Integer, 'Header depth'
   c.action do |args, options|
     # Do something or c.when_called Jira::Commands::Status
-		options.defaults :t=>4
+		options.default :depth=>4
 
 		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
 
-		puts "--- #{options.t} ---"
-		hh = '#' * options.t.to_i # FIXME: this isn't working.
+		hh = '#' * options.depth.to_i
 
 		puts "#{hh} Done"
 		query ="assignee = #{jira.username} AND project = #{project} AND status = 'Pending Release'" 
