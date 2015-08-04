@@ -21,7 +21,11 @@ command :kanban do |c|
 		qBase.unshift("project = #{jira.project} AND") unless options.raw
 
 		## things to do
-		q = qBase + [%{(status = open OR status = "On Deck" OR status = "Waiting Estimation Approval" OR status = "Testing - Bug Found")}]
+		q = qBase + [%{(status = open OR},
+							 %{status = "On Deck" OR},
+							 %{status = "Waiting Estimation Approval" OR},
+							 %{status = "Reopened" OR},
+							 %{status = "Testing - Bug Found")}]
 		q << %{ORDER BY Rank}
 		todo = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}\n #{i['fields']['summary'][0..cWR]}"}
 
