@@ -12,8 +12,8 @@ command :kanban do |c|
 		options.default :assignedSelf=>true,
 			:width=>HighLine::SystemExtensions.terminal_size[0]
 
-		# cleanup for rounding.
-		cW = (options.width.to_i - 13) / 3
+		cW = (options.width.to_i - 16) / 3
+		cWR = cW + ((options.width.to_i - 16) % 3)
 
 		jira = JiraUtils.new(args, options)
 		qBase = []
@@ -22,7 +22,7 @@ command :kanban do |c|
 
 		## things to do
 		q = qBase + [%{(status = open OR status = "On Deck" OR status = "Waiting Estimation Approval" OR status = "Testing - Bug Found")}]
-		todo = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}\n #{i['fields']['summary'][0..cW]}"}
+		todo = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}\n #{i['fields']['summary'][0..cWR]}"}
 
 		## Things working on
 		q = qBase + [%{status = "In Progress"}]
