@@ -21,6 +21,7 @@ global_option '-n', '--dry', "Don't run actions that make changes"
 default_command :help
 
 require 'jiraTool/status'
+require 'jiraTool/kanban'
 require 'jiraTool/testReady'
 require 'jiraTool/release'
 # difference between testReady and release is two things:
