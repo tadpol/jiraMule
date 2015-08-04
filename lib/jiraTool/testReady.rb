@@ -13,8 +13,8 @@ command :testReady do |c|
 		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
 		version = newver unless newver == ''
 
-		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
+		project = jira.project
 
 		if !options.assign.nil? then
 			users = jira.checkUser(options.assign)

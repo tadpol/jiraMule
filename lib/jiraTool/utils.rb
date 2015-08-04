@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'json'
 require 'date'
+require 'pp'
 
 # ??? require 'jiraby' ???
 
@@ -65,8 +66,17 @@ class JiraUtils
 
 	def jiraEndPoint
 		return @jiraEndPoint unless @jiraEndPoint.nil?
+		base = @cfg['.jira.url']
+		base = @options.url if @options.url
 		@jiraEndPoint = URI(@cfg['.jira.url'] + '/rest/api/2/')
 		return @jiraEndPoint
+	end
+
+	def project
+		return @project unless @project.nil?
+		@project = @cfg['.jira.project']
+		@project = @options.project if @options.project
+		return @project
 	end
 
 	def getIssues(query)

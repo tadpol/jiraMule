@@ -6,20 +6,19 @@ command :kanban do |c|
   c.summary = 'Show a kanban table'
   c.description = ''
   c.example 'description', 'command example'
-	c.option '-u', '--[no-]assignedSelf', 'Prefix query with assignee test'
-	c.option '-p', '--[no-]project', 'Prefix query with project test'
+	c.option '--[no-]raw', 'Do not prefix queries with project and assigned'
 	c.option '-w', '--width WIDTH', 'Width of the table'
   c.action do |args, options|
-		options.default :project=>true,
-			:assignedSelf=>true,
+		options.default :assignedSelf=>true,
 			:width=>HighLine::SystemExtensions.terminal_size[0]
 
-		cW = (options.width.to_i - 4) / 3
+		# cleanup for rounding.
+		cW = (options.width.to_i - 13) / 3
 
 		jira = JiraUtils.new(args, options)
 		qBase = []
-		qBase.unshift("assignee = #{jira.username} AND") if options.assignedSelf
-		qBase.unshift("project = #{$cfg['.jira.project']} AND") if options.project
+		qBase.unshift("assignee = #{jira.username} AND") unless options.raw
+		qBase.unshift("project = #{jira.project} AND") unless options.raw
 
 		## things to do
 		q = qBase + [%{(status = open OR status = "On Deck" OR status = "Waiting Estimation Approval" OR status = "Testing - Bug Found")}]
