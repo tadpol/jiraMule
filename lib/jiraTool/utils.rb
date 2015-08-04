@@ -206,20 +206,20 @@ class JiraUtils
 				trans = JSON.parse(response.body)
 				closed = trans['transitions'].select {|item| item['name'] == to }
 			else
-				puts "failed because"
+				printErr "failed because"
 				exit 1 # FIXME: return or throw instead
 			end
 
 			if closed.empty?
-				puts "Cannot find Transition to Closed!!!!"
+				printErr "Cannot find Transition to #{to}!!!!"
 				exit 2 # FIXME: return or throw instead
 			end
 
-			printVars({:closedID=>closed[0]['id']})
+			printVars({:transitionID=>closed[0]['id']})
 
 			update = JSON.generate({'transition'=>{'id'=> closed[0]['id'] }})
 			keys.each do |key|
-				request = Net::HTTP::Post.new(@rest2 + ('issue/' + key + '/transitions'))
+				request = Net::HTTP::Post.new(r + ('issue/' + key + '/transitions'))
 				request.content_type = 'application/json'
 				request.basic_auth(username, password)
 				request.body = update
@@ -230,7 +230,7 @@ class JiraUtils
 					case response
 					when Net::HTTPSuccess
 					else
-						puts "failed on #{key} because #{response}"
+						printErr "failed on #{key} because #{response}"
 					end
 				end
 			end
