@@ -9,8 +9,16 @@ Gem::Specification.new do |s|
   s.email       = ['tadpol@tadpol.org']
   s.license     = 'MIT'
   s.homepage    = ''
-  s.summary     = ''
-  s.description = ''
+  s.summary     = 'A collection of things that I do with jira'
+  s.description = %{A collection of things that I do with jira.
+
+Many of which are either big batch operations, or need bits of info from
+the command line.  All of which turn out to be better handled as a command
+line app.
+
+This very specifically does not try to be a generic jira tool; those exist
+already.  Rather this is specific to things I need.
+}
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -19,7 +27,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency('commander', '~> 4.3.4')
 
-  s.add_development_dependency('bundler', '~> 1.10')
+  s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('rspec', '~> 3.2')
   s.add_development_dependency('rake')
 end
