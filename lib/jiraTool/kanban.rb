@@ -22,14 +22,17 @@ command :kanban do |c|
 
 		## things to do
 		q = qBase + [%{(status = open OR status = "On Deck" OR status = "Waiting Estimation Approval" OR status = "Testing - Bug Found")}]
+		q << %{ORDER BY Rank}
 		todo = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}\n #{i['fields']['summary'][0..cWR]}"}
 
 		## Things working on
 		q = qBase + [%{status = "In Progress"}]
+		q << %{ORDER BY Rank}
 		inP = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}\n #{i['fields']['summary'][0..cW]}"}
 
 		## Things in testing
 		q = qBase + [%{status = Testing}]
+		q << %{ORDER BY Rank}
 		test = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}\n #{i['fields']['summary'][0..cW]}"}
 
 		## pad out short
