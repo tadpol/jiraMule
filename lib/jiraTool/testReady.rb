@@ -4,11 +4,10 @@ command :testReady do |c|
 	c.summary = 'Little tool for setting the fix version on testable issues'
 	c.description = ''
 	c.example 'description', 'command example'
-	c.option '-r', '--reassign', 'Also reassign to Default'
-#	c.option '-a --assign USER', 'Assign to '
+	c.option '-r', '--[no-]reassign', 'Also reassign to Default'
+	c.option '-a', '--assign USER', 'Assign to '
 	c.action do |args, options|
-		# Do something or c.when_called Jira::Commands::Testready
-		options.default :reassign => true
+		options.default :reassign => false
 
 		version = GitUtils.getVersion
 		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
@@ -16,6 +15,21 @@ command :testReady do |c|
 
 		project = $cfg['.jira.project']
 		jira = JiraUtils.new(args, options)
+
+		if !options.assign.nil? then
+			users = jira.checkUser(options.assign)
+			if users.length > 1 then
+				printErr "User name '#{options.assign}' is ambigious."
+				printVars('Could be'=>users)
+				exit 4
+			end
+			if users.length <= 0 then
+				printErr "No users match #{options.assign}"
+				exit 4
+			end
+			options.assign = users[0]
+			printVars(:assign=>options.assign)
+		end
 
 		jira.createVersion(project, version)
 
@@ -28,6 +42,9 @@ command :testReady do |c|
 		updt = { 'fixVersions'=>[{'add'=>{'name'=>version}}] }
 		## assign to '-1' to have Jira automatically assign it
 		updt['assignee'] = [{'set'=>{'name'=>'-1'}}] if options.reassign
+		updt['assignee'] = [{'set'=>{'name'=>options.assign}}] if options.assign
+
+		printVars(:update=>updt) if options.verbose
 
 		jira.updateKeys(keys, updt)
 

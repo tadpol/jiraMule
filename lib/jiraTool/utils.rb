@@ -3,12 +3,20 @@ require 'net/http'
 require 'json'
 require 'date'
 
+# ??? require 'jiraby' ???
+
 def printVars(map)
 	$stdout.print("\033[1m=:\033[0m ")
 	map.each {|k,v|
 		$stdout.print("\033[1m#{k}:\033[0m #{v}  ")
 	}
 	$stdout.print("\n")
+end
+
+def printErr(msg)
+	$stdout.print("\033[1m=!\033[0m ")
+		$stdout.print(msg)
+		$stdout.print("\n")
 end
 
 class JiraUtils
@@ -81,6 +89,31 @@ class JiraUtils
 				return issues['issues']
 
 			else
+				return []
+			end
+		end
+	end
+
+	def checkUser(user, keyMatch=true)
+		# make sure #user is an actual user in the system.
+		r = jiraEndPoint
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			r = r + 'user/search' 
+			r.query = "username=#{user}"
+			request = Net::HTTP::Get.new(r)
+			request.basic_auth(username(), password())
+
+			verbose "Get user: #{r}"
+			response = http.request(request)
+			case response
+			when Net::HTTPSuccess
+				users = JSON.parse(response.body)
+				userKeys = users.map{|i| i['key']}
+				return [user] if keyMatch and userKeys.index(user)
+				return userKeys
+
+			else
+				puts response
 				return []
 			end
 		end
