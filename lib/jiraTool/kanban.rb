@@ -21,7 +21,7 @@ command :kanban do |c|
 		qBase.unshift("project = #{jira.project} AND") unless options.raw
 
 		## things to do
-		q = qBase + [%{(status = open OR},
+		q = qBase + [%{(status = Open OR},
 							 %{status = "On Deck" OR},
 							 %{status = "Waiting Estimation Approval" OR},
 							 %{status = "Reopened" OR},
