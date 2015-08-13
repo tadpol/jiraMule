@@ -11,9 +11,7 @@ command :kanban do |c|
 	c.option '-l', '--list', 'List items instead of using a table'
 	c.option '-d', '--depth DEPTH', Integer, 'Header depth'
   c.action do |args, options|
-		options.default :assignedSelf=>true,
-			:width=>HighLine::SystemExtensions.terminal_size[0],
-			:depth=>4
+		options.default :width=>HighLine::SystemExtensions.terminal_size[0], :depth=>4
 
 		if options.list then
 			cW = options.width.to_i - 2
@@ -58,7 +56,6 @@ command :kanban do |c|
 			hh = '#' * options.depth.to_i
 			puts "#{hh} Done"
 			done.each{|i| puts "- #{i}"}
-
 			puts "#{hh} Testing"
 			test.each{|i| puts "- #{i}"}
 			puts "#{hh} In Progress"
