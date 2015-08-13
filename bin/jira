@@ -23,7 +23,6 @@ global_option '--url URL', "Set jira base url"
 
 default_command :help
 
-require 'jiraTool/status'
 require 'jiraTool/kanban'
 require 'jiraTool/transitions'
 require 'jiraTool/testReady'
