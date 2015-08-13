@@ -26,7 +26,7 @@ command :release do |c|
 		updt = { 'fixVersions'=>[{'add'=>{'name'=>version}}] }
 		jira.updateKeys(keys, updt)
 
-		### This is old preocess residue.  So should consider removing
+		### This is old process residue.  So should consider removing
 		if $cfg['.jira.alsoClose'] == true
 			puts "Also closing." if options.verbose
 			query = "assignee = #{jira.username} AND project = #{project} AND status = Resolved AND fixVersion != EMPTY" 
