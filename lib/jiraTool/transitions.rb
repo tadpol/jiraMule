@@ -1,9 +1,9 @@
 
 command :move do |c|
-  c.syntax = 'jira move [options] transition [keys]'
+  c.syntax = 'jira move [options] [transition] [keys]'
   c.summary = 'Move issues into a state.'
   c.description = ''
-  c.example 'description', 'command example'
+  c.example 'Move BUG1 and BUG-4 into the In Progress state.', %{jira move 'In Progress' BUG-1 BUG-4}
   c.action do |args, options|
 		jira = JiraUtils.new(args, options)
 		to = args.shift
