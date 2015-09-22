@@ -4,6 +4,7 @@ command :testReady do |c|
 	c.summary = 'Little tool for setting the fix version on testable issues'
 	c.description = %{On all issues in the Testing state, set the fix version and optionally reassign.
 	}
+	c.example 'Set the release version to the latest git tag', %{jira testReady}
 	c.example 'Set the release version to "v2.0"', %{jira testReady v2.0}
 	c.example 'Also reassign to the default', %{jira testReady -r v2.0}
 	c.example 'Also reassign to BOB', %{jira testReady v2.0 --assign BOB}
@@ -12,9 +13,13 @@ command :testReady do |c|
 	c.action do |args, options|
 		options.default :reassign => false
 
-		version = GitUtils.getVersion
-		newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
-		version = newver unless newver == ''
+		if args[0].nil? then
+			version = GitUtils.getVersion
+			newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
+			version = newver unless newver == ''
+		else
+			version = args[0]
+		end
 
 		jira = JiraUtils.new(args, options)
 		project = jira.project
