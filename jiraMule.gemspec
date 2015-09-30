@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
-require 'jiraTool/version'
+require 'jiraMule/version'
 
 Gem::Specification.new do |s|
   s.name        = 'jira'
-  s.version     = JiraTool::VERSION
+  s.version     = JiraMule::VERSION
   s.authors     = ['Michael Conrad Tadpol Tilstra']
   s.email       = ['tadpol@tadpol.org']
   s.license     = 'MIT'

@@ -10,7 +10,7 @@ end
 
 desc "Build the gem"
 task :build do
-	sh %{gem build jiraTool.gemspec}
+	sh %{gem build jiraMule.gemspec}
 end
 
 task :install do
