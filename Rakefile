@@ -1,10 +1,18 @@
 require "bundler/gem_tasks"
 
 desc "Run specs"
+# what does this do?
 task :spec do
   sh "bundle exec rspec -f progress"
 end
 
-desc "Default: Run specs"
-task :default => [:spec]
+#task :default => [:build]
 
+desc "Build the gem"
+task :build do
+	sh %{gem build jiraTool.gemspec}
+end
+
+task :install do
+	sh %{gem install --user-install jira-0.0.1.gem}
+end
