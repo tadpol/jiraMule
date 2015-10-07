@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'commander/import'
-require 'jiraTool'
+require 'jiraMule'
 
 program :version, '0.0.1'
 program :description, %{A collection of things that I do with jira.
@@ -23,10 +23,10 @@ global_option '--url URL', "Set jira base url"
 
 default_command :help
 
-require 'jiraTool/kanban'
-require 'jiraTool/transitions'
-require 'jiraTool/testReady'
-require 'jiraTool/release'
+require 'jiraMule/kanban'
+require 'jiraMule/transitions'
+require 'jiraMule/testReady'
+require 'jiraMule/release'
 # difference between testReady and release is two things:
 # 1. testReady also assigns
 # 2. release also transitions
