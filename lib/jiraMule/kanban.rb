@@ -23,54 +23,55 @@ command :kanban do |c|
 			lj = "\n "
 		end
 
+		# Columms
+		columns = {
+			:Done => [%{status = 'Pending Release'}],
+			:Testing => [%{status = Testing}],
+			:InProgress => [%{status = "In Progress"}],
+			:Todo => [%{(status = Open OR},
+							 %{status = Reopened OR},
+							 %{status = "On Deck" OR},
+							 %{status = "Waiting Estimation Approval" OR},
+							 %{status = "Reopened" OR},
+							 %{status = "Testing (Signoff)" OR},
+							 %{status = "Testing (Review)" OR},
+							 %{status = "Testing - Bug Found")}],
+		}
+
 		jira = JiraUtils.new(args, options)
 		qBase = []
 		qBase.unshift("assignee = #{jira.username} AND") unless options.raw
 		qBase.unshift("project = #{jira.project} AND") unless options.raw
 
-		## Things to do
-		q = qBase + [%{(status = Open OR},
-							 %{status = "On Deck" OR},
-							 %{status = "Waiting Estimation Approval" OR},
-							 %{status = "Reopened" OR},
-							 %{status = "Testing - Bug Found")}]
-		q << %{ORDER BY Rank}
-		todo = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}#{lj}#{i['fields']['summary'][0..cWR]}"}
 
-		## Things working on
-		q = qBase + [%{status = "In Progress"}]
-		q << %{ORDER BY Rank}
-		inP = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}#{lj}#{i['fields']['summary'][0..cW]}"}
-
-		## Things in testing
-		q = qBase + [%{status = Testing}]
-		q << %{ORDER BY Rank}
-		test = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}#{lj}#{i['fields']['summary'][0..cW]}"}
-
-		## Things Done
-		q = qBase + [%{status = 'Pending Release'}]
-		q << %{ORDER BY Rank}
-		done = jira.getIssues(q.join(' ')).map{|i| "#{i['key']}#{lj}#{i['fields']['summary'][0..cW]}"}
+		results = {}
+		columns.each_pair do |name, query|
+			q = qBase + query + [%{ORDER BY Rank}]
+			issues = jira.getIssues(q.join(' ')).map do |i|
+				"#{i['key']}#{lj}#{i['fields']['summary'][0..cWR]}"
+			end
+			results[key] = issues
+		end
 
 		if options.list then
 			hh = '#' * options.depth.to_i
 			puts "#{hh} Done"
-			done.each{|i| puts "- #{i}"}
+			results[:Done].each{|i| puts "- #{i}"}
 			puts "#{hh} Testing"
-			test.each{|i| puts "- #{i}"}
+			results[:Testing].each{|i| puts "- #{i}"}
 			puts "#{hh} In Progress"
-			inP.each{|i| puts "- #{i}"}
+			results[:InProgress].each{|i| puts "- #{i}"}
 			puts "#{hh} To Do"
-			todo.each{|i| puts "- #{i}"}
+			results[:Todo].each{|i| puts "- #{i}"}
 
 		else
 			## pad out short
-			longest = [todo.length, inP.length, test.length].max
-			todo.fill(' ', todo.length .. longest) if todo.length <= longest
-			inP.fill(' ', inP.length .. longest) if inP.length <= longest
-			test.fill(' ', test.length .. longest) if test.length <= longest
+			longest = [results[:Todo].length, results[:InProgress].length, results[:Testing].length].max
+			results[:Todo].fill(' ', results[:Todo].length .. longest) if results[:Todo].length <= longest
+			results[:InProgress].fill(' ', results[:InProgress].length .. longest) if results[:InProgress].length <= longest
+			results[:Testing].fill(' ', results[:Testing].length .. longest) if results[:Testing].length <= longest
 
-			rows = [todo, inP, test].transpose
+			rows = [results[:Todo], results[:InProgress], results[:Testing]].transpose
 			table = Terminal::Table.new :headings => ["TODO", "In Progress", "Testing"], :rows=>rows
 			puts table
 		end
