@@ -75,11 +75,10 @@ command :kanban do |c|
 					:item => "- {{summary}} @jira({{key}})",
 				},
 				:columns => {
-					:InProgress => [%{status = "In Progress"}],
+					:InProgress => %{status = "In Progress"},
 				}
 			},
 		}
-
 
 		### Fetch the issues for each column
 		columns = allOfThem[options.style.to_sym][:columns]
@@ -96,6 +95,7 @@ command :kanban do |c|
 		qBase.unshift("project = #{jira.project} AND") unless options.raw
 		results = {}
 		columns.each_pair do |name, query|
+			query = [query] unless query.is_a? Array
 			q = qBase + query + [%{ORDER BY Rank}]
 			issues = jira.getIssues(q.join(' '))
 			results[name] = issues
