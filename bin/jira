@@ -4,6 +4,7 @@ require 'rubygems'
 require 'commander/import'
 require 'jiraMule'
 require 'pp'
+require 'json'
 
 program :version, '0.0.1'
 program :description, %{A collection of things that I do with jira.
@@ -37,8 +38,8 @@ require 'jiraMule/release'
 command :query do |c|
   c.syntax = 'jira query [options] query'
   c.summary = 'Get the keys from a jira query'
-  c.description = ''
-  c.example 'description', 'command example'
+  c.description = 'Run a query. '
+	c.example 'Get Open issues and dump everything', %{jira query status=Open --fields "" --json}
 	c.option '--[no-]raw', 'Do not prefix query with project and assigned'
 	c.option '--[no-]json', 'Output json reply instead of summary'
 	c.option '--fields FIELDS', Array, ''
@@ -54,7 +55,7 @@ command :query do |c|
 			issues = jira.getIssues(q)
 		end
 		if options.json then
-			pp issues
+			puts JSON.dump(issues)
 		else
 			keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
 			keys.each {|k| puts k}
