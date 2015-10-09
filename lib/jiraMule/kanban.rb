@@ -12,12 +12,15 @@ command :kanban do |c|
 	c.option '-l', '--list', 'List items instead of using a table'
 	c.option '-d', '--depth DEPTH', Integer, 'Header depth'
 	c.option '-s', '--style STYLE', String, 'Which style to use'
+
+	c.option '--heading STYLE', String, 'Format for heading'
+	c.option '--item STYLE', String, 'Format for items'
+
   c.action do |args, options|
 		options.default :width=>HighLine::SystemExtensions.terminal_size[0],
 			:depth => 4,
 			:style => 'statusStyle'
 
-		puts "** #{options.style} **"
 		if options.list then
 			cW = options.width.to_i - 2
 			cWR = cW
@@ -103,6 +106,9 @@ command :kanban do |c|
 
 		### Now format the output
 		format = allOfThem[options.style.to_sym][:format]
+		#### look for command line overrides
+		format[:heading] = options.heading if options.heading
+		format[:item] = options.item if options.item
 
 		#### list styles
 		if format.has_key? :order
