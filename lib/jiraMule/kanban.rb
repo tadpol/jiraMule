@@ -1,5 +1,6 @@
 require 'terminal-table'
 require 'mustache'
+require 'yaml'
 require 'pp'
 
 command :kanban do |c|
@@ -79,6 +80,8 @@ command :kanban do |c|
 				}
 			},
 		}
+		# TODO: Load styles from a file
+		# TODO: Load styles from project file
 
 		### Fetch the issues for each column
 		columns = allOfThem[options.style.to_sym][:columns]
@@ -161,4 +164,57 @@ command :kanban do |c|
 end
 alias_command :status, :kanban, '--style', 'status'
 
-#  vim: set sw=2 ts=2 :
+# DATA isn't working. so move on.
+__END__
+---
+empty:
+	format:
+		heading: "{{column}}"
+		item: "{{key}} {{summary}}"
+	columns:
+
+status:
+	format:
+		heading: "#### {{column}}"
+		item: "- {{key}} {{summary}}"
+		order: [Done, Testing, InProgress, Todo]
+	columns:
+		Done: status = 'Pending Release'
+		Testing: status = Testing
+		InProgress: status = "In Progress"
+		Todo:
+			- (status = Open OR
+			- status = Reopened OR
+			- status = "On Deck" OR
+			- status = "Waiting Estimation Approval" OR
+			- status = "Reopened" OR
+			- status = "Testing (Signoff)" OR
+			- status = "Testing (Review)" OR
+			- status = "Testing - Bug Found")
+
+kanban:
+	format:
+		heading: "{{column}}"
+		item: "{{key}}\n {{summary}}"
+		order: [Todo, InProgress, Testing]
+		usetable: true
+	columns:
+		Testing: status = Testing
+		InProgress: status = "In Progress"
+		Todo:
+			- (status = Open OR
+			- status = Reopened OR
+			- status = "On Deck" OR
+			- status = "Waiting Estimation Approval" OR
+			- status = "Reopened" OR
+			- status = "Testing (Signoff)" OR
+			- status = "Testing (Review)" OR
+			- status = "Testing - Bug Found")
+
+taskpaper:
+	format:
+		heading: "{{column}}"
+		item: "- {{summary}} @jira({{key}})"
+	columns:
+		InProgress: status = "In Progress"
+
