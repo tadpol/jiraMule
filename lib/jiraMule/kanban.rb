@@ -8,32 +8,18 @@ command :kanban do |c|
   c.description = ''
   c.example 'description', 'command example'
 	c.option '--[no-]raw', 'Do not prefix queries with project and assigned'
-	c.option '-w', '--width WIDTH', Integer, 'Width of the table'
-	c.option '-l', '--list', 'List items instead of using a table'
-	c.option '-d', '--depth DEPTH', Integer, 'Header depth'
+	c.option '-w', '--width WIDTH', Integer, 'Width of the terminal'
 	c.option '-s', '--style STYLE', String, 'Which style to use'
-
 	c.option '--heading STYLE', String, 'Format for heading'
 	c.option '--item STYLE', String, 'Format for items'
 
   c.action do |args, options|
 		options.default :width=>HighLine::SystemExtensions.terminal_size[0],
-			:depth => 4,
-			:style => 'statusStyle'
-
-		if options.list then
-			cW = options.width.to_i - 2
-			cWR = cW
-			lj = " "
-		else
-			cW = (options.width.to_i - 16) / 3
-			cWR = cW + ((options.width.to_i - 16) % 3)
-			lj = "\n "
-		end
+			:style => 'kanban'
 
 		# Table of Styles. Appendable via config file. ??and command line??
 		allOfThem = {
-			:statusStyle => {
+			:status => {
 				:format => {
 					:heading => "#### {{column}}",
 					:item => "- {{key}} {{summary}}",
@@ -54,11 +40,11 @@ command :kanban do |c|
 				},
 
 			},
-			:kanbanStyle => {
-				# How to mix the table and list outputs?
+			:kanban => {
 				:format => {
 					:heading => "{{column}}",
 					:item => "{{key}}\n {{summary}}",
+					:order => [:Todo, :InProgress, :Testing],
 					:usetable => true
 				},
 				:columns => {
@@ -85,23 +71,18 @@ command :kanban do |c|
 			},
 		}
 
-		columns = allOfThem[options.style.to_sym][:columns]
 
+		### Fetch the issues for each column
+		columns = allOfThem[options.style.to_sym][:columns]
 		jira = JiraUtils.new(args, options)
 		qBase = []
 		qBase.unshift("assignee = #{jira.username} AND") unless options.raw
 		qBase.unshift("project = #{jira.project} AND") unless options.raw
-
 		results = {}
-		resultsOld = {}
 		columns.each_pair do |name, query|
 			q = qBase + query + [%{ORDER BY Rank}]
 			issues = jira.getIssues(q.join(' '))
 			results[name] = issues
-			resultsOld[name] = issues.map do |i|
-				"#{i['key']}#{lj}#{i['fields']['summary'][0..cWR]}"
-			end
-			
 		end
 
 		### Now format the output
@@ -110,40 +91,58 @@ command :kanban do |c|
 		format[:heading] = options.heading if options.heading
 		format[:item] = options.item if options.item
 
-		#### list styles
-		if format.has_key? :order
-			format[:order]
-		else
-			columns.keys
-		end.each do |columnName|
-			puts Mustache.render(format[:heading], :column => columnName.to_s)
-			results[columnName].each do |issue|
-				puts Mustache.render(format[:item], issue.merge(issue['fields']))
+		#### Setup ordering
+		format[:order] = columns.keys.sort unless format.has_key? :order
+
+		#### setup column widths
+		cW = options.width.to_i
+		cW = -1 if cW == 0
+		cWR = cW
+		if format[:usetable] and cW > 0 then
+			borders = 4 + (columns.count * 3);   # 2 on left, 2 on right, 3 for each internal
+			cW = (cW - borders) / columns.count
+			cWR = cW + ((cW - borders) % columns.count)
+		end
+
+		#### Format Items
+		formatted={}
+		results.each_pair do |name, issues|
+			formatted[name] = issues.map do |issue|
+				line = Mustache.render(format[:item], issue.merge(issue['fields']))
+				#### Trim length?
+				if format[:order].last == name
+					line[0..cWR]
+				else
+					line[0..cW]
+				end
 			end
 		end
 
-		# if table style:
-		#  Format columns
-		#  trim length
-		#  pad
-		#  transpose
-		#  print
+		#### Print
+		if format.has_key?(:usetable) and format[:usetable] then
+			# Table type
+			#### Pad
+			longest = formatted.values.map{|l| l.length}.max
+			formatted.each_pair do |name, issues|
+				if issues.length <= longest then
+					issues.fill(' ', issues.length .. longest)
+				end
+			end
 
+			#### Transpose
+			rows = format[:order].map{|n| formatted[n]}.transpose
+			puts Terminal::Table.new :headings => format[:order], :rows=>rows
 
-		if not options.list then
-			## pad out short
-			longest = [results[:Todo].length, results[:InProgress].length, results[:Testing].length].max
-			results[:Todo].fill(' ', results[:Todo].length .. longest) if results[:Todo].length <= longest
-			results[:InProgress].fill(' ', results[:InProgress].length .. longest) if results[:InProgress].length <= longest
-			results[:Testing].fill(' ', results[:Testing].length .. longest) if results[:Testing].length <= longest
-
-			rows = [results[:Todo], results[:InProgress], results[:Testing]].transpose
-			table = Terminal::Table.new :headings => ["TODO", "In Progress", "Testing"], :rows=>rows
-			puts table
+		else
+			# List type
+			format[:order].each do |columnName|
+				puts Mustache.render(format[:heading], :column => columnName.to_s)
+				formatted[columnName].each {|issue| puts issue}
+			end
 		end
 
   end
 end
-alias_command :status, :kanban, '--list'
+alias_command :status, :kanban, '--style', 'status'
 
 #  vim: set sw=2 ts=2 :
