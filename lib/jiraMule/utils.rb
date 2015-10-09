@@ -79,7 +79,7 @@ class JiraUtils
 		return @project
 	end
 
-	def getIssues(query)
+	def getIssues(query, fields=[ 'key', 'summary' ])
 		r = jiraEndPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + 'search')
@@ -87,7 +87,7 @@ class JiraUtils
 			request.basic_auth(username(), password())
 			request.body = JSON.generate({
 				'jql' => query,
-				'fields' => [ 'key', 'summary' ]
+				'fields' => fields
 			})
 
 			verbose "Get keys: #{query}"

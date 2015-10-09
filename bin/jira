@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'commander/import'
 require 'jiraMule'
+require 'pp'
 
 program :version, '0.0.1'
 program :description, %{A collection of things that I do with jira.
@@ -39,14 +40,25 @@ command :query do |c|
   c.description = ''
   c.example 'description', 'command example'
 	c.option '--[no-]raw', 'Do not prefix query with project and assigned'
+	c.option '--[no-]json', 'Output json reply instead of summary'
+	c.option '--fields FIELDS', Array, ''
   c.action do |args, options|
+		options.defaults :json => false
 		jira = JiraUtils.new(args, options)
 		args.unshift("assignee = #{jira.username} AND") unless options.raw
 		args.unshift("project = #{jira.project} AND") unless options.raw
 		q = args.join(' ')
-		issues = jira.getIssues(q)
-		keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
-		keys.each {|k| puts k}
+		if options.fields then
+			issues = jira.getIssues(q, options.fields)
+		else
+			issues = jira.getIssues(q)
+		end
+		if options.json then
+			pp issues
+		else
+			keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
+			keys.each {|k| puts k}
+		end
   end
 end
 
