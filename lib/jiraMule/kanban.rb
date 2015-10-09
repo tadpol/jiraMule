@@ -7,8 +7,24 @@ command :kanban do |c|
 	extra_columns = []
   c.syntax = 'jira query [options] kanban'
   c.summary = 'Show a kanban table'
-  c.description = ''
-  c.example 'description', 'command example'
+  c.description = %{Display a group of related queries.
+
+	Mostly for displaying a list of current status, or a kanban table.
+
+	The columns, their queries, and how to format them is all configurable.
+
+	Formatting is done with Mushtash.
+	}
+  c.example 'Show a kanban table', 'jira kanban'
+  c.example 'Show a status list', 'jira status'
+  c.example 'Another way to show a status list', 'jira --style status'
+	c.example 'Show a list to use with Taskpaper', 'jira --style taskpaper'
+	c.example 'Show status list, with differnt styling', %{jira --style status --header '# {{column}}' --item '** {{key}} {{summary}}'}
+	c.example 'Showoff', %{jira kanban --style empty --heading '<h1>{{column}}</h1>' \\
+	--column 'Working=status="In Progress"' \\
+	--column 'Done=status="Pending Release"' \\
+	--fields key,summary,assignee \\
+	--item '<h2>{{key}}</h2><b>Who:{{assignee.name}}</b><p>{{summary}}</p>'}
 	c.option '--[no-]raw', 'Do not prefix queries with project and assigned'
 	c.option '-w', '--width WIDTH', Integer, 'Width of the terminal'
 	c.option '-s', '--style STYLE', String, 'Which style to use'
@@ -175,57 +191,4 @@ command :kanban do |c|
 end
 alias_command :status, :kanban, '--style', 'status'
 
-# DATA isn't working. so move on.
-__END__
----
-empty:
-	format:
-		heading: "{{column}}"
-		item: "{{key}} {{summary}}"
-	columns:
-
-status:
-	format:
-		heading: "#### {{column}}"
-		item: "- {{key}} {{summary}}"
-		order: [Done, Testing, InProgress, Todo]
-	columns:
-		Done: status = 'Pending Release'
-		Testing: status = Testing
-		InProgress: status = "In Progress"
-		Todo:
-			- (status = Open OR
-			- status = Reopened OR
-			- status = "On Deck" OR
-			- status = "Waiting Estimation Approval" OR
-			- status = "Reopened" OR
-			- status = "Testing (Signoff)" OR
-			- status = "Testing (Review)" OR
-			- status = "Testing - Bug Found")
-
-kanban:
-	format:
-		heading: "{{column}}"
-		item: "{{key}}\n {{summary}}"
-		order: [Todo, InProgress, Testing]
-		usetable: true
-	columns:
-		Testing: status = Testing
-		InProgress: status = "In Progress"
-		Todo:
-			- (status = Open OR
-			- status = Reopened OR
-			- status = "On Deck" OR
-			- status = "Waiting Estimation Approval" OR
-			- status = "Reopened" OR
-			- status = "Testing (Signoff)" OR
-			- status = "Testing (Review)" OR
-			- status = "Testing - Bug Found")
-
-taskpaper:
-	format:
-		heading: "{{column}}"
-		item: "- {{summary}} @jira({{key}})"
-	columns:
-		InProgress: status = "In Progress"
-
+#  vim: set sw=2 ts=2 :
