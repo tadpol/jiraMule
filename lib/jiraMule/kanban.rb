@@ -13,7 +13,7 @@ command :kanban do |c|
 
 	The columns, their queries, and how to format them is all configurable.
 
-	Formatting is done with Mushtash.
+	Formatting is done with Mustash.
 	}
   c.example 'Show a kanban table', 'jira kanban'
   c.example 'Show a status list', 'jira status'
