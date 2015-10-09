@@ -15,6 +15,7 @@ command :kanban do |c|
 	c.option '--heading STYLE', String, 'Format for heading'
 	c.option '--item STYLE', String, 'Format for items'
 	c.option('-c', '--column NAME=QUERY', '') {|ec| extra_columns << ec}
+	c.option '-f', '--fields FIELDS', Array, 'Which fields to return'
 
   c.action do |args, options|
 		options.default :width=>HighLine::SystemExtensions.terminal_size[0],
@@ -23,6 +24,7 @@ command :kanban do |c|
 		# Table of Styles. Appendable via config file. ??and command line??
 		allOfThem = {
 			:empty => {
+				:fields => [:key, :summary],
 				:format => {
 					:heading => "{{column}}",
 					:item => "{{key}} {{summary}}",
@@ -30,6 +32,7 @@ command :kanban do |c|
 				:columns => {}
 			},
 			:status => {
+				:fields => [:key, :summary],
 				:format => {
 					:heading => "#### {{column}}",
 					:item => "- {{key}} {{summary}}",
@@ -51,6 +54,7 @@ command :kanban do |c|
 
 			},
 			:kanban => {
+				:fields => [:key, :summary],
 				:format => {
 					:heading => "{{column}}",
 					:item => "{{key}}\n {{summary}}",
@@ -71,12 +75,14 @@ command :kanban do |c|
 				},
 			},
 			:taskpaper => {
+				:fields => [:key, :summary, :duedate],
 				:format => {
 					:heading => "{{column}}:",
-					:item => "- {{summary}} @jira({{key}})",
+					:item => "- {{summary}} @jira({{key}}) {{#duedate}}@due({{duedate}}){{/duedate}}",
 				},
 				:columns => {
 					:InProgress => %{status = "In Progress"},
+					:Todo => %{status = Open},
 				}
 			},
 		}
@@ -91,8 +97,13 @@ command :kanban do |c|
 			columns[name.to_sym] = [query]
 		end
 
-		#### Now fetch
 		jira = JiraUtils.new(args, options)
+
+		#### Fetch these fields
+		fields = allOfThem[options.style.to_sym][:fields]
+		fields = options.fields if options.fields
+
+		#### Now fetch
 		qBase = []
 		qBase.unshift("assignee = #{jira.username} AND") unless options.raw
 		qBase.unshift("project = #{jira.project} AND") unless options.raw
@@ -100,7 +111,7 @@ command :kanban do |c|
 		columns.each_pair do |name, query|
 			query = [query] unless query.is_a? Array
 			q = qBase + query + [%{ORDER BY Rank}]
-			issues = jira.getIssues(q.join(' '))
+			issues = jira.getIssues(q.join(' '), fields)
 			results[name] = issues
 		end
 
