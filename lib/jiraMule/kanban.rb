@@ -3,6 +3,7 @@ require 'mustache'
 require 'pp'
 
 command :kanban do |c|
+	extra_columns = []
   c.syntax = 'jira query [options] kanban'
   c.summary = 'Show a kanban table'
   c.description = ''
@@ -12,6 +13,7 @@ command :kanban do |c|
 	c.option '-s', '--style STYLE', String, 'Which style to use'
 	c.option '--heading STYLE', String, 'Format for heading'
 	c.option '--item STYLE', String, 'Format for items'
+	c.option('-c', '--column NAME=QUERY', '') {|ec| extra_columns << ec}
 
   c.action do |args, options|
 		options.default :width=>HighLine::SystemExtensions.terminal_size[0],
@@ -19,6 +21,13 @@ command :kanban do |c|
 
 		# Table of Styles. Appendable via config file. ??and command line??
 		allOfThem = {
+			:empty => {
+				:format => {
+					:heading => "{{column}}",
+					:item => "{{key}} {{summary}}",
+				},
+				:columns => {}
+			},
 			:status => {
 				:format => {
 					:heading => "#### {{column}}",
@@ -74,6 +83,13 @@ command :kanban do |c|
 
 		### Fetch the issues for each column
 		columns = allOfThem[options.style.to_sym][:columns]
+		#### look for command line overrides
+		extra_columns.each do |cm|
+			name, query = cm.split(/=/, 2)
+			columns[name.to_sym] = [query]
+		end
+
+		#### Now fetch
 		jira = JiraUtils.new(args, options)
 		qBase = []
 		qBase.unshift("assignee = #{jira.username} AND") unless options.raw
