@@ -79,6 +79,23 @@ class JiraUtils
 		return @project
 	end
 
+	##
+	# Given an array of issues keys that may or may not have the project prefixed
+	# Return an array with the project prefixed.
+	#
+	# So on project APP, from %w{1 56 BUG-78} you get %w{APP-1 APP-56 BUG-78}
+	def expandKeys(keys)
+		return keys.map do |k|
+			k.match(/([a-zA-Z]+-)?(\d+)/) do |m|
+				if m[1].nil? then
+					"#{project}-#{m[2]}"
+				else
+					m[0]
+				end
+			end
+		end.compact
+	end
+
 	def getIssues(query, fields=[ 'key', 'summary' ])
 		r = jiraEndPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
