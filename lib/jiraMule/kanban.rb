@@ -26,7 +26,7 @@ command :kanban do |c|
 	--fields key,summary,assignee \\
 	--item '<h2>{{key}}</h2><b>Who:{{assignee.name}}</b><p>{{summary}}</p>'}
 
-	c.option '--[no-]raw', 'Do not prefix queries with project and assigned'
+	c.option '--[no-]raw', 'Do not prefix queries with project and assignee'
 	c.option '-w', '--width WIDTH', Integer, 'Width of the terminal'
 	c.option '-s', '--style STYLE', String, 'Which style to use'
 	c.option '--heading STYLE', String, 'Format for heading'
