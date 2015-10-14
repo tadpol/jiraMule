@@ -20,6 +20,10 @@ def printErr(msg)
 		$stdout.print("\n")
 end
 
+class JiraUtilsException < Exception
+	attr_accessor :request, :response
+end
+
 class JiraUtils
 
 	def initialize(args, options={}, cfg=$cfg)
@@ -96,6 +100,8 @@ class JiraUtils
 		end.compact
 	end
 
+	##
+	# Run a JQL query and get issues with the selected fields
 	def getIssues(query, fields=[ 'key', 'summary' ])
 		r = jiraEndPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
@@ -121,8 +127,9 @@ class JiraUtils
 		end
 	end
 
+	##
+	# make sure #user is an actual user in the system.
 	def checkUser(user, keyMatch=true)
-		# make sure #user is an actual user in the system.
 		r = jiraEndPoint
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			r = r + 'user/search' 
@@ -178,10 +185,10 @@ class JiraUtils
 
 					end
 				else
-					puts "failed on version creation because #{response}"
-					puts response.body
-
-					exit 1
+					ex = JiraUtilsException.new("Failed to create version #{version} in project #{project}")
+					ex.request = request
+					ex.response = response
+					raise ex
 				end
 			end
 		end
@@ -202,7 +209,10 @@ class JiraUtils
 					case response
 					when Net::HTTPSuccess
 					else
-						puts "failed on #{key} because #{response}"
+						ex = JiraUtilsException.new("Failed to update #{key} with #{update}")
+						ex.request = request
+						ex.response = response
+						raise ex
 					end
 				end
 			end
@@ -223,13 +233,14 @@ class JiraUtils
 				trans = JSON.parse(response.body)
 				closed = trans['transitions'].select {|item| item['name'] == to }
 			else
-				printErr "failed because"
-				exit 1 # FIXME: return or throw instead
+				ex = JiraUtilsException.new("Failed to get ID for #{to}")
+				ex.request = request
+				ex.response = response
+				raise ex
 			end
 
 			if closed.empty?
-				printErr "Cannot find Transition to #{to}!!!!"
-				exit 2 # FIXME: return or throw instead
+				ex = JiraUtilsException.new("Cannot find Transition to #{to}!!!!")
 			end
 
 			printVars({:transitionID=>closed[0]['id']})
@@ -247,7 +258,10 @@ class JiraUtils
 					case response
 					when Net::HTTPSuccess
 					else
-						printErr "failed on #{key} because #{response}"
+						ex = JiraUtilsException.new("Failed to transition #{key} to #{to}")
+						ex.request = request
+						ex.response = response
+						raise ex
 					end
 				end
 			end
