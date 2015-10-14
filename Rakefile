@@ -1,15 +1,14 @@
-#require "bundler/gem_tasks" # Don't want these for now.
+require "bundler/gem_tasks"
 
 #task :default => []
 
-desc "Build the gem"
-task :build do
-	sh %{gem build jiraMule.gemspec}
-end
-
+desc "Install gem in user dir"
 task :bob do
-	sh %{gem install --user-install jira-0.0.1.gem}
+	sh %{gem install --user-install pkg/jira-#{Bundler::GemHelper.gemspec.version}.gem}
 end
 
+task :echo do
+	puts "= #{Bundler::GemHelper.gemspec.version} ="
+end
 
 #  vim: set sw=4 ts=4 :
