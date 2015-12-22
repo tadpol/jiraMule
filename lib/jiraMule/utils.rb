@@ -267,7 +267,40 @@ class JiraUtils
 			end
 		end
 	end
+
+
+	def attach(key, file)
+		r = jiraEndPoint
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			request = Net::HTTP::Post.new(r + ('issue/' + key + '/attachments'))
+			#request.content_type = 'application/json'
+			request.content_type = 'multipart/form-data'
+			request.basic_auth(username, password)
+			request['X-Atlassian-Token'] = 'nocheck'
+			lBND = "AaBbCcDdEeFfGgxxX"
+			File.open(file) do |io|
+				request.body << "\r\n--" << lBND << "\r\n"
+				request.body << "Content-Disposition: form-data; name=\"file\"\r\n\r\n"
+				request.body << io.read
+				request.body << "\r\n--" << lBND << "--\r\n"
+			end
+
+			verbose "Going to upload #{file} to #{key}"
+			if not @options.dry
+				response = http.request(request)
+				case response
+				when Net::HTTPSuccess
+				else
+					ex = JiraUtilsException.new("Failed to POST #{file} to #{key}")
+					ex.request = request
+					ex.response = response
+					raise ex
+				end
+			end
+		end
+	end
 end
+
 
 class GitUtils
 
