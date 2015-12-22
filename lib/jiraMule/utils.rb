@@ -279,10 +279,12 @@ class JiraUtils
 			request['X-Atlassian-Token'] = 'nocheck'
 			lBND = "AaBbCcDdEeFfGgxxX"
 			File.open(file) do |io|
-				request.body << "\r\n--" << lBND << "\r\n"
-				request.body << "Content-Disposition: form-data; name=\"file\"\r\n\r\n"
-				request.body << io.read
-				request.body << "\r\n--" << lBND << "--\r\n"
+				rbody = ""
+				rbody << "\r\n--" << lBND << "\r\n"
+				rbody << "Content-Disposition: form-data; name=\"file\"\r\n\r\n"
+				rbody << io.read
+				rbody << "\r\n--" << lBND << "--\r\n"
+				request.body = rbody
 			end
 
 			verbose "Going to upload #{file} to #{key}"
