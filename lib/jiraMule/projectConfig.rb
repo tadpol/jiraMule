@@ -1,9 +1,21 @@
 require 'yaml'
+require 'pathname'
 require 'vine'
 
 class ProjectConfig
+
+	def findProjectFile()
+		a = []
+		home = Pathname.new(Dir.home)
+		Pathname.new(Dir.pwd).ascend{|i| 
+			break if i == home
+			a << i + '.rpjProject'
+		}
+		a.select{|i| i.exist? }.map{|i| i.to_s}
+	end
+
 	def load()
-		cfgFiles = [ '.rpjProject', ENV['HOME'] + '/.rpjProject']
+		cfgFiles = findProjectFile() + [ ENV['HOME'] + '/.rpjProject']
 		@cfg = cfgFiles.map do |file|
 			result = Hash.new
 			if File.exist?(file) 
@@ -25,7 +37,6 @@ class ProjectConfig
 		end
 		return nil
 	end
-
 
 end
 
