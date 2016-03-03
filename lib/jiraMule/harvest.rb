@@ -25,8 +25,7 @@ class HarvestUtils
 
 	def username
 		return @username unless @username.nil?
-		userpass = @cfg['.harvest.user']
-		@username = userpass
+		@username = @cfg['.harvest.user']
 		# if darwin
 		@password = `security 2>&1 >/dev/null find-internet-password -gs "#{@cfg['.harvest.url']}" -a "#{@username}"`
 		@password.strip!
@@ -35,8 +34,7 @@ class HarvestUtils
 	end
 	def password
 		return @password unless @username.nil?
-		userpass = @cfg['.jira.userpass']
-		@username = userpass
+		@username = @cfg['.harvest.user']
 		# if darwin
 		@password = `security 2>&1 >/dev/null find-internet-password -gs "#{@cfg['.harvest.url']}" -a "#{@username}"`
 		@password.strip!
@@ -71,6 +69,7 @@ class HarvestUtils
 		r = endPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + 'daily')
+			request['Accept'] = 'application/json'
 			request.content_type = 'application/json'
 			request.basic_auth(username(), password())
 
@@ -85,6 +84,71 @@ class HarvestUtils
 			end
 
 		end
+	end
+
+	def projectIDfromName(name)
+		projects = getProjectsAndTasks()
+		matches = projects.select do |prj| 
+			return false unless prj.is_a? Hash
+			return false unless prj.has_key? 'id'
+			return false unless prj.has_key? 'name'
+			return prj['name'] == name if name.is_a? String
+			return prj['name'] =~ name if name.is_a? Regexp
+			return false
+		end
+		return nil if matches.empty?
+		prj = matches.first
+		prj['id']
+	end
+
+	def projectIDfromCode(code)
+		projects = getProjectsAndTasks()
+		matches = projects.select do |prj| 
+			return false unless prj.is_a? Hash
+			return false unless prj.has_key? 'id'
+			return false unless prj.has_key? 'code'
+			return prj['code'] == name if name.is_a? String
+			return prj['code'] =~ name if name.is_a? Regexp
+			return false
+		end
+		return nil if matches.empty?
+		prj = matches.first
+		prj['id']
+	end
+
+	def taskIDfromProjectAndName(project=self.project, task=self.task)
+		verbose %{Going to find from "#{project}" and "#{task}"}
+		projects = getProjectsAndTasks()
+		pp projects
+		matches = projects.select do |prj| 
+			return false unless prj.is_a? Hash
+			return false unless prj.has_key? 'id'
+			return false unless prj.has_key? 'code'
+			return false unless prj.has_key? 'name'
+			return false unless prj.has_key? 'tasks'
+			return prj['code'] == project if project.is_a? String
+			return prj['code'] =~ project if project.is_a? Regexp
+			return prj['name'] == project if project.is_a? String
+			return prj['name'] =~ project if project.is_a? Regexp
+			return false
+		end
+		return [nil,nil] if matches.empty?
+
+		# have matching projects.  Now filter down to 
+		verbose "Multiple projects(#{matches.length}) found, using first" if matches.length > 1
+		prj = matches.first
+		matches = prj['tasks'].select do |tsk|
+			return false unless tsk.is_a? Hash
+			return false unless tsk.has_key? 'id'
+			return false unless tsk.has_key? 'name'
+			return tsk['name'] == task if task.is_a? String
+			return tsk['name'] =~ task if task.is_a? Regexp
+			return false
+		end
+		return [prj['id'], nil] if matches.empty?
+		verbose "Multiple tasks(#{matches.length}) found, using first" if matches.length > 1
+		tsk = matches.first
+		return [prj['id'], tsk['id']]
 	end
 
 
