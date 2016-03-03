@@ -275,18 +275,18 @@ class JiraUtils
 	def logWork(key, timespent, notes="")
 		r = jiraEndPoint
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-			request = Net::HTTP::Put.new(r + ('issue/' + key + '/worklog'))
+			request = Net::HTTP::Post.new(r + ('issue/' + key + '/worklog'))
 			request.content_type = 'application/json'
 			request.basic_auth(username(), password())
 			request.body = JSON.generate({
 				:comment => notes,
-				#:timeSpent => "",
 				:timeSpentSeconds => timespent
 			}) 
 
-			verbose ""
+			verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
 			return if @options.dry
 			response = http.request(request)
+			pp response
 			case response
 			when Net::HTTPSuccess
 			else
