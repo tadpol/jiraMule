@@ -7,6 +7,7 @@ cookies
 .jiraProject
 .rpjProject
 jira-*.gem
+tags
 
 xcuserdata
 Pods/

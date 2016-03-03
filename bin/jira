@@ -28,6 +28,7 @@ default_command :help
 require 'jiraMule/kanban'
 require 'jiraMule/query'
 require 'jiraMule/transitions'
+require 'jiraMule/logWork'
 
 require 'jiraMule/testReady'
 require 'jiraMule/release'
