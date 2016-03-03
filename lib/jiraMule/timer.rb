@@ -1,7 +1,8 @@
 #
+require 'chronic_duration'
 
 command :time do |c|
-  c.syntax = 'jira time [options] <key>'
+  c.syntax = 'jira time [options] <key> <time spent...>'
   c.summary = 'Log work spent'
   c.description = %{Log time spent on a issue, sending update to both jira and harvest}
   c.option '-m', 'message to add to work log'
@@ -15,14 +16,15 @@ command :time do |c|
     harvest = HarvestUtils.new(args, options)
 
     key = jira.expandKeys(args).first
+    ts = ChronicDuration.parse(args[1..-1].join(' '))
     pid, tid = harvest.taskIDfromProjectAndName()
-    printVars(:k=>key, :pt=>[pid,tid], :m=>options.m)
+    printVars(:k=>key, :ts=>ts, :m=>options.m, :pt=>[pid,tid])
 
     jmsg = %{[#{pid['code']}] #{pid['name']} - #{tid['name']}: #{options.m}}
-    hmsg =  %{#{key} #{options.m}}
+    hmsg =  %{#{key} #{options.m}: #{options.m}}
 
-    #jira.logWork(key, 20*60, jmsg)
-    harvest.logWork(pid['id'], tid['id'], (2*3600), hmsg)
+    jira.logWork(key, ts, jmsg)
+    harvest.logWork(pid['id'], tid['id'], ts, hmsg)
 
   end
 end
