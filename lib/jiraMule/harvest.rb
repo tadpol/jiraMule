@@ -116,39 +116,62 @@ class HarvestUtils
 		prj['id']
 	end
 
+	# Given a project name|code|id and a task name|id, return the project and task ids.
 	def taskIDfromProjectAndName(project=self.project, task=self.task)
 		verbose %{Going to find from "#{project}" and "#{task}"}
-		projects = getProjectsAndTasks()
-		pp projects
-		matches = projects.select do |prj| 
-			return false unless prj.is_a? Hash
-			return false unless prj.has_key? 'id'
-			return false unless prj.has_key? 'code'
-			return false unless prj.has_key? 'name'
-			return false unless prj.has_key? 'tasks'
-			return prj['code'] == project if project.is_a? String
-			return prj['code'] =~ project if project.is_a? Regexp
-			return prj['name'] == project if project.is_a? String
-			return prj['name'] =~ project if project.is_a? Regexp
-			return false
+		prjs = getProjectsAndTasks()
+		matches = []
+		prjs.each do |prj| 
+			next unless prj.is_a? Hash
+			next unless prj.has_key? 'id'
+			next unless prj.has_key? 'code'
+			next unless prj.has_key? 'name'
+			next unless prj.has_key? 'tasks'
+			if (project.is_a? Integer and prj['id'] == project) or
+			   (project.is_a? String and prj['id'] == project) then
+				matches << tsk
+				next
+			end
+			#verbose "Comparing to #{prj['code']} or #{prj['name']}"
+			if (project.is_a? String and prj['code'] == project) or
+			   (project.is_a? Regexp and prj['code'] =~ project) then
+				matches << prj
+				next
+			end
+			if (project.is_a? String and prj['name'] == project) or
+			   (project.is_a? Regexp and prj['name'] =~ project) then
+				matches << prj
+				next
+			end
 		end
 		return [nil,nil] if matches.empty?
 
 		# have matching projects.  Now filter down to 
 		verbose "Multiple projects(#{matches.length}) found, using first" if matches.length > 1
 		prj = matches.first
-		matches = prj['tasks'].select do |tsk|
-			return false unless tsk.is_a? Hash
-			return false unless tsk.has_key? 'id'
-			return false unless tsk.has_key? 'name'
-			return tsk['name'] == task if task.is_a? String
-			return tsk['name'] =~ task if task.is_a? Regexp
-			return false
+
+		matches = []
+		prj['tasks'].each do |tsk|
+			next unless tsk.is_a? Hash
+			next unless tsk.has_key? 'id'
+			if (task.is_a? Integer and tsk['id'] == task) or
+			   (task.is_a? String and tsk['id'] == task) then
+				matches << tsk
+				next
+			end
+			next unless tsk.has_key? 'name'
+			#verbose "Comparing to #{tsk['name']}"
+			if (task.is_a? String and tsk['name'] == task) or
+			   (task.is_a? Regexp and tsk['name'] =~ task) then
+				matches << tsk
+				next
+			end
 		end
-		return [prj['id'], nil] if matches.empty?
+		prj.delete('tasks')
+		return [prj, nil] if matches.empty?
 		verbose "Multiple tasks(#{matches.length}) found, using first" if matches.length > 1
 		tsk = matches.first
-		return [prj['id'], tsk['id']]
+		return [prj, tsk]
 	end
 
 
@@ -161,15 +184,17 @@ class HarvestUtils
 		r = endPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + 'daily/add')
+			request['Accept'] = 'application/json'
 			request.content_type = 'application/json'
 			request.basic_auth(username(), password())
 			request.body = JSON.generate({
 				:notes => notes,
+				:hours => (timespent / 3600.0),
 				:project_id => project,
 				:task_id => task,
-				:hours => (timespent / 3600.0)
+				:spent_at => Time.now.strftime('%Y-%m-%d')
 			})
-			verbose "Getting Projects and Tasks"
+			verbose "Going to log work #{timespent} to #{project}:#{task}"
 			return if @options.dry
 			response = http.request(request)
 			case response
@@ -177,7 +202,7 @@ class HarvestUtils
 				daily = JSON.parse(response.body)
 				return daily
 			else
-				ex = HarvestUtilsException.new("Failed to log work on #{project}:#{task}")
+				ex = HarvestUtilsException.new("Failed to log work on #{project}:#{task} (#{response.code})")
 				ex.request = request
 				ex.response = response
 				raise ex
