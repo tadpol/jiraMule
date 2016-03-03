@@ -7,6 +7,11 @@ task :bob do
 	sh %{gem install --user-install pkg/jira-#{Bundler::GemHelper.gemspec.version}.gem}
 end
 
+desc "Uninstall from user dir"
+task :unbob do
+	sh %{gem uninstall --user-install pkg/jira-#{Bundler::GemHelper.gemspec.version}.gem}
+end
+
 task :echo do
 	puts "= #{Bundler::GemHelper.gemspec.version} ="
 end
