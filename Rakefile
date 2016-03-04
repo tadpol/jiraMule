@@ -16,4 +16,8 @@ task :echo do
 	puts "= #{Bundler::GemHelper.gemspec.version} ="
 end
 
+task :run do
+	sh %{ruby -Ilib bin/jira }
+end
+
 #  vim: set sw=4 ts=4 :
