@@ -6,7 +6,7 @@ require 'jiraMule'
 require 'pp'
 require 'json'
 
-program :version, '0.0.1'
+program :version, '0.0.3'
 program :description, %{A collection of things that I do with jira.
 
 Many of which are either big batch operations, or need bits of info from
@@ -25,6 +25,7 @@ global_option '--url URL', "Set jira base url"
 
 default_command :help
 
+require 'jiraMule/init'
 require 'jiraMule/kanban'
 require 'jiraMule/query'
 require 'jiraMule/transitions'
