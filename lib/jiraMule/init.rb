@@ -5,14 +5,14 @@ command :logwork do |c|
   c.syntax = 'jira init'
   c.summary = 'Initialize a project'
   c.description = %{Initialize a project }
-  c.example '', %{jira init}
+  c.example 'Initialize a project', %{jira init}
 
   c.action do |args, options|
 
       p=Pathname.new(Dir.home) + '.rpjProject'
       if not p.exist? then
         cfg = {
-          :jira => {}
+          :jira => {},
           :harvest => {}
         }
 
@@ -27,7 +27,8 @@ command :logwork do |c|
             cfg[:jira][:userpass],
             cfg[:jira][:url],
             pswd
-        ]
+        ])
+        pswd = nil
 
         puts "Now lets get Harvest credentials:"
         subd = ask("Harvest subdomain: ").to_s
@@ -39,8 +40,8 @@ command :logwork do |c|
             cfg[:harvest][:user],
             cfg[:harvest][:url],
             pswd
-        ]
-        pswd=nil
+        ])
+        pswd = nil
 
         p.open('w') { |io| io << cfg.to_yaml }
       end
@@ -66,7 +67,7 @@ command :logwork do |c|
       end
       if not p.exist? then
         cfg = {
-          :jira => {}
+          :jira => {},
           :harvest => {}
         }
 
