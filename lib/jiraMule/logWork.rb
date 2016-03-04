@@ -18,7 +18,7 @@ command :logwork do |c|
     key = jira.expandKeys(args).shift
     ts = ChronicDuration.parse(args.join(' '))
     pid, tid = harvest.taskIDfromProjectAndName()
-    printVars(:k=>key, :ts=>ts, :m=>options.m, :pt=>[pid,tid])
+    printVars(:k=>key, :ts=>ts, :m=>options.m, :pt=>[pid['name'],tid['name']])
 
     jmsg = %{[#{pid['code']}] #{pid['name']} - #{tid['name']}: #{options.m}}
     hmsg =  %{#{key} #{options.m}: #{options.m}}

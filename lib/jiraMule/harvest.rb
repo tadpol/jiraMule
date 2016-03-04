@@ -120,6 +120,7 @@ class HarvestUtils
 	def taskIDfromProjectAndName(project=self.project, task=self.task)
 		verbose %{Going to find from "#{project}" and "#{task}"}
 		prjs = getProjectsAndTasks()
+		verbose %{From #{prjs.length} projects and ? tasks}
 		matches = []
 		prjs.each do |prj| 
 			next unless prj.is_a? Hash
@@ -144,6 +145,7 @@ class HarvestUtils
 				next
 			end
 		end
+		verbose "No projects matched"  if matches.empty?
 		return [nil,nil] if matches.empty?
 
 		# have matching projects.  Now filter down to 
@@ -168,6 +170,7 @@ class HarvestUtils
 			end
 		end
 		prj.delete('tasks')
+		verbose "No tasks matched"  if matches.empty?
 		return [prj, nil] if matches.empty?
 		verbose "Multiple tasks(#{matches.length}) found, using first" if matches.length > 1
 		tsk = matches.first
@@ -194,7 +197,7 @@ class HarvestUtils
 				:task_id => task,
 				:spent_at => Time.now.strftime('%Y-%m-%d')
 			})
-			verbose "Going to log work #{timespent} to #{project}:#{task}"
+			verbose "Going to log work #{timespent} to harvest #{project}:#{task}"
 			return if @options.dry
 			response = http.request(request)
 			case response
