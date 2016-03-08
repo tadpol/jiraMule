@@ -5,8 +5,6 @@ require 'json'
 require 'date'
 require 'pp'
 
-# ??? require 'jiraby' ???
-
 def printVars(map)
 	$stdout.print("\033[1m=:\033[0m ")
 	map.each {|k,v|
@@ -17,8 +15,8 @@ end
 
 def printErr(msg)
 	$stdout.print("\033[1m=!\033[0m ")
-		$stdout.print(msg)
-		$stdout.print("\n")
+	$stdout.print(msg)
+	$stdout.print("\n")
 end
 
 class JiraUtilsException < Exception
@@ -298,7 +296,13 @@ class JiraUtils
 			end
 		end
 	end
-def attach(key, file, type="application/octect", name=nil)
+
+	# Attach a file to an issue.
+	# +key+:: The issue to attach to
+	# +file+:: Full path to the file to be attached
+	# +type+:: MIME type of the fiel data
+	# +name+:: Aternate name of file being uploaded
+	def attach(key, file, type="application/octect", name=nil)
 		r = jiraEndPoint
 		if name.nil? then
 			name = File.basename(file)
@@ -306,7 +310,7 @@ def attach(key, file, type="application/octect", name=nil)
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			path = r + ('issue/' + key + '/attachments')
 			request = Net::HTTP::Post::Multipart.new(path,
-				'file'=> UploadIO.new(File.new(file), type, name) )
+													 'file'=> UploadIO.new(File.new(file), type, name) )
 			#request.content_type = 'application/json'
 			request.basic_auth(username, password)
 			request['X-Atlassian-Token'] = 'nocheck'
@@ -316,7 +320,6 @@ def attach(key, file, type="application/octect", name=nil)
 				response = http.request(request)
 				case response
 				when Net::HTTPSuccess
-					pp response
 				else
 					ex = JiraUtilsException.new("Failed to POST #{file} to #{key}")
 					ex.request = request
