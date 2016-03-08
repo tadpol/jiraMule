@@ -1,10 +1,9 @@
 require 'uri'
 require 'net/http'
+require 'net/http/post/multipart'
 require 'json'
 require 'date'
 require 'pp'
-
-# ??? require 'jiraby' ???
 
 def printVars(map)
 	$stdout.print("\033[1m=:\033[0m ")
@@ -16,8 +15,8 @@ end
 
 def printErr(msg)
 	$stdout.print("\033[1m=!\033[0m ")
-		$stdout.print(msg)
-		$stdout.print("\n")
+	$stdout.print(msg)
+	$stdout.print("\n")
 end
 
 class JiraUtilsException < Exception
@@ -297,7 +296,42 @@ class JiraUtils
 			end
 		end
 	end
+
+	# Attach a file to an issue.
+	# +key+:: The issue to attach to
+	# +file+:: Full path to the file to be attached
+	# +type+:: MIME type of the fiel data
+	# +name+:: Aternate name of file being uploaded
+	def attach(key, file, type="application/octect", name=nil)
+		r = jiraEndPoint
+		if name.nil? then
+			name = File.basename(file)
+		end
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			path = r + ('issue/' + key + '/attachments')
+			request = Net::HTTP::Post::Multipart.new(path,
+													 'file'=> UploadIO.new(File.new(file), type, name) )
+			#request.content_type = 'application/json'
+			request.basic_auth(username, password)
+			request['X-Atlassian-Token'] = 'nocheck'
+
+			verbose "Going to upload #{file} to #{key}"
+			if not @options.dry
+				response = http.request(request)
+				case response
+				when Net::HTTPSuccess
+				else
+					ex = JiraUtilsException.new("Failed to POST #{file} to #{key}")
+					ex.request = request
+					ex.response = response
+					raise ex
+				end
+			end
+		end
+	end
+
 end
+
 
 class GitUtils
 
