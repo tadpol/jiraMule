@@ -285,7 +285,6 @@ class JiraUtils
 			verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
 			return if @options.dry
 			response = http.request(request)
-			pp response
 			case response
 			when Net::HTTPSuccess
 			else

@@ -24,8 +24,8 @@ command :logwork do |c|
     hmsg =  %{#{key} #{options.m}: #{options.m}}
 
     begin
-    jira.logWork(key, ts, jmsg)
-    harvest.logWork(pid['id'], tid['id'], ts, hmsg)
+      jira.logWork(key, ts, jmsg)
+      harvest.logWork(pid['id'], tid['id'], ts, hmsg)
     rescue JiraUtilsException => e
       pp e.response.body
       
