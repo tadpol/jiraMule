@@ -1,31 +1,63 @@
+require 'tempfile'
+require 'zip'
 
 command :attach do |c|
   c.syntax = 'jira attach [options] [key] [file...]'
   c.summary = 'Attach file to an Issue'
-  c.description = ''
+  c.description = 'Attach a file to an Issue'
   c.example 'Attach a file', %{jira attach BUG-1 foo.log}
+	c.option '-z', '--zip', 'Zip the file[s] first'
 
   c.action do |args, options|
+		options.default :zip => false
+
 		jira = JiraUtils.new(args, options)
 		key = args.shift
-		file = args.shift
-		# TODO Work with multiple files. 
-		# Upload each as a seperate attachment.
-		# ??? -z to zip all files together and upload that?
-		# ??? Support - to take STDIN and upload?
 
 		# keys can be with or without the project prefix.
 		key = jira.expandKeys([key]).first
 
-		printVars(:key=>key, :file=>file)
+		printVars(:key=>key, :files=>args)
 
 		begin
-			jira.attach(key, file)
+			if options.zip then
+				tf = Tempfile.new('zipped')
+				printVars(:tf=>tf.path)
+				begin
+					tf.close
+					Zip::File.open(tf.path, Zip::File::CREATE) do |zipfile|
+						args.each do |file|
+							if File.directory?(file) then
+								Dir[File.join(file, '**', '**')].each do |dfile|
+									zipfile.add(dfile, dfile)
+								end
+							else
+								zipfile.add(file, file)
+							end
+						end
+					end
+
+					jira.attach(key, tf.path)
+
+				ensure
+					tf.unlink
+				end
+
+			else
+				args.each do |file|
+					raise "Cannot send directories! #{file}" if File.directory?(file)
+					raise "No such file! #{file}" unless File.exists? file
+					jira.attach(key, file)
+				end
+			end
+
 		rescue JiraUtilsException => e
 			puts "= #{e}"
 			puts "= #{e.response}"
 			puts "= #{e.response.inspect}"
 			puts "= #{e.request}"
+		rescue Exception => e
+			puts e
 		end
 
 	end
