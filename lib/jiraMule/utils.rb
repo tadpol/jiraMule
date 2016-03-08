@@ -274,16 +274,18 @@ class JiraUtils
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + ('issue/' + key + '/attachments'))
 			#request.content_type = 'application/json'
-			request.content_type = 'multipart/form-data'
+			lBND = "AaBbCcDdEeFfGgxxX"
+			request.content_type = "multipart/form-data; boundary=#{lBND}"
 			request.basic_auth(username, password)
 			request['X-Atlassian-Token'] = 'nocheck'
-			lBND = "AaBbCcDdEeFfGgxxX"
 			File.open(file) do |io|
 				rbody = ""
 				rbody << "\r\n--" << lBND << "\r\n"
-				rbody << "Content-Disposition: form-data; name=\"file\"\r\n\r\n"
+				rbody << "Content-Disposition: form-data; name=\"file\"\r\n"
+				#rbody << "Content-Transfer-Encoding: binary\r\n"
+				rbody << "\r\n"
 				rbody << io.read
-				rbody << "\r\n--" << lBND << "--\r\n"
+				rbody << "\r\n--" << lBND << "--\r\n\r\n"
 				request.body = rbody
 			end
 
@@ -292,6 +294,7 @@ class JiraUtils
 				response = http.request(request)
 				case response
 				when Net::HTTPSuccess
+					pp response
 				else
 					ex = JiraUtilsException.new("Failed to POST #{file} to #{key}")
 					ex.request = request
