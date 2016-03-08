@@ -2,5 +2,7 @@ source 'http://rubygems.org'
 
 gemspec
 
-gem multipart-post
+gem 'chronic_duration'
+gem 'multipart-post'
+
 

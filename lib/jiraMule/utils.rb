@@ -269,8 +269,36 @@ class JiraUtils
 		end
 	end
 
+	# Log a work entry to Jira
+	# +key+:: The issue to log work on
+	# +timespend+:: The time spent in seconds
+	# +notes+:: Any notes to add.
+	def logWork(key, timespent, notes="")
+		r = jiraEndPoint
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			request = Net::HTTP::Post.new(r + ('issue/' + key + '/worklog'))
+			request.content_type = 'application/json'
+			request.basic_auth(username(), password())
+			request.body = JSON.generate({
+				:comment => notes,
+				:timeSpentSeconds => timespent
+			}) 
 
-	def attach(key, file, type="application/octect", name=nil)
+			verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
+			return if @options.dry
+			response = http.request(request)
+			pp response
+			case response
+			when Net::HTTPSuccess
+			else
+				ex = JiraUtilsException.new("Failed to log work on #{key}")
+				ex.request = request
+				ex.response = response
+				raise ex
+			end
+		end
+	end
+def attach(key, file, type="application/octect", name=nil)
 		r = jiraEndPoint
 		if name.nil? then
 			name = File.basename(file)
@@ -298,6 +326,7 @@ class JiraUtils
 			end
 		end
 	end
+
 end
 
 
