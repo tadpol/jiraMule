@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/http'
+require 'net/http/post/multipart'
 require 'json'
 require 'date'
 require 'pp'
@@ -269,25 +270,18 @@ class JiraUtils
 	end
 
 
-	def attach(key, file)
+	def attach(key, file, type="application/octect", name=nil)
 		r = jiraEndPoint
+		if name.nil? then
+			name = File.basename(file)
+		end
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-			request = Net::HTTP::Post.new(r + ('issue/' + key + '/attachments'))
+			path = r + ('issue/' + key + '/attachments')
+			request = Net::HTTP::Post::Multipart.new(path,
+				'file'=> UploadIO.new(File.new(file), type, name) )
 			#request.content_type = 'application/json'
-			lBND = "AaBbCcDdEeFfGgxxX"
-			request.content_type = "multipart/form-data; boundary=#{lBND}"
 			request.basic_auth(username, password)
 			request['X-Atlassian-Token'] = 'nocheck'
-			File.open(file) do |io|
-				rbody = ""
-				rbody << "\r\n--" << lBND << "\r\n"
-				rbody << "Content-Disposition: form-data; name=\"file\"\r\n"
-				#rbody << "Content-Transfer-Encoding: binary\r\n"
-				rbody << "\r\n"
-				rbody << io.read
-				rbody << "\r\n--" << lBND << "--\r\n\r\n"
-				request.body = rbody
-			end
 
 			verbose "Going to upload #{file} to #{key}"
 			if not @options.dry

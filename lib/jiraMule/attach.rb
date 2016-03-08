@@ -22,7 +22,6 @@ command :attach do |c|
 		begin
 			if options.zip then
 				tf = Tempfile.new('zipped')
-				printVars(:tf=>tf.path)
 				begin
 					tf.close
 					Zip::File.open(tf.path, Zip::File::CREATE) do |zipfile|
@@ -37,7 +36,7 @@ command :attach do |c|
 						end
 					end
 
-					jira.attach(key, tf.path)
+					jira.attach(key, tf.path, 'application/zip', "#{Time.new.to_i}.zip")
 
 				ensure
 					tf.unlink
@@ -47,15 +46,18 @@ command :attach do |c|
 				args.each do |file|
 					raise "Cannot send directories! #{file}" if File.directory?(file)
 					raise "No such file! #{file}" unless File.exists? file
-					jira.attach(key, file)
+					mime=`file -I -b #{file}`
+					mime='application/octect' if mime.nil?
+					jira.attach(key, file, mime)
 				end
 			end
 
 		rescue JiraUtilsException => e
 			puts "= #{e}"
+			puts "= #{e.request}"
 			puts "= #{e.response}"
 			puts "= #{e.response.inspect}"
-			puts "= #{e.request}"
+			puts "= #{e.response.body}"
 		rescue Exception => e
 			puts e
 		end
