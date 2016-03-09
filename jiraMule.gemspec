@@ -26,8 +26,8 @@ already.  Rather this is specific to things I need.
   s.require_paths = ['lib']
 
   s.add_runtime_dependency('commander', '~> 4.3.4')
-  s.add_runtime_dependency('chronic_duration', '~> 0.10.6')
-  s.add_runtime_dependency('multipart-post', '~> 2.0.0')
+  #s.add_runtime_dependency('chronic_duration', '~> 0.10.6')
+  #s.add_runtime_dependency('multipart-post', '~> 2.0.0')
   s.add_dependency('mustache', '~> 1.0')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
