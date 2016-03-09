@@ -10,20 +10,25 @@ command :progress do |c|
   # Show only overdue
   # Show only unstarted
   # Show only Started
+	# Show only with status[s] = 
+	c.option '-s', '--status STATUSES', Array, 'Which status to limit to'
   c.example 'Show how current project is going', %{jm progress}
   c.example 'Show how work on task 5 is going', %{jm progress 5}
 
   c.action do |args, options|
+		options.default :status=>[]
 
 	jira = JiraUtils.new(args, options)
-
-    keys = jira.expandKeys(args)
+	keys = jira.expandKeys(args)
 	
 	query = %{assignee = #{jira.username} AND project = #{jira.project}}
 	query << ' AND (' unless keys.empty?
 	query << keys.map{|k| "key=#{k}"}.join(' OR ') unless keys.empty?
 	query << ')' unless keys.empty?
-	#printVars(:q=>query)
+	query << ' AND (' unless options.status.empty?
+	query << options.status.map{|s| %{status="#{s}"}}.join(' OR ') unless options.status.empty?
+	query << ')' unless options.status.empty?
+	printVars(:q=>query)
 	progresses = jira.getIssues(query, ['key', 'aggregateprogress', 'duedate'])
 
 	rows = progresses.map do |issue|
