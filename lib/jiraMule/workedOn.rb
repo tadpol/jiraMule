@@ -33,6 +33,9 @@ command :progress do |c|
 			issue.access('fields.aggregateprogress.progress')/3600.0,
 			%{#{issue.access('fields.aggregateprogress.percent')}%},
 		]
+		if issue.access('fields.aggregateprogress.percent').to_i > 100 then
+			ret.map!{|v| %{\033[1m#{v}\033[0m}}
+		end
 		due = issue.access('fields.duedate')
 		if Date.new >= Date.parse(due) then
 			ret << %{\033[1m#{due}\033[0m}
@@ -42,7 +45,6 @@ command :progress do |c|
 		ret
 	end.sort{|a,b| a[0].sub(/^\D+(\d+)$/,'\1').to_i <=> b[0].sub(/^\D+(\d+)$/,'\1').to_i }
 
-	# TODO: Highlight rows that are over 100%
 	tbl = Terminal::Table.new :headings=>[:key, :total, :progress, :percent, :due], :rows=>rows
 	tbl.align_column(1, :right)
 	tbl.align_column(2, :right)
