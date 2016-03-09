@@ -1,3 +1,4 @@
+require 'date'
 require 'terminal-table'
 require 'vine'
 require 'pp'
@@ -26,16 +27,21 @@ command :progress do |c|
 	progresses = jira.getIssues(query, ['key', 'aggregateprogress', 'duedate'])
 
 	rows = progresses.map do |issue|
-		[
+		ret = [
 			issue['key'],
 			issue.access('fields.aggregateprogress.total')/3600.0,
 			issue.access('fields.aggregateprogress.progress')/3600.0,
 			%{#{issue.access('fields.aggregateprogress.percent')}%},
-			issue.access('fields.duedate'),
 		]
+		due = issue.access('fields.duedate')
+		if Date.new >= Date.parse(due) then
+			ret << %{\033[1m#{due}\033[0m}
+		else
+			ret << due
+		end
+		ret
 	end.sort{|a,b| a[0].sub(/^\D+(\d+)$/,'\1').to_i <=> b[0].sub(/^\D+(\d+)$/,'\1').to_i }
 
-	# TODO: Highlight rows that are overdue and/or over 100%
 	# TODO: Highlight rows that are over 100%
 	tbl = Terminal::Table.new :headings=>[:key, :total, :progress, :percent, :due], :rows=>rows
 	tbl.align_column(1, :right)
