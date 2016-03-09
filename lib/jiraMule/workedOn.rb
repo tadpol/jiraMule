@@ -9,7 +9,8 @@ command :progress do |c|
   # Show only overdue
   # Show only unstarted
   # Show only Started
-  c.example '', %{jm progress}
+  c.example 'Show how current project is going', %{jm progress}
+  c.example 'Show how work on task 5 is going', %{jm progress 5}
 
   c.action do |args, options|
 
@@ -21,7 +22,7 @@ command :progress do |c|
 	query << ' AND (' unless keys.empty?
 	query << keys.map{|k| "key=#{k}"}.join(' OR ') unless keys.empty?
 	query << ')' unless keys.empty?
-	printVars(:q=>query)
+	#printVars(:q=>query)
 	progresses = jira.getIssues(query, ['key', 'aggregateprogress', 'duedate'])
 
 	rows = progresses.map do |issue|
@@ -35,7 +36,12 @@ command :progress do |c|
 	end.sort{|a,b| a[0].sub(/^\D+(\d+)$/,'\1').to_i <=> b[0].sub(/^\D+(\d+)$/,'\1').to_i }
 
 	# TODO: Highlight rows that are overdue and/or over 100%
-	puts Terminal::Table.new :headings=>[:key, :total, :progress, :percent, :due], :rows=>rows
+	# TODO: Highlight rows that are over 100%
+	tbl = Terminal::Table.new :headings=>[:key, :total, :progress, :percent, :due], :rows=>rows
+	tbl.align_column(1, :right)
+	tbl.align_column(2, :right)
+	tbl.align_column(3, :right)
+	puts tbl
 
   end
 end
