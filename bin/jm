@@ -30,6 +30,7 @@ require 'jiraMule/kanban'
 require 'jiraMule/query'
 require 'jiraMule/transitions'
 require 'jiraMule/logWork'
+require 'jiraMule/workedOn'
 require 'jiraMule/attach'
 
 require 'jiraMule/testReady'
