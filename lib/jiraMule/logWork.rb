@@ -35,5 +35,6 @@ command :logwork do |c|
 
   end
 end
+alias_command :lw, :logwork
 
 #  vim: set et sw=2 ts=2 :
