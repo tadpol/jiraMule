@@ -10,7 +10,6 @@ command :progress do |c|
   # Show only overdue
   # Show only unstarted
   # Show only Started
-	# Show only with status[s] = 
 	c.option '-s', '--status STATUSES', Array, 'Which status to limit to'
   c.example 'Show how current project is going', %{jm progress}
   c.example 'Show how work on task 5 is going', %{jm progress 5}
@@ -42,7 +41,7 @@ command :progress do |c|
 			ret.map!{|v| %{\033[1m#{v}\033[0m}}
 		end
 		due = issue.access('fields.duedate')
-		if Date.new >= Date.parse(due) then
+		if not due.nil? and Date.new >= Date.parse(due) then
 			ret << %{\033[1m#{due}\033[0m}
 		else
 			ret << due
