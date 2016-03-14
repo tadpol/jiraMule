@@ -41,10 +41,12 @@ command :goto do |c|
 				at = issues.first.access('fields.status.name')
 
 				# lookup a transition map
+				# I'm not sure about this as the map.
 				transMap = $cfg[".jira.goto.#{type}.#{at}.#{to}"]
 				transMap = $cfg[".jira.goto.*.#{at}.#{to}"] if transMap.nil?
 				raise "No transition map for #{key} from #{at} to #{to}" if transMap.nil?
 
+				transMap << to
 				# Now move thru
 				transMap.each do |step|
 					trans = jira.transitionsFor(key)
@@ -64,6 +66,7 @@ command :mapGoto do |c|
   c.syntax = 'jm mapGoto [options]'
   c.summary = 'Attempt to build a map '
   c.description = %{
+	This is just dumping stuff right now.
 	}
   c.action do |args, options|
 		jira = JiraUtils.new(args, options)
