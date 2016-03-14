@@ -230,7 +230,7 @@ class JiraUtils
 			request.basic_auth(username, password)
 			request.body = update
 
-			verbose "Updating key #{key} with #{update}"
+			verbose "Transitioning key #{key} to #{toID}"
 			if not @options.dry
 				response = http.request(request)
 				case response
@@ -254,7 +254,7 @@ class JiraUtils
 			request = Net::HTTP::Get.new(r + ('issue/' + key + '/transitions'))
 			request.content_type = 'application/json'
 			request.basic_auth(username, password)
-			verbose "Fetching transition ID for #{to}"
+			verbose "Fetching transitions for #{key}"
 			response = http.request(request)
 			case response
 			when Net::HTTPSuccess

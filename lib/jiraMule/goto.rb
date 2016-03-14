@@ -1,3 +1,4 @@
+require 'vine'
 
 command :goto do |c|
   c.syntax = 'jira goto [options] [status] [key]'
@@ -21,18 +22,36 @@ command :goto do |c|
 		keys.each do |key|
 			# First see if we can just go there.
 			trans = jira.transitionsFor(key)
-			direct = trans.select {|item| item['name'] == to }
+			direct = trans.select {|item| item['name'] == to || item['id'] == to }
 			if not direct.empty? then
 				# We can just go right there.
 				id = direct.first['id']
-				jira.transition(key, to)
+				jira.transition(key, id)
 				# TODO: deal with required field.
 			else
 
 				# TODO: Get the workflow; ah, might not be able to get this.
-				# Cannot get workflows, how else to do this?
+				# Cannot get workflows, how else to do this? We'll load it in the config i
+				# think.
 
-				# TODO: Find a path from here to there.
+				# where we are.
+				query = "assignee = #{jira.username} AND project = #{jira.project} AND "
+				query << "key = #{key}"
+				issues = jira.getIssues(query, ["status"])
+				at= issues.first.access('fields.status.name')
+
+				# lookup a transition map
+				transMap = $cfg[".jira.goto.#{at}.#{to}"]
+				raise "No transition map for #{key} from #{at} to #{to}" if transMap.nil?
+
+				transMap.each do |step|
+					trans = jira.transitionsFor(key)
+					direct = trans.select {|item| item['name'] == step || item['id'] == step }
+					raise "Broken transition step on #{key} to #{step}" if direct.empty?
+					id = direct.first['id']
+					jira.transition(key, id)
+				end
+
 			end
 		end
 	end
