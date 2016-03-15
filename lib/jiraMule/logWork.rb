@@ -37,4 +37,36 @@ command :logwork do |c|
 end
 alias_command :lw, :logwork
 
+command :mapwork do |c|
+  c.syntax = 'jm mapwork [options] "<harvest project>" "<harvest task>" <keys>'
+  c.summary = 'Store the harvest codes as a label in Jira.'
+  c.description = %{
+  Different Jira Tasks get different Harvest codes all in the same project.
+
+  What a mess.
+
+  This easily stores which harvest project and task a Jira task should map to.
+
+  Logwork will then use this mapping.
+}
+
+
+  c.action do |args, options|
+    jira = JiraUtils.new(args, options)
+    harvest = HarvestUtils.new(args, options)
+
+    printVars(:p=>args[0], :t=>args[1])
+    pid, tid = harvest.taskIDfromProjectAndName(args[0], args[1])
+    printVars(:pid=>pid['id'], :tid=>tid['id'])
+
+    keys = jira.expandKeys(args[2..-1])
+    printVars(:k=>keys)
+
+    hl = {:labels=>[{:add=>"harvest:#{pid['id']}:#{tid['id']}"}]}
+    jira.updateKeys(keys, hl)
+
+  end
+end
+alias_command :mw, :mapwork
+
 #  vim: set et sw=2 ts=2 :
