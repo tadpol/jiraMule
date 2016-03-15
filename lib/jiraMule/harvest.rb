@@ -130,7 +130,7 @@ class HarvestUtils
 			next unless prj.has_key? 'tasks'
 			if (project.is_a? Integer and prj['id'] == project) or
 			   (project.is_a? String and prj['id'] == project) then
-				matches << tsk
+				matches << prj
 				next
 			end
 			#verbose "Comparing to #{prj['code']} or #{prj['name']}"
