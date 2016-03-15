@@ -1,14 +1,15 @@
 #
 require 'chronic_duration'
+require 'vine'
 
 command :logwork do |c|
-  c.syntax = 'jira logwork [options] <key> <time spent...>'
+  c.syntax = 'jm logwork [options] <key> <time spent...>'
   c.summary = 'Log work spent'
   c.description = %{Log time spent on a issue, sending update to both jira and harvest}
   c.option '-m', 'message to add to work log'
   c.option '--task', 'Which Harvest task to track against'
   #c.option '--[no-]harvest', %{Don't post time to harvest}
-  c.example 'Log some work done on an issue', %{jira time BUG-42 1h 12m}
+  c.example 'Log some work done on an issue', %{jm logwork BUG-42 1h 12m}
 
   c.action do |args, options|
     options.defaults :harvest => true, :m => ''
@@ -17,7 +18,24 @@ command :logwork do |c|
 
     key = jira.expandKeys(args).shift
     ts = ChronicDuration.parse(args.join(' '))
-    pid, tid = harvest.taskIDfromProjectAndName()
+
+    # ask the key where work should go.
+    issues = jira.getIssues("key='#{key}'", ['key', 'labels'])
+    labels = issues.first.access('fields.labels')
+    pid=nil
+    tid=nil
+    labels.each do |lbl|
+      if lbl =~ /^harvest:(\d+):(\d+)$/ then
+        pid=$1.to_i
+        tid=$2.to_i
+      end
+    end
+    printVars(:pid=>pid, :tid=>tid)
+
+    # TODO: if issue is a sub-task, and it does not have a harvest label, check the
+    # parent.
+
+    pid, tid = harvest.taskIDfromProjectAndName(pid, tid)
     printVars(:k=>key, :ts=>ts, :m=>options.m, :pt=>[pid['name'],tid['name']])
 
     jmsg = %{[#{pid['code']}] #{pid['name']} - #{tid['name']}: #{options.m}}
