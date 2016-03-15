@@ -35,6 +35,8 @@ command :logwork do |c|
     # TODO: if issue is a sub-task, and it does not have a harvest label, check the
     # parent.
 
+    # if pid and/or tid are still nil here, the values in the project config will be
+    # used instead.
     pid, tid = harvest.taskIDfromProjectAndName(pid, tid)
     printVars(:k=>key, :ts=>ts, :m=>options.m, :pt=>[pid['name'],tid['name']])
 
