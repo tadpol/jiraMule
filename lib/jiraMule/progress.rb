@@ -37,6 +37,8 @@ command :progress do |c|
 			issue.access('fields.aggregateprogress.progress')/3600.0,
 			%{#{issue.access('fields.aggregateprogress.percent')}%},
 		]
+		# This won't happen, because Jira automagically increments the total as progress
+		# goes over.
 		if issue.access('fields.aggregateprogress.percent').to_i > 100 then
 			ret.map!{|v| %{\033[1m#{v}\033[0m}}
 		end
