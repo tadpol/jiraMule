@@ -6,7 +6,7 @@ require 'jiraMule'
 require 'pp'
 require 'json'
 
-program :version, '0.0.3'
+program :version, JiraMule::VERSION
 program :description, %{A collection of things that I do with jira.
 
 Many of which are either big batch operations, or need bits of info from
@@ -28,7 +28,7 @@ default_command :help
 require 'jiraMule/init'
 require 'jiraMule/kanban'
 require 'jiraMule/query'
-require 'jiraMule/transitions'
+require 'jiraMule/goto'
 require 'jiraMule/logWork'
 require 'jiraMule/progress'
 require 'jiraMule/attach'

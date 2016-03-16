@@ -218,54 +218,81 @@ class JiraUtils
 		end
 	end
 
-	def transition(keys, to)
+	# Transition key into a new status
+	# +key+:: The key to transition
+	# +toID+:: The ID of the transition to make
+	def transition(key, toID)
 		r = jiraEndPoint
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-			# *sigh* Need to transition by ID, buts what's the ID? So look that up
-			request = Net::HTTP::Get.new(r + ('issue/' + keys.first + '/transitions'))
+			update = JSON.generate({'transition'=>{'id'=> toID }})
+			request = Net::HTTP::Post.new(r + ('issue/' + key + '/transitions'))
 			request.content_type = 'application/json'
 			request.basic_auth(username, password)
-			verbose "Fetching transition ID for #{to}"
-			response = http.request(request)
-			case response
-			when Net::HTTPSuccess
-				trans = JSON.parse(response.body)
-				closed = trans['transitions'].select {|item| item['name'] == to }
-			else
-				ex = JiraUtilsException.new("Failed to get ID for #{to}")
-				ex.request = request
-				ex.response = response
-				raise ex
-			end
+			request.body = update
 
-			if closed.empty?
-				ex = JiraUtilsException.new("Cannot find Transition to #{to}!!!!")
-			end
-
-			printVars({:transitionID=>closed[0]['id']})
-
-			update = JSON.generate({'transition'=>{'id'=> closed[0]['id'] }})
-			keys.each do |key|
-				request = Net::HTTP::Post.new(r + ('issue/' + key + '/transitions'))
-				request.content_type = 'application/json'
-				request.basic_auth(username, password)
-				request.body = update
-
-				verbose "Updating key #{key} with #{update}"
-				if not @options.dry
-					response = http.request(request)
-					case response
-					when Net::HTTPSuccess
-					else
-						ex = JiraUtilsException.new("Failed to transition #{key} to #{to}")
-						ex.request = request
-						ex.response = response
-						raise ex
-					end
+			verbose "Transitioning key #{key} to #{toID}"
+			if not @options.dry
+				response = http.request(request)
+				case response
+				when Net::HTTPSuccess
+				else
+					ex = JiraUtilsException.new("Failed to transition #{key} to #{toID}")
+					ex.request = request
+					ex.response = response
+					raise ex
 				end
 			end
 		end
 	end
+
+	# Get the transitions that a key can move to.
+	# +key+:: The issue 
+	def transitionsFor(key)
+		r = jiraEndPoint
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			# *sigh* Need to transition by ID, buts what's the ID? So look that up
+			request = Net::HTTP::Get.new(r + ('issue/' + key + '/transitions'))
+			request.content_type = 'application/json'
+			request.basic_auth(username, password)
+			verbose "Fetching transitions for #{key}"
+			response = http.request(request)
+			case response
+			when Net::HTTPSuccess
+				trans = JSON.parse(response.body)
+				closed = trans['transitions']
+			else
+				ex = JiraUtilsException.new("Failed to get transitions for #{key}")
+				ex.request = request
+				ex.response = response
+				raise ex
+			end
+			return closed
+		end
+	end
+
+	# Get the status for a project
+	# +project+:: The project to fetch status from
+	def statusesFor(project)
+		r = jiraEndPoint
+		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
+			request = Net::HTTP::Get.new(r + ('project/' + project + '/statuses'))
+			request.content_type = 'application/json'
+			request.basic_auth(username, password)
+			verbose "Fetching statuses for #{project}"
+			response = http.request(request)
+			case response
+			when Net::HTTPSuccess
+				statuses = JSON.parse(response.body)
+			else
+				ex = JiraUtilsException.new("Failed to get statuses for #{project}")
+				ex.request = request
+				ex.response = response
+				raise ex
+			end
+			return statuses
+		end
+	end
+
 
 	# Log a work entry to Jira
 	# +key+:: The issue to log work on
