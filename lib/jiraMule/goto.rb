@@ -1,7 +1,7 @@
 require 'vine'
 
 command :goto do |c|
-  c.syntax = 'jm goto [options] [status] [key]'
+  c.syntax = 'jm goto [options] [status] [keys]'
   c.summary = 'Move issue to a status; making multiple transitions if needed'
   c.description = %{
 	Named for the bad command that sometime there is nothing better to use.
@@ -12,7 +12,7 @@ command :goto do |c|
 	The down side is there is no good way to automatically get mutli-step transitions.
 	So these need to be added to your config.
 	}
-  c.example 'Move BUG-4 into the In Progress state.', %{jm move 'In Progress' BUG-4}
+  c.example 'Move BUG-4 into the In Progress state.', %{jm goto 'In Progress' BUG-4}
   c.action do |args, options|
 		jira = JiraUtils.new(args, options)
 		to = args.shift
@@ -61,6 +61,7 @@ command :goto do |c|
 		end
 	end
 end
+alias_command :move, :goto
 
 command :mapGoto do |c|
   c.syntax = 'jm mapGoto [options]'

@@ -28,7 +28,6 @@ default_command :help
 require 'jiraMule/init'
 require 'jiraMule/kanban'
 require 'jiraMule/query'
-require 'jiraMule/transitions'
 require 'jiraMule/goto'
 require 'jiraMule/logWork'
 require 'jiraMule/progress'
