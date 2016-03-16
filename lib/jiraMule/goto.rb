@@ -65,9 +65,13 @@ alias_command :move, :goto
 
 command :mapGoto do |c|
   c.syntax = 'jm mapGoto [options]'
-  c.summary = 'Attempt to build a map '
+  c.summary = 'Attempt to build a goto map'
   c.description = %{
-	This is just dumping stuff right now.
+	This command is incomplete.  The goal here is to auto-build the transision maps
+	for multi-step gotos.
+
+	Right now it is just dumping stuff.
+
 	}
   c.action do |args, options|
 		jira = JiraUtils.new(args, options)
