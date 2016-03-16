@@ -100,6 +100,23 @@ class JiraUtils
 	end
 
 	##
+	# Allow for some sloppy matching.
+	# +transition+:: The transition hash to match against
+	# +couldBe+:: The string from a human to match for
+	def fuzzyMatchStatus(transition, couldBe)
+		return transition['id'] == couldBe if couldBe =~ /^\d+$/
+
+		# Build a regexp for all sorts of variations.
+
+		# Replace whitespace with a rex for dashes, whitespace, or nospace.
+		cb = couldBe.gsub(/\s+/, '[-_\s]*')
+
+		matcher = Regexp.new(cb, Regexp::IGNORECASE)
+		verbose "Fuzzing: #{transition['name']} =~ #{cb}"
+		return transition['name'] =~ matcher
+	end
+
+	##
 	# Run a JQL query and get issues with the selected fields
 	def getIssues(query, fields=[ 'key', 'summary' ])
 		r = jiraEndPoint()

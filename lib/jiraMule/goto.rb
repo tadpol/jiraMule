@@ -19,13 +19,13 @@ command :goto do |c|
 
 		# keys can be with or without the project prefix.
 		keys = jira.expandKeys(args)
-		printVars(:to=>to, :k=>keys)
+		printVars(:to=>to, :keys=>keys)
 		return if keys.empty?
 
 		keys.each do |key|
 			# First see if we can just go there.
 			trans = jira.transitionsFor(key)
-			direct = trans.select {|item| item['name'] == to || item['id'] == to }
+			direct = trans.select {|item| jira.fuzzyMatchStatus(item, to) }
 			if not direct.empty? then
 				# We can just go right there.
 				id = direct.first['id']
