@@ -7,9 +7,9 @@ command :progress do |c|
   c.syntax = 'jm progress [options] [<key>]'
   c.summary = 'Show progress on issues'
   c.description = %{}
-  # Show only overdue
-  # Show only unstarted
-  # Show only Started
+  # Show only overdue (today > duedate)
+  # Show only unstarted (timespent == 0)
+  # Show only Started (timespent > 0)
 	c.option '-s', '--status STATUSES', Array, 'Which status to limit to'
   c.example 'Show how current project is going', %{jm progress}
   c.example 'Show how work on task 5 is going', %{jm progress 5}
