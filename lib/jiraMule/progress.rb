@@ -19,6 +19,9 @@ command :progress do |c|
 
 	jira = JiraUtils.new(args, options)
 	keys = jira.expandKeys(args)
+	if keys.empty? and options.status.empty? then
+		options.status << 'In Progress'
+	end
 	
 	query = %{assignee = #{jira.username} AND project = #{jira.project}}
 	query << ' AND (' unless keys.empty?
