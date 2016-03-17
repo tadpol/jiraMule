@@ -42,6 +42,7 @@ command :goto do |c|
 
 				# lookup a transition map
 				# I'm not sure about this as the map.
+				# TODO fuzzy match here too.
 				transMap = $cfg[".jira.goto.#{type}.#{at}.#{to}"]
 				transMap = $cfg[".jira.goto.*.#{at}.#{to}"] if transMap.nil?
 				raise "No transition map for #{key} from #{at} to #{to}" if transMap.nil?
@@ -82,25 +83,32 @@ command :mapGoto do |c|
 		#
 		types = jira.statusesFor(jira.project)
 		
+		# There is only one workflow for all types it seems.
+
+		# We just need the names, so we'll merge down.
+		statusNames = {}
+
 		types.each do |type|
 			statuses = type['statuses']
 			next if statuses.nil?
 			next if statuses.empty?
-			puts "- #{type['name']}:"
-			statuses.each do |status|
-				puts "    #{status['name']}"
-				query = %{project = #{jira.project} AND issuetype = "#{type['name']}" AND status = "#{status['name']}"}
-				issues = jira.getIssues(query, ["key"])
-				if issues.empty? then
-					#?
-				else
-					key = issues.first['key']
-					# get transisitons.
-					trans = jira.transitionsFor(key)
-					trans.each {|tr| puts "      -> #{tr['name']}"}
-				end
+			statuses.each {|status| statusNames[ status['name'] ] = 1}
+		end
+
+		statusNames.each_key do |status|
+			puts "    #{status}"
+			query = %{project = #{jira.project} AND status = "#{status}"}
+			issues = jira.getIssues(query, ["key"])
+			if issues.empty? then
+				#?
+			else
+				key = issues.first['key']
+				# get transisitons.
+				trans = jira.transitionsFor(key)
+				trans.each {|tr| puts "      -> #{tr['name']} [#{tr['id']}]"}
 			end
 		end
+
 	end
 end
 
