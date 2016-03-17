@@ -28,30 +28,25 @@ command :progress do |c|
 	query << options.status.map{|s| %{status="#{s}"}}.join(' OR ') unless options.status.empty?
 	query << ')' unless options.status.empty?
 	printVars(:q=>query)
-	progresses = jira.getIssues(query, ['key', 'aggregateprogress', 'duedate'])
+	progresses = jira.getIssues(query, ['key', 'workratio', 'aggregatetimespent',
+																		 'duedate', 'aggregatetimeoriginalestimate'])
 
 	rows = progresses.map do |issue|
-		ret = [
-			issue['key'],
-			issue.access('fields.aggregateprogress.total')/3600.0,
-			issue.access('fields.aggregateprogress.progress')/3600.0,
-			%{#{issue.access('fields.aggregateprogress.percent')}%},
-		]
-		# This won't happen, because Jira automagically increments the total as progress
-		# goes over.
-		if issue.access('fields.aggregateprogress.percent').to_i > 100 then
-			ret.map!{|v| %{\033[1m#{v}\033[0m}}
-		end
+		estimate = issue.access('fields.aggregatetimeoriginalestimate')/3600.0
+		progress = issue.access('fields.aggregatetimespent')/3600.0
 		due = issue.access('fields.duedate')
-		if not due.nil? and Date.new >= Date.parse(due) then
-			ret << %{\033[1m#{due}\033[0m}
-		else
-			ret << due
+		percent = issue.access('fields.workratio')
+		if percent < 0 then
+			percent = (progress / estimate * 100).floor
+		end
+		ret = [ issue['key'], estimate, progress, %{#{percent}%}, due ]
+		if progress > estimate or (not due.nil? and Date.new >= Date.parse(due)) then
+			ret.map!{|v| %{\033[1m#{v}\033[0m}}
 		end
 		ret
 	end.sort{|a,b| a[0].sub(/^\D+(\d+)$/,'\1').to_i <=> b[0].sub(/^\D+(\d+)$/,'\1').to_i }
 
-	tbl = Terminal::Table.new :headings=>[:key, :total, :progress, :percent, :due], :rows=>rows
+	tbl = Terminal::Table.new :headings=>[:key, :estimated, :progress, :percent, :due], :rows=>rows
 	tbl.align_column(1, :right)
 	tbl.align_column(2, :right)
 	tbl.align_column(3, :right)
