@@ -26,4 +26,6 @@ command :query do |c|
 		end
   end
 end
+alias_command :q, :query
+
 #  vim: set sw=2 ts=2 :
