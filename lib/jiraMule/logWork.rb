@@ -70,17 +70,23 @@ command :mapwork do |c|
   Logwork will then use this mapping.
 }
 
-
   c.action do |args, options|
     jira = JiraUtils.new(args, options)
     harvest = HarvestUtils.new(args, options)
 
-    printVars(:p=>args[0], :t=>args[1])
-    pid, tid = harvest.taskIDfromProjectAndName(args[0], args[1])
+    proj = args[0]
+    proj = harvest.project if proj == "" # allow project name from cfg
+    task = args[1]
+    task = harvest.task if task == "" # allow task name from cfg
+
+    printVars(:project=>proj, :task=>task)
+    pid, tid = harvest.taskIDfromProjectAndName(proj, task)
+    raise "Cannot find a project \"#{proj}\"" if pid.nil?
+    raise "Cannot find a task \"#{task}\"" if tid.nil?
     printVars(:pid=>pid['id'], :tid=>tid['id'])
 
     keys = jira.expandKeys(args[2..-1])
-    printVars(:k=>keys)
+    printVars(:keys=>keys)
 
     hl = {:labels=>[{:add=>"harvest:#{pid['id']}:#{tid['id']}"}]}
     jira.updateKeys(keys, hl)
