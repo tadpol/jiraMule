@@ -35,8 +35,8 @@ command :progress do |c|
 																		 'duedate', 'aggregatetimeoriginalestimate'])
 
 	rows = progresses.map do |issue|
-		estimate = issue.access('fields.aggregatetimeoriginalestimate')/3600.0
-		progress = issue.access('fields.aggregatetimespent')/3600.0
+		estimate = (issue.access('fields.aggregatetimeoriginalestimate') or 0)/3600.0
+		progress = (issue.access('fields.aggregatetimespent') or 0)/3600.0
 		due = issue.access('fields.duedate')
 		percent = issue.access('fields.workratio')
 		if percent < 0 then
