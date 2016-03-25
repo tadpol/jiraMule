@@ -34,7 +34,7 @@ class ProjectConfig
 
 		@cfg.each do |acfg|
 			v = acfg.access(key)
-			return v if !v.nil?
+			return v unless v.nil?
 		end
 		return nil
 	end
@@ -92,37 +92,37 @@ class ProjectConfig
 					"PSStaging"=>{
 						'*'=>{'*'=>['Blocked']}
 					}
+				},
+				'next'=>{
+					'PSSimple'=>{
+						'To do'=>'In Progress',
+						'In Progress'=>'Done',
+						'Done'=>'To do'
+					},
+					'PSBasic'=>{
+						'Code Review'=>'QA',
+						'QA'=>'Dev/QA Complete'
+					},
+					'PSStandard'=>{
+						'Please Estimate'=>'Open',
+						'On Deck'=>'Waiting Estimation Approval',
+						'Waiting Estimation Approval'=>'Open',
+						'Blocked'=>'Open',
+						'In Progress'=>'Testing',
+						'Testing'=>'Pending Release',
+						'Pending Release'=>'Released',
+						'Released'=>'Closed',
+					},
+					'PSStaging'=>{
+						'Please Estimate'=>'Open',
+						'On Deck'=>'Waiting Estimation Approval',
+						'Waiting Estimation Approval'=>'Open',
+						'Blocked'=>'Open',
+						'In Progress'=>'Testing',
+						'Testing'=>'Pending Staging Release',
+						'Pending Staging Release'=>'Released To Staging',
+					},
 				}
-			},
-			'next'=>{
-				'PSSimple'=>{
-					'To do'=>'In Progress',
-					'In Progress'=>'Done',
-					'Done'=>'To do'
-				},
-				'PSBasic'=>{
-					'Code Review'=>'QA',
-					'QA'=>'Dev/QA Complete'
-				},
-				'PSStandard'=>{
-					'Please Estimate'=>'Open',
-					'On Deck'=>'Waiting Estimation Approval',
-					'Waiting Estimation Approval'=>'Open',
-					'Blocked'=>'Open',
-					'In Progress'=>'Testing',
-					'Testing'=>'Pending Release',
-					'Pending Release'=>'Released',
-					'Released'=>'Closed',
-				},
-				'PSStaging'=>{
-					'Please Estimate'=>'Open',
-					'On Deck'=>'Waiting Estimation Approval',
-					'Waiting Estimation Approval'=>'Open',
-					'Blocked'=>'Open',
-					'In Progress'=>'Testing',
-					'Testing'=>'Pending Staging Release',
-					'Pending Staging Release'=>'Released To Staging',
-				},
 			}
 		}
 	end
