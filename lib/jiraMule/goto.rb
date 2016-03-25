@@ -112,9 +112,7 @@ end
 
 def getPath(at, to, map)
 	transMap = $cfg[".jira.goto.#{map}"]
-	transMap = defaultMaps().access("jira.goto.#{map}") if transMap.nil?
 	transMap = $cfg[".jira.goto.*"] if transMap.nil?
-	transMap = defaultMaps().access("jira.goto.*") if transMap.nil?
 	raise "No maps for #{map}" if transMap.nil?
 	
 	starts = transMap.keys.select {|k| k == at}
@@ -130,62 +128,6 @@ def getPath(at, to, map)
 end
 
 # These are based on the workflows we have at my work.
-def defaultMaps()
-	return {
-		'jira'=>{
-			'goto'=>{
-				'PSBasic'=>{
-					'Open'=>{
-						"Dev Ready"=> ["Needs BA"],
-						"In Development"=> ["Needs BA", "Dev Ready"],
-						"Code Review"=> ["Needs BA", "Dev Ready", "In Development"],
-						"QA"=> ["Needs BA", "Dev Ready", "In Development", "Code Review"],
-						"QA - Bug Found"=> ["Needs BA", "Dev Ready", "In Development", "Code Review", "QA"],
-						"Dev/QA Complete"=> ["Needs BA", "Dev Ready", "In Development", "Code Review", "QA"],
-					},
-					"Needs BA"=>{
-						"In Development"=> ["Dev Ready"],
-						"Code Review"=> ["Dev Ready", "In Development"],
-						"QA"=> ["Dev Ready", "In Development", "Code Review"],
-						"QA - Bug Found"=> ["Dev Ready", "In Development", "Code Review", "QA"],
-						"Dev/QA Complete"=> ["Dev Ready", "In Development", "Code Review", "QA"],
-					},
-					"Dev Ready"=>{
-						"Code Review"=> ["In Development"],
-						"QA"=> ["In Development", "Code Review"],
-						"QA - Bug Found"=> ["In Development", "Code Review", "QA"],
-						"Dev/QA Complete"=> ["In Development", "Code Review", "QA"],
-					},
-					"In Development"=>{
-						"Dev Ready"=> ["Code Review"],
-						"QA"=> ["Code Review"],
-						"QA - Bug Found"=> ["Code Review", "QA"],
-						"Dev/QA Complete"=> ["Code Review", "QA"],
-					},
-					"Code Review"=>{
-						"In Development"=> ["Dev Ready"],
-						"QA - Bug Found"=> ["QA"],
-						"Dev/QA Complete"=> ["QA"],
-					}
-				},
-				"PSStandard"=>{
-					# If there is a matching named state, that will always be preferred to the
-					# catchall state.
-					'Waiting Estimation Approval' => {
-						'In Progress' => ['Open'],
-						'*'=>['Blocked']
-					},
-					'*'=>{
-						'*'=>['Blocked']
-					}
-				},
-				"PSStaging"=>{
-					'*'=>{'*'=>['Blocked']}
-				}
-			}
-		}
-	}
-end
 
 #  vim: set sw=2 ts=2 :
 
