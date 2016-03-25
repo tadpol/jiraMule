@@ -40,18 +40,13 @@ command :goto do |c|
 				type = issues.first.access('fields.issuetype.name')
 				at = issues.first.access('fields.status.name')
 
-				# lookup a transition map
-				# I'm not sure about this as the map.
-				# TODO fuzzy match here too.
-				transMap = $cfg[".jira.goto.#{type}.#{at}.#{to}"]
-				transMap = $cfg[".jira.goto.*.#{at}.#{to}"] if transMap.nil?
-				raise "No transition map for #{key} from #{at} to #{to}" if transMap.nil?
+				# Get the 
+				transMap = getPath(at, to, options.map)
 
-				transMap << to
 				# Now move thru
 				transMap.each do |step|
 					trans = jira.transitionsFor(key)
-					direct = trans.select {|item| item['name'] == step || item['id'] == step }
+					direct = trans.select {|item| jira.fuzzyMatchStatus(item, step) }
 					raise "Broken transition step on #{key} to #{step}" if direct.empty?
 					id = direct.first['id']
 					jira.transition(key, id)
@@ -110,6 +105,25 @@ command :mapGoto do |c|
 		end
 
 	end
+end
+
+def getPath(at, to, map)
+	transMap = $cfg[".jira.goto.#{map}"]
+	transMap = defaultMaps().access("jira.goto.#{map}") if transMap.nil?
+	transMap = $cfg[".jira.goto.*"] if transMap.nil?
+	transMap = defaultMaps().access("jira.goto.*") if transMap.nil?
+	raise "No maps for #{map}" if transMap.nil?
+	
+	starts = transMap.keys.select {|k| k == at}
+	starts = ['*'] if starts.empty? and transMap.has_key? '*'
+	raise "No starting point for #{at}" if starts.nil? || starts.empty?
+
+	sets = transMap[starts.first]
+	stops = sets.keys.select {|k| k == to}
+	stops = ['*'] if stops.empty? and sets.has_key? '*'
+	raise "No stopping point for #{to}" if stops.nil? || stops.empty?
+	
+	return sets[stops.first] + [to]
 end
 
 # These are based on the workflows we have at my work.
