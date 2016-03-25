@@ -42,7 +42,8 @@ command :progress do |c|
 		if percent < 0 then
 			percent = (progress / estimate * 100).floor
 		end
-		ret = [ issue['key'], estimate, progress, %{#{percent}%}, due ]
+		ret = [ issue['key'], "%.2f"%[estimate], "%.2f"%[progress],
+					%{#{"%.1f"%[percent]}%}, due ]
 		if progress > estimate or (not due.nil? and Date.new >= Date.parse(due)) then
 			ret.map!{|v| %{\033[1m#{v}\033[0m}}
 		end
