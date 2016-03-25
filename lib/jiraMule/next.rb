@@ -23,6 +23,7 @@ command :next do |c|
 			# First see if there is a single exit. If so, just do that.
 			trans = jira.transitionsFor(key)
 			if trans.length == 1 then
+
 				id = trans.first['id']
 				jira.transition(key, id)
 				# TODO: deal with required fields.
@@ -35,12 +36,21 @@ command :next do |c|
 				type = issues.first.access('fields.issuetype.name')
 				at = issues.first.access('fields.status.name')
 
-				# TODO: Look up what the preferred next step is, and do that.
-				# If no preferred next step, fail
+				# Look up what the preferred next step is, and do that.
+				nxt = $cfg[".jira.next.#{map}.#{at}"]
+				raise "Not sure which state is next." if nxt.nil?
+
+				direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
+				raise "Broken transition step on #{key} to #{nxt}" if direct.empty?
+				id = direct.first['id']
+				jira.transition(key, id)
+				# TODO: deal with required fields.
 
 			end
 		end
 	end
 end
+
+
 #  vim: set sw=2 ts=2 :
 
