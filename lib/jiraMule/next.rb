@@ -10,13 +10,12 @@ command :next do |c|
   c.example 'Move BUG-4 into the next state.', %{jm next BUG-4}
 	c.option '-m', '--map MAPNAME', String, 'Which workflow map to use'
   c.action do |args, options|
-		options.default :m=>'PSStandard'
+		options.default :map=>'PSStandard'
 		jira = JiraUtils.new(args, options)
-		to = args.shift
 
 		# keys can be with or without the project prefix.
 		keys = jira.expandKeys(args)
-		printVars(:to=>to, :keys=>keys)
+		printVars(:keys=>keys)
 		return if keys.empty?
 
 		keys.each do |key|
@@ -37,8 +36,8 @@ command :next do |c|
 				at = issues.first.access('fields.status.name')
 
 				# Look up what the preferred next step is, and do that.
-				nxt = $cfg[".jira.next.#{map}.#{at}"]
-				raise "Not sure which state is next." if nxt.nil?
+				nxt = $cfg[".jira.next.#{options.map}.#{at}"]
+				raise "Not sure which state is next after #{at} in #{options.map}" if nxt.nil?
 
 				direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
 				raise "Broken transition step on #{key} to #{nxt}" if direct.empty?
