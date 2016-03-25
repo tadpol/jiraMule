@@ -6,7 +6,7 @@ command :logwork do |c|
   c.syntax = 'jm logwork [options] <key> <time spent...>'
   c.summary = 'Log work spent'
   c.description = %{Log time spent on a issue, sending update to both jira and harvest}
-  c.option '-m', 'message to add to work log'
+  c.option '-m', String, 'Message to add to work log'
   c.option '--task', 'Which Harvest task to track against'
   #c.option '--[no-]harvest', %{Don't post time to harvest}
   c.example 'Log some work done on an issue', %{jm logwork BUG-42 1h 12m}
