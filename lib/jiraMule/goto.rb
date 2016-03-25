@@ -1,4 +1,5 @@
 require 'vine'
+require 'pp'
 
 command :goto do |c|
   c.syntax = 'jm goto [options] [status] [keys]'
@@ -13,7 +14,9 @@ command :goto do |c|
 	So these need to be added to your config.
 	}
   c.example 'Move BUG-4 into the In Progress state.', %{jm goto 'In Progress' BUG-4}
+	c.option '-m', '--map MAPNAME', String, 'Which workflow map to use'
   c.action do |args, options|
+		options.default :m=>'PSStandard'
 		jira = JiraUtils.new(args, options)
 		to = args.shift
 
