@@ -112,5 +112,57 @@ command :mapGoto do |c|
 	end
 end
 
+# These are based on the workflows we have at my work.
+def defaultMaps()
+	return {
+		'jira'=>{
+			'goto'=>{
+				'PSBasic'=>{
+					'Open'=>{
+						"Dev Ready"=> ["Needs BA"],
+						"In Development"=> ["Needs BA", "Dev Ready"],
+						"Code Review"=> ["Needs BA", "Dev Ready", "In Development"],
+						"QA"=> ["Needs BA", "Dev Ready", "In Development", "Code Review"],
+						"QA - Bug Found"=> ["Needs BA", "Dev Ready", "In Development", "Code Review", "QA"],
+						"Dev/QA Complete"=> ["Needs BA", "Dev Ready", "In Development", "Code Review", "QA"],
+					},
+					"Needs BA"=>{
+						"In Development"=> ["Dev Ready"],
+						"Code Review"=> ["Dev Ready", "In Development"],
+						"QA"=> ["Dev Ready", "In Development", "Code Review"],
+						"QA - Bug Found"=> ["Dev Ready", "In Development", "Code Review", "QA"],
+						"Dev/QA Complete"=> ["Dev Ready", "In Development", "Code Review", "QA"],
+					},
+					"Dev Ready"=>{
+						"Code Review"=> ["In Development"],
+						"QA"=> ["In Development", "Code Review"],
+						"QA - Bug Found"=> ["In Development", "Code Review", "QA"],
+						"Dev/QA Complete"=> ["In Development", "Code Review", "QA"],
+					},
+					"In Development"=>{
+						"Dev Ready"=> ["Code Review"],
+						"QA"=> ["Code Review"],
+						"QA - Bug Found"=> ["Code Review", "QA"],
+						"Dev/QA Complete"=> ["Code Review", "QA"],
+					},
+					"Code Review"=>{
+						"In Development"=> ["Dev Ready"],
+						"QA - Bug Found"=> ["QA"],
+						"Dev/QA Complete"=> ["QA"],
+					}
+				},
+				"PSStandard"=>{
+					# If there is a matching named state, that will always be preferred to the
+					# catchall state.
+					'*'=>{'*'=>['Blocked']}
+				},
+				"PSStaging"=>{
+					'*'=>{'*'=>['Blocked']}
+				}
+			}
+		}
+	}
+end
+
 #  vim: set sw=2 ts=2 :
 
