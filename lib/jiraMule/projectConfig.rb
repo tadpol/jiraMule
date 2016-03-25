@@ -25,6 +25,7 @@ class ProjectConfig
 			end
 			result
 		end
+		@cfg << defaultCfgs()
 	end
 
 	def [](key)
@@ -38,9 +39,97 @@ class ProjectConfig
 		return nil
 	end
 
+	# Preloading a bunch of stuff here for the workflows used at my work.
+	def defaultCfgs()
+		return {
+			'jira'=>{
+				'goto'=>{
+					'PSBasic'=>{
+						'Open'=>{
+							"Dev Ready"=> ["Needs BA"],
+							"In Development"=> ["Needs BA", "Dev Ready"],
+							"Code Review"=> ["Needs BA", "Dev Ready", "In Development"],
+							"QA"=> ["Needs BA", "Dev Ready", "In Development", "Code Review"],
+							"QA - Bug Found"=> ["Needs BA", "Dev Ready", "In Development", "Code Review", "QA"],
+							"Dev/QA Complete"=> ["Needs BA", "Dev Ready", "In Development", "Code Review", "QA"],
+						},
+						"Needs BA"=>{
+							"In Development"=> ["Dev Ready"],
+							"Code Review"=> ["Dev Ready", "In Development"],
+							"QA"=> ["Dev Ready", "In Development", "Code Review"],
+							"QA - Bug Found"=> ["Dev Ready", "In Development", "Code Review", "QA"],
+							"Dev/QA Complete"=> ["Dev Ready", "In Development", "Code Review", "QA"],
+						},
+						"Dev Ready"=>{
+							"Code Review"=> ["In Development"],
+							"QA"=> ["In Development", "Code Review"],
+							"QA - Bug Found"=> ["In Development", "Code Review", "QA"],
+							"Dev/QA Complete"=> ["In Development", "Code Review", "QA"],
+						},
+						"In Development"=>{
+							"Dev Ready"=> ["Code Review"],
+							"QA"=> ["Code Review"],
+							"QA - Bug Found"=> ["Code Review", "QA"],
+							"Dev/QA Complete"=> ["Code Review", "QA"],
+						},
+						"Code Review"=>{
+							"In Development"=> ["Dev Ready"],
+							"QA - Bug Found"=> ["QA"],
+							"Dev/QA Complete"=> ["QA"],
+						}
+					},
+					"PSStandard"=>{
+						# If there is a matching named state, that will always be preferred to the
+						# catchall state.
+						'Waiting Estimation Approval' => {
+							'In Progress' => ['Open'],
+							'*'=>['Blocked']
+						},
+						'*'=>{
+							'*'=>['Blocked']
+						}
+					},
+					"PSStaging"=>{
+						'*'=>{'*'=>['Blocked']}
+					}
+				}
+			},
+			'next'=>{
+				'PSSimple'=>{
+					'To do'=>'In Progress',
+					'In Progress'=>'Done',
+					'Done'=>'To do'
+				},
+				'PSBasic'=>{
+					'Code Review'=>'QA',
+					'QA'=>'Dev/QA Complete'
+				},
+				'PSStandard'=>{
+					'Please Estimate'=>'Open',
+					'On Deck'=>'Waiting Estimation Approval',
+					'Waiting Estimation Approval'=>'Open',
+					'Blocked'=>'Open',
+					'In Progress'=>'Testing',
+					'Testing'=>'Pending Release',
+					'Pending Release'=>'Released',
+					'Released'=>'Closed',
+				},
+				'PSStaging'=>{
+					'Please Estimate'=>'Open',
+					'On Deck'=>'Waiting Estimation Approval',
+					'Waiting Estimation Approval'=>'Open',
+					'Blocked'=>'Open',
+					'In Progress'=>'Testing',
+					'Testing'=>'Pending Staging Release',
+					'Pending Staging Release'=>'Released To Staging',
+				},
+			}
+		}
+	end
 end
 
 # Load and merge config files.
 $cfg = ProjectConfig.new
 $cfg.load()
 
+#  vim: set sw=2 ts=2 :
