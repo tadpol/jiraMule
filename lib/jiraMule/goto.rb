@@ -171,7 +171,13 @@ def defaultMaps()
 				"PSStandard"=>{
 					# If there is a matching named state, that will always be preferred to the
 					# catchall state.
-					'*'=>{'*'=>['Blocked']}
+					'Waiting Estimation Approval' => {
+						'In Progress' => ['Open'],
+						'*'=>['Blocked']
+					},
+					'*'=>{
+						'*'=>['Blocked']
+					}
 				},
 				"PSStaging"=>{
 					'*'=>{'*'=>['Blocked']}
