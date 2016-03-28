@@ -23,7 +23,7 @@ command :goto do |c|
 		# keys can be with or without the project prefix.
 		keys = jira.expandKeys(args)
 		printVars(:to=>to, :keys=>keys)
-		return if keys.empty?
+		raise "No keys to transition" if keys.empty?
 
 		keys.each do |key|
 			# First see if we can just go there.
@@ -44,7 +44,7 @@ command :goto do |c|
 				at = issues.first.access('fields.status.name')
 
 				# Get the 
-				transMap = getPath(at, to, options.map)
+				transMap = jira.getPath(at, to, options.map)
 
 				# Now move thru
 				transMap.each do |step|
@@ -109,25 +109,6 @@ command :mapGoto do |c|
 
 	end
 end
-
-def getPath(at, to, map)
-	transMap = $cfg[".jira.goto.#{map}"]
-	transMap = $cfg[".jira.goto.*"] if transMap.nil?
-	raise "No maps for #{map}" if transMap.nil?
-	
-	starts = transMap.keys.select {|k| k == at}
-	starts = ['*'] if starts.empty? and transMap.has_key? '*'
-	raise "No starting point for #{at}" if starts.nil? || starts.empty?
-
-	sets = transMap[starts.first]
-	stops = sets.keys.select {|k| k == to}
-	stops = ['*'] if stops.empty? and sets.has_key? '*'
-	raise "No stopping point for #{to}" if stops.nil? || stops.empty?
-	
-	return sets[stops.first] + [to]
-end
-
-# These are based on the workflows we have at my work.
 
 #  vim: set sw=2 ts=2 :
 

@@ -117,6 +117,29 @@ class JiraUtils
 	end
 
 	##
+	# Lookup a path from one state to another in a map
+	# +at+:: The starting state
+	# +to+:: The stopping state
+	# +map+:: The lookup map to use
+	def getPath(at, to, map)
+		verbose "In '#{map}', getting path from '#{at}' to '#{to}'"
+		transMap = $cfg[".jira.goto.#{map}"]
+		transMap = $cfg[".jira.goto.*"] if transMap.nil?
+		raise "No maps for #{map}" if transMap.nil?
+
+		starts = transMap.keys.select {|k| k == at}
+		starts = ['*'] if starts.empty? and transMap.has_key? '*'
+		raise "No starting point for #{at}" if starts.nil? || starts.empty?
+
+		sets = transMap[starts.first]
+		stops = sets.keys.select {|k| k == to}
+		stops = ['*'] if stops.empty? and sets.has_key? '*'
+		raise "No stopping point for #{to}" if stops.nil? || stops.empty?
+
+		return sets[stops.first] + [to]
+	end
+
+	##
 	# Run a JQL query and get issues with the selected fields
 	def getIssues(query, fields=[ 'key', 'summary' ])
 		r = jiraEndPoint()
