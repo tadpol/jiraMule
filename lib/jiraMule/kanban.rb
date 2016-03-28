@@ -5,7 +5,7 @@ require 'pp'
 
 command :kanban do |c|
 	extra_columns = []
-  c.syntax = 'jira query [options] kanban'
+  c.syntax = 'jm query [options] kanban'
   c.summary = 'Show a kanban table'
   c.description = %{Display a group of related queries.
 
@@ -15,12 +15,12 @@ command :kanban do |c|
 
 	Formatting is done with Mustash.
 	}
-  c.example 'Show a kanban table', 'jira kanban'
-  c.example 'Show a status list', 'jira status'
-  c.example 'Another way to show a status list', 'jira --style status'
-	c.example 'Show a list to use with Taskpaper', 'jira --style taskpaper'
-	c.example 'Show status list, with differnt styling', %{jira --style status --header '# {{column}}' --item '** {{key}} {{summary}}'}
-	c.example 'Showoff', %{jira kanban --style empty --heading '<h1>{{column}}</h1>' \\
+  c.example 'Show a kanban table', 'jm kanban'
+  c.example 'Show a status list', 'jm status'
+  c.example 'Another way to show a status list', 'jm --style status'
+	c.example 'Show a list to use with Taskpaper', 'jm --style taskpaper'
+	c.example 'Show status list, with differnt styling', %{jm --style status --header '# {{column}}' --item '** {{key}} {{summary}}'}
+	c.example 'Showoff', %{jm kanban --style empty --heading '<h1>{{column}}</h1>' \\
 	--column 'Working=status="In Progress"' \\
 	--column 'Done=status="Pending Release"' \\
 	--fields key,summary,assignee \\

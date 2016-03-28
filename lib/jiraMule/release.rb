@@ -1,6 +1,6 @@
 
 command :release do |c|
-  c.syntax = 'jira release [options]'
+  c.syntax = 'jm release [options]'
   c.summary = 'Little tool for releasing a version in Jira'
   c.description = ''
   c.example 'description', 'command example'

@@ -2,10 +2,10 @@ require 'tempfile'
 require 'zip'
 
 command :attach do |c|
-  c.syntax = 'jira attach [options] [key] [file...]'
+  c.syntax = 'jm attach [options] [key] [file...]'
   c.summary = 'Attach file to an Issue'
   c.description = 'Attach a file to an Issue'
-  c.example 'Attach a file', %{jira attach BUG-1 foo.log}
+  c.example 'Attach a file', %{jm attach BUG-1 foo.log}
 	c.option '-z', '--zip', 'Zip the file[s] first'
 
   c.action do |args, options|

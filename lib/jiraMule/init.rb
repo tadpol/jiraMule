@@ -2,10 +2,10 @@ require 'pathname'
 require 'yaml'
 
 command :init do |c|
-  c.syntax = 'jira init'
+  c.syntax = 'jm init'
   c.summary = 'Initialize a project'
   c.description = %{Initialize a project }
-  c.example 'Initialize a project', %{jira init}
+  c.example 'Initialize a project', %{jm init}
 
   c.action do |args, options|
 
