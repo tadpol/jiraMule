@@ -7,13 +7,15 @@ command :kanban do |c|
 	extra_columns = []
   c.syntax = 'jm query [options] kanban'
   c.summary = 'Show a kanban table'
-  c.description = %{Display a group of related queries.
+  c.description = %{
+Display issues grouped by a query.  Each group is a column in a table or a section in a list.
 
-	Mostly for displaying a list of current status, or a kanban table.
+Original intent was to build kanban tables, hence the name.  However, the output is quite
+configurable can can be used for many other styles.
 
-	The columns, their queries, and how to format them is all configurable.
+Use the --dump option to see how things have been styled.
 
-	Formatting is done with Mustash.
+Formatting is done with Mustash.
 	}
   c.example 'Show a kanban table', 'jm kanban'
   c.example 'Show a status list', 'jm status'
