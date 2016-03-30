@@ -42,5 +42,9 @@ require 'jiraMule/release'
 #
 # So, merge all that into one command and have the parts be --options; maybe
 
+# ok, now pull in used defined aliases.
+$cfg['.cmd.aliases'].each_pair do |k,v|
+	alias_command k, *v
+end
 
 #  vim: set sw=2 ts=2 :
