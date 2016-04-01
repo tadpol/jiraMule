@@ -40,6 +40,8 @@ class ProjectConfig
 	end
 
 	# Preloading a bunch of stuff here for the workflows used at my work.
+	# XXX Not sure if I should leave these here, or move them to the 'init' subcommand as a set
+	# of defaults to be added to a new setup's user config.
 	def defaultCfgs()
 		return {
 			'jira'=>{
@@ -85,7 +87,7 @@ class ProjectConfig
 							'In Progress' => ['Open'],
 							'*'=>['Blocked']
 						},
-						'*'=>{
+						'*'=>{ # TODO: There are a few states that cannot be reached from blocked.
 							'*'=>['Blocked']
 						}
 					},
