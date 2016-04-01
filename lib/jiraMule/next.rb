@@ -22,7 +22,7 @@ command :next do |c|
 			# First see if there is a single exit. If so, just do that.
 			trans = jira.transitionsFor(key)
 			if trans.length == 1 then
-
+				puts "Taking single exit" if options.verbose
 				id = trans.first['id']
 				jira.transition(key, id)
 				# TODO: deal with required fields.
@@ -42,6 +42,7 @@ command :next do |c|
 				direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
 				raise "Broken transition step on #{key} to #{nxt}" if direct.empty?
 				id = direct.first['id']
+				puts "Transitioning #{key} to #{direct.first['name']} (#{id})" if options.verbose
 				jira.transition(key, id)
 				# TODO: deal with required fields.
 
