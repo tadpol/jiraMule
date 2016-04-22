@@ -1,13 +1,14 @@
 #
 require 'chronic_duration'
 require 'vine'
+require 'date'
 
 command :logwork do |c|
   c.syntax = 'jm logwork [options] <key> <time spent...>'
   c.summary = 'Log work spent'
   c.description = %{Log time spent on a issue, sending update to both jira and harvest}
   c.option '-m', '--message MSG', String, 'Message to add to work log'
-  c.option '--task', 'Which Harvest task to track against'
+  c.option '--date DATE', String, 'When this work was done'
   #c.option '--[no-]harvest', %{Don't post time to harvest}
   c.example 'Log some work done on an issue', %{jm logwork BUG-42 1h 12m}
 
@@ -18,6 +19,10 @@ command :logwork do |c|
 
     key = jira.expandKeys(args).shift
     ts = ChronicDuration.parse(args.join(' '))
+
+    unless options.date.nil? then
+      options.date = DateTime.parse(options.date)
+    end
 
     # ask the key where work should go.
     issues = jira.getIssues("key='#{key}'", ['key', 'labels'])
@@ -30,22 +35,20 @@ command :logwork do |c|
         tid=$2.to_i
       end
     end
-    printVars(:pid=>pid, :tid=>tid)
-
-    # TODO: if issue is a sub-task, and it does not have a harvest label, check the
-    # parent.
+    printVars(:pid=>pid, :tid=>tid) if options.verbose
 
     # if pid and/or tid are still nil here, the values in the project config will be
     # used instead.
     pid, tid = harvest.taskIDfromProjectAndName(pid, tid)
+    raise "Cannot figure out which havest code to use" if pid.nil? or tid.nil?
     printVars(:k=>key, :ts=>ts, :m=>options.message, :pt=>[pid['name'],tid['name']])
 
     jmsg = %{[#{pid['code']}] #{pid['name']} - #{tid['name']}: #{options.message}}
     hmsg =  %{#{key}: #{options.message}}
 
     begin
-      jira.logWork(key, ts, jmsg)
-      harvest.logWork(pid['id'], tid['id'], ts, hmsg)
+      jira.logWork(key, ts, jmsg, options.date)
+      harvest.logWork(pid['id'], tid['id'], ts, hmsg, options.date)
     rescue JiraUtilsException => e
       pp e.response.body
       
