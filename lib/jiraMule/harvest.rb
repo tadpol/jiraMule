@@ -197,7 +197,7 @@ class HarvestUtils
 				:task_id => task,
 				:spent_at => Time.now.strftime('%Y-%m-%d')
 			})
-			verbose "Going to log work #{timespent} to harvest #{project}:#{task}"
+			verbose "Logging #{timespent} of work to harvest #{project}:#{task} with \"#{notes}\""
 			return if @options.dry
 			response = http.request(request)
 			case response
