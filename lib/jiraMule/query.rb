@@ -6,7 +6,7 @@ command :query do |c|
 	c.example 'Get Open issues and dump everything', %{jm query status=Open --fields "" --json}
 	c.option '--[no-]raw', 'Do not prefix query with project and assignee'
 	c.option '--[no-]json', 'Output json reply instead of summary'
-	c.option '--fields FIELDS', Array, ''
+	c.option '--fields FIELDS', Array, 'Which fields to return. Set to empty to get all fields.'
   c.action do |args, options|
 		options.defaults :json => false
 		jira = JiraUtils.new(args, options)
