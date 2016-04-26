@@ -21,7 +21,9 @@ command :query do |c|
 		if options.json then
 			puts JSON.dump(issues)
 		else
-			keys = issues.map {|item| item['key'] + ' ' + item.access('fields.summary')}
+			keys = issues.map {|item|
+				"#{item['key']} #{(item.access('fields.summary') or '')}"
+			}
 			keys.each {|k| puts k}
 		end
   end
