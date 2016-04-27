@@ -22,6 +22,11 @@ command :logwork do |c|
 
     unless options.date.nil? then
       options.date = DateTime.parse(options.date)
+      if options.date.day_fraction.numerator == 0 then
+        # No time component. Need to add timezone...
+        offset = -(Time.now.gmt_offset/3600)
+        options.date += Rational(offset,24)
+      end
     end
 
     # ask the key where work should go.
