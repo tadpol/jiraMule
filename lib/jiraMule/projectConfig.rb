@@ -83,16 +83,75 @@ class ProjectConfig
 					"PSStandard"=>{
 						# If there is a matching named state, that will always be preferred to the
 						# catchall state.
-						'Waiting Estimation Approval' => {
+						'Please Estimate' => {
+							'Blocked' => ['Open'],
 							'In Progress' => ['Open'],
-							'*'=>['Blocked']
+							'Testing' => ['Open', 'In Progress'],
+							'Testing - Bug Found' => ['Open', 'In Progress', 'Testing'],
+							'Pending Release' => ['Open', 'In Progress'],
+							'Released' => ['Open', 'In Progress', 'Pending Release'],
 						},
-						'*'=>{ # TODO: There are a few states that cannot be reached from blocked.
-							'*'=>['Blocked']
-						}
+						'Waiting Estimation Approval' => {
+							'Blocked' => ['Open'],
+							'In Progress' => ['Open'],
+							'Testing' => ['Open', 'In Progress'],
+							'Testing - Bug Found' => ['Open', 'In Progress', 'Testing'],
+							'Pending Release' => ['Open', 'In Progress'],
+							'Released' => ['Open', 'In Progress', 'Pending Release'],
+						},
+						'On Deck' => {
+							'Open' => ['Waiting Estimation Approval'],
+							'Blocked' => ['Waiting Estimation Approval', 'Open'],
+							'In Progress' => ['Waiting Estimation Approval', 'Open'],
+							'Testing' => ['Waiting Estimation Approval', 'Open', 'In Progress'],
+							'Testing - Bug Found' => ['Waiting Estimation Approval', 'Open', 'In Progress', 'Testing'],
+							'Pending Release' => ['Waiting Estimation Approval', 'Open', 'In Progress'],
+							'Released' => ['Waiting Estimation Approval', 'Open', 'In Progress', 'Pending Release'],
+						},
+						'Blocked' => { # Block only goes to Open, In Progress, or Testing
+							'Pending Release' => ['In Progress'],
+							'Testing - Bug Found' => ['Testing'],
+							'Released' => ['Testing', 'Pending Release'],
+						}.
+						'Open' => {
+							'Testing' => ['In Progress'],
+							'Testing - Bug Found' => ['In Progress', 'Testing'],
+							'Pending Release' => ['In Progress'],
+							'Released' => ['In Progress', 'Pending Release'],
+						},
+						'In Progress' => {
+							'Open' => ['Blocked'],
+							'Released' => ['Pending Release'],
+							'Testing - Bug Found' => ['Testing'],
+						},
+						'Testing' => {
+							'Open' => ['Testing - Bug Found'],
+							'Released' => ['Pending Release'],
+							'In Progress' => ['Testing - Bug Found'],
+						},
+						'Testing - Bug Found' => {
+							'Testing' => ['In Progress'],
+							'Pending Release' => ['In Progress'],
+							'Released' => ['In Progress', 'Pending Release'],
+						},
+						'Pending Release' => {
+							'In Progress' => ['Reopened'],
+							'Testing' => ['Reopened', 'In Progress'],
+							'Testing - Bug Found' => ['Reopened', 'In Progress', 'Testing'],
+						},
+						'Released' => {
+							'In Progress' => ['Reopened'],
+							'Testing' => ['Reopened', 'In Progress'],
+							'Testing - Bug Found' => ['Reopened', 'In Progress', 'Testing'],
+							'Pending Release' => ['Reopened', 'In Progress'],
+						},
+						'*' => {
+							'Open' => ['Blocked'], # Anything to Opened via Blocked.
+							'Reopened' => ['Closed'] # Anything to Reopened via Closed.
+						},
 					},
 					"PSStaging"=>{
-						'*'=>{'*'=>['Blocked']}
+						# '*'=>{'*'=>['Blocked']}
 					}
 				},
 				'next'=>{
