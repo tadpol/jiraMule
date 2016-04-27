@@ -349,8 +349,8 @@ class JiraUtils
 				:comment => notes,
 				:timeSpentSeconds => timespent,
 			}
-			# FIXME server isn't liking this key. why?
-			body[:started] = on.iso8601() unless on.nil?
+			# FIXME server isn't liking this key. why? colon in timezone and need milliseconds.
+			body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
 			pp body
 			request.body = JSON.generate(body)
 
