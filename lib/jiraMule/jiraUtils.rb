@@ -338,16 +338,20 @@ class JiraUtils
 	# +key+:: The issue to log work on
 	# +timespend+:: The time spent in seconds
 	# +notes+:: Any notes to add.
-	def logWork(key, timespent, notes="")
+	# +on+:: When this work happened. (default is now)
+	def logWork(key, timespent, notes="", on=nil)
 		r = jiraEndPoint
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + ('issue/' + key + '/worklog'))
 			request.content_type = 'application/json'
 			request.basic_auth(username(), password())
-			request.body = JSON.generate({
+			body = {
 				:comment => notes,
-				:timeSpentSeconds => timespent
-			}) 
+				:timeSpentSeconds => timespent,
+			}
+			body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
+			pp body
+			request.body = JSON.generate(body)
 
 			verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
 			return if @options.dry

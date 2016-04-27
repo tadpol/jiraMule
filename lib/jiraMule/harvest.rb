@@ -183,20 +183,24 @@ class HarvestUtils
 	# +task+:: The task ID
 	# +timespend+:: The time spent in seconds
 	# +notes+:: Any notes to add.
-	def logWork(project, task, timespent, notes)
+	# +on+:: When this work happened. (default is now)
+	def logWork(project, task, timespent, notes='', on=nil)
 		r = endPoint()
 		Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
 			request = Net::HTTP::Post.new(r + 'daily/add')
 			request['Accept'] = 'application/json'
 			request.content_type = 'application/json'
 			request.basic_auth(username(), password())
-			request.body = JSON.generate({
+			body = {
 				:notes => notes,
 				:hours => (timespent / 3600.0),
 				:project_id => project,
 				:task_id => task,
 				:spent_at => Time.now.strftime('%Y-%m-%d')
-			})
+			}
+			body[:spent_at] = on.strftime('%Y-%m-%d') unless on.nil?
+
+			request.body = JSON.generate(body)
 			verbose "Logging #{timespent} of work to harvest #{project}:#{task} with \"#{notes}\""
 			return if @options.dry
 			response = http.request(request)
