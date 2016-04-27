@@ -112,7 +112,7 @@ class ProjectConfig
 							'Pending Release' => ['In Progress'],
 							'Testing - Bug Found' => ['Testing'],
 							'Released' => ['Testing', 'Pending Release'],
-						}.
+						},
 						'Open' => {
 							'Testing' => ['In Progress'],
 							'Testing - Bug Found' => ['In Progress', 'Testing'],
