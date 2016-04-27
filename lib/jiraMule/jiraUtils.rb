@@ -350,7 +350,6 @@ class JiraUtils
 				:timeSpentSeconds => timespent,
 			}
 			body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
-			pp body
 			request.body = JSON.generate(body)
 
 			verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
