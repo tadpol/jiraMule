@@ -4,10 +4,29 @@ require 'vine'
 
 class ProjectConfig
 
+	ConfigFile = Struct.new(:kind, :path, :data) do
+		def load()
+			return if kind == :internal
+			self[:path] = Pathname.new(path) unless path.kind_of? Pathname
+			self[:data] = Hash.new
+			if path.exist? then
+				path.open('r') do |fio|
+					self[:data] = YAML.load(fio)
+				end
+			end
+		end
+
+		def write()
+		end
+	end
+
+	# Look at parent directories until HOME
 	def findProjectFile()
 		a = []
 		home = Pathname.new(Dir.home)
-		Pathname.new(Dir.pwd).ascend{|i| 
+		pwd = Pathname.new(Dir.pwd)
+		return a if home == pwd
+		pwd.dirname.ascend{|i| 
 			break if i == home
 			a << i + '.rpjProject'
 		}
@@ -15,17 +34,19 @@ class ProjectConfig
 	end
 
 	def load()
-		cfgFiles = findProjectFile() + [ ENV['HOME'] + '/.rpjProject']
-		@cfg = cfgFiles.map do |file|
-			result = Hash.new
-			if File.exist?(file) 
-				File.open(file, 'r') do |fio|
-					result = YAML.load(fio)
-				end
-			end
-			result
+		@cfg = []
+		@cfg << ConfigFile.new(:local, Dir.pwd + '/.rpjProject', {})
+
+		cfgFiles = findProjectFile()
+		@cfg += cfgFiles.map do |file|
+			ConfigFile.new(:parent, file, {})
 		end
-		@cfg << defaultCfgs()
+
+		@cfg << ConfigFile.new(:user, ENV['HOME'] + '/.rpjProject', {})
+
+		@cfg << ConfigFile.new(:internal, '', defaultCfgs())
+
+		@cfg.each {|c| c.load}
 	end
 
 	def [](key)
@@ -33,11 +54,15 @@ class ProjectConfig
 		key = key[1..-1] if key[0] == '.'
 
 		@cfg.each do |acfg|
-			v = acfg.access(key)
+			v = acfg.data.access(key)
 			return v unless v.nil?
 		end
 		return nil
 	end
+
+	def update(key, value, which=:local)
+	end
+
 
 	# Preloading a bunch of stuff here for the workflows used at my work.
 	# XXX Not sure if I should leave these here, or move them to the 'init' subcommand as a set
