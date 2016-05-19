@@ -2,6 +2,18 @@ require 'yaml'
 require 'pathname'
 require 'vine'
 
+class Hash
+	def access!(path, value)
+		steps = path.to_s.split('.')
+		parent = steps[0..-2].join('.')
+		child = steps.last
+
+		whom = self.access(parent)
+		whom[child] = value
+		self
+	end
+end
+
 class ProjectConfig
 
 	ConfigFile = Struct.new(:kind, :path, :data) do
@@ -17,6 +29,11 @@ class ProjectConfig
 		end
 
 		def write()
+			return if kind == :internal
+			self[:path] = Pathname.new(path) unless path.kind_of? Pathname
+			path.open('w') do |fio|
+				fio << data.to_yaml
+			end
 		end
 	end
 
@@ -61,6 +78,10 @@ class ProjectConfig
 	end
 
 	def update(key, value, which=:local)
+		cfg = @cfg.select{|c| c.kind == which}.first
+		return if cfg.nil?
+		cfg.data.access!(key, value)
+		cfg.write
 	end
 
 
