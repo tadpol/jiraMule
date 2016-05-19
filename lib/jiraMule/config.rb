@@ -22,15 +22,17 @@ command :config do |c|
           puts $cfg[args[0]]
           # TODO: pretty the output up
 
-      elsif args.count == 2 then
+      elsif args.count >= 2 then
           # This is a write action.
           level = :local
           level = :parent if options.parent
           level = :user if options.user
           level = :local if options.local
-          $cfg.update(args[0], args[1], level)
           #FIXME: handle setting values are an array.
           #  if multiple values, set them as an array.
+          val = args[1].to_s
+          val = args[1..-1] if args.count > 2 #this makes val an Array
+          $cfg.update(args[0], val, level)
 
       end
 
