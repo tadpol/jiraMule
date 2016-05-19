@@ -26,6 +26,7 @@ global_option '--url URL', "Set jira base url"
 default_command :help
 
 require 'jiraMule/init'
+require 'jiraMule/config'
 require 'jiraMule/kanban'
 require 'jiraMule/query'
 require 'jiraMule/goto'
