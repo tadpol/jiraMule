@@ -7,6 +7,7 @@ command :config do |c|
   c.example 'Set the jira project name', %{jm config jira.project jiraMule}
   c.example 'Set a new alias', %{jm config cmd.aliases.p progress}
 
+  # TODO: implement --where.
   c.option '-w', '--where', 'Tell which file this key is found in'
 
   c.option '-u', '--user', 'Save changes to the file at $HOME'
@@ -19,6 +20,7 @@ command :config do |c|
       if args.count == 1 then
           # This is a read action.
           puts $cfg[args[0]]
+          # TODO: pretty the output up
 
       elsif args.count == 2 then
           # This is a write action.
@@ -27,6 +29,8 @@ command :config do |c|
           level = :user if options.user
           level = :local if options.local
           $cfg.update(args[0], args[1], level)
+          #FIXME: handle setting values are an array.
+          #  if multiple values, set them as an array.
 
       end
 
