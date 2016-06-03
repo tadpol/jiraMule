@@ -1,4 +1,5 @@
 require 'pp'
+require 'erb'
 
 command :completion do |c|
   c.syntax = %{jm completion [options] }
@@ -13,11 +14,12 @@ command :completion do |c|
   # - dump a completion file that can be loaded into shell
 
   # it feels like I could make a HelpFormatter that actually dumps in a completion
-  # script format.
+  # script format. Yes, but it doesn't save any work to do it that way.
 
   c.action do |args, options|
 
     runner = ::Commander::Runner.instance
+
     #pp runner
     if options.gopts then
       opts = runner.instance_variable_get(:@options)
@@ -27,7 +29,10 @@ command :completion do |c|
     end
 
     if options.subs then
-      say runner.instance_variable_get(:@commands).keys.join(' ')
+      runner.instance_variable_get(:@commands).each do |name,cmd|
+        desc = cmd.instance_variable_get(:@summary) #.lines[0]
+        say "#{name}:'#{desc}'"
+      end
     end
 
     if options.opts then
