@@ -24,21 +24,43 @@ command :completion do |c|
     if options.gopts then
       opts = runner.instance_variable_get(:@options)
       opts.each do |o|
-        say "{#{o[:switches].join(',')}}::#{o[:description]}"
+
+        desc = o[:description].lines[0].chomp.gsub(/'/, '_')
+        values = ''
+        switch = o[:switches].join(',')
+
+        #say "#{switch}[#{desc}]:Global Option:#{values}"
+        if o[:switches].count > 1 then
+          say "{#{switch}}[#{desc}]:GlobalOption:#{values}"
+        else
+          say "#{switch}[#{desc}]:GlobalOption:#{values}"
+        end
       end
     end
 
     if options.subs then
       runner.instance_variable_get(:@commands).each do |name,cmd|
-        desc = cmd.instance_variable_get(:@summary) #.lines[0]
-        say "#{name}:'#{desc}'"
+        #desc = cmd.instance_variable_get(:@summary) #.lines[0]
+        #say "#{name}:'#{desc}'"
+        say "#{name}"
       end
     end
 
     if options.opts then
       cmds = runner.instance_variable_get(:@commands)
       cmds[options.opts].options.each do |o|
-        say "{#{o[:switches].join(',')}}::#{o[:description]}"
+        #say "{#{o[:switches].join(',')}}: :'#{o[:description]}'"
+        desc = o[:description] #
+        desc = desc.lines[0].chomp.gsub(/'/, '_') if desc.lines.count > 1
+        values = ''
+        switch = o[:switches].join(',')
+
+        #say "#{switch}[#{desc}]:Global Option:#{values}"
+        if o[:switches].count > 1 then
+          say "{#{switch}}'[#{desc}]: :#{values}'"
+        else
+          say "'#{switch}[#{desc}]: :#{values}'"
+        end
       end
     end
 

@@ -1,0 +1,65 @@
+#compdef jm
+
+__subcommands () {
+	local -a cmds
+	cmds=( $(jm completion --subs) )
+	_values subcommands $cmds
+}
+
+_jm () {
+	typeset -A opt_args
+	local ret=1
+	local context state state_descr line
+	local -a args
+	local configfile=""
+
+	# Build up options
+
+	# Global options first.
+
+	# doing these by hand, then backing them into completion. 
+	args=(
+		'--verbose[Be chatty]:Global Option:'
+		{-n,--dry}'[Dont run actions that make changes]:Global Option:'
+		'--project PROJECT[Which project to use]:Global Option:'
+		'--url URL[Set jira base url]:Global Option:'
+		{-h,--help}'[Display help documentation]:Global Option:'
+		{-v,--version}'[Display version information]:Global Option:'
+		{-t,--trace}'[Display backtrace when an error occurs]:Global Option:'
+	)
+	args+=(
+		': :__subcommands'
+	)
+
+	# Sub-Command specific switches
+	args+=('*:: :->switches')
+
+	_arguments "$args[@]" && ret=0
+
+
+	bleck=(
+		'--raw[Do not prefix queries with project and assignee]: :'
+		{-w,--width}='[Width of the terminal]: :'
+		{-s,--style}='[Which style to use]: :'
+		'--heading STYLE[Format for heading]: :'
+		'--item STYLE[Format for items]: :'
+		{-c,--column}='[]: :'
+		{-f,--fields}='[Which fields to return]: :'
+		{-d,--dump}'[Dump the style to STDOUT as yaml]: :'
+		'--file FILE[Style definition file to load]: :'
+	)
+	case $state in
+
+		(switches)
+			local -a opts
+			opts=( $(jm completion --opts $line[1]) )
+			#_describe -o "$line[1] Options" "$opts[@]" && ret=0
+			_arguments "$bleck[@]" && ret=0
+
+			;;
+	esac
+
+	return ret
+}
+
+
