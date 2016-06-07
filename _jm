@@ -1,65 +1,147 @@
 #compdef jm
 
-__subcommands () {
-	local -a cmds
-	cmds=( $(jm completion --subs) )
-	_values subcommands $cmds
+__jm_top_commands () {
+  local -a list
+  list=(
+      attach:'Attach file to an Issue'
+      completion:'Tool for getting bits for tab completion.'
+      goto:'Move issue to a status; making multiple transitions if needed'
+      help:'Display global or [command] help documentation'
+      init:'Initialize a project'
+      kanban:'Show a kanban table'
+      logwork:'Log work spent'
+      mapGoto:'Attempt to build a goto map'
+      mapwork:'Store the harvest codes as a label in Jira.'
+      next:'Move issue to the next state'
+      progress:'Show progress on issues'
+      query:'Get the keys from a jira query'
+      release:'Little tool for releasing a version in Jira'
+      testReady:'Little tool for setting the fix version on testable
+issues'
+  )
+  _describe -t top-commands 'top commands' list
+}
+
+__oc_subcommand () {
+  case "$words[1]" in
+      (attach)
+        _arguments \
+          {-z,--zip}'[Zip the file[s] first]: :' \
+
+        ;;
+
+      (completion)
+        _arguments \
+          '--subs[List sub commands]: :' \
+          '--opts CMD[List options for subcommand]: :' \
+          '--gopts[List global options]: :' \
+
+        ;;
+
+      (goto)
+        _arguments \
+          {-m,--map MAPNAME}'[Which workflow map to use]: :' \
+
+        ;;
+
+
+
+      (kanban)
+        _arguments \
+          '--[no-]raw[Do not prefix queries with project and assignee]: :' \
+          {-w,--width WIDTH}'[Width of the terminal]: :' \
+          {-s,--style STYLE}'[Which style to use]: :' \
+          '--heading STYLE[Format for heading]: :' \
+          '--item STYLE[Format for items]: :' \
+          {-c,--column NAME=QUERY}'[]: :' \
+          {-f,--fields FIELDS}'[Which fields to return]: :' \
+          {-d,--dump}'[Dump the style to STDOUT as yaml]: :' \
+          '--file FILE[Style definition file to load]: :' \
+
+        ;;
+
+      (logwork)
+        _arguments \
+          {-m,--message MSG}'[Message to add to work log]: :' \
+          '--date DATE[When this work was done]: :' \
+
+        ;;
+
+
+
+
+
+
+      (next)
+        _arguments \
+          {-m,--map MAPNAME}'[Which workflow map to use]: :' \
+
+        ;;
+
+      (progress)
+        _arguments \
+          {-s,--status STATUSES}'[Which status to limit to]: :' \
+
+        ;;
+
+
+
+      (query)
+        _arguments \
+          '--[no-]raw[Do not prefix query with project and assignee]: :' \
+          '--[no-]json[Output json reply instead of summary]: :' \
+          '--fields FIELDS[Which fields to return. Set to empty to get all
+fields.]: :' \
+
+        ;;
+
+      (release)
+        _arguments \
+          '--some-switch[Some switch that does something]: :' \
+
+        ;;
+
+
+
+      (testReady)
+        _arguments \
+          {-r,--[no-]reassign}'[Also reassign to Default]: :' \
+          {-a,--assign USER}'[Assign to USER]: :' \
+
+        ;;
+
+
+    (*)
+      _message 'Unknown sub command'
+  esac
 }
 
 _jm () {
-	typeset -A opt_args
-	local ret=1
-	local context state state_descr line
-	local -a args
-	local configfile=""
-
-	# Build up options
-
-	# Global options first.
-
-	# doing these by hand, then backing them into completion. 
-	args=(
-		'--verbose[Be chatty]:Global Option:'
-		{-n,--dry}'[Dont run actions that make changes]:Global Option:'
-		'--project PROJECT[Which project to use]:Global Option:'
-		'--url URL[Set jira base url]:Global Option:'
-		{-h,--help}'[Display help documentation]:Global Option:'
-		{-v,--version}'[Display version information]:Global Option:'
-		{-t,--trace}'[Display backtrace when an error occurs]:Global Option:'
-	)
-	args+=(
-		': :__subcommands'
-	)
-
-	# Sub-Command specific switches
-	args+=('*:: :->switches')
-
-	_arguments "$args[@]" && ret=0
-
-
-	bleck=(
-		'--raw[Do not prefix queries with project and assignee]: :'
-		{-w,--width}='[Width of the terminal]: :'
-		{-s,--style}='[Which style to use]: :'
-		'--heading STYLE[Format for heading]: :'
-		'--item STYLE[Format for items]: :'
-		{-c,--column}='[]: :'
-		{-f,--fields}='[Which fields to return]: :'
-		{-d,--dump}'[Dump the style to STDOUT as yaml]: :'
-		'--file FILE[Style definition file to load]: :'
-	)
-	case $state in
-
-		(switches)
-			local -a opts
-			opts=( $(jm completion --opts $line[1]) )
-			#_describe -o "$line[1] Options" "$opts[@]" && ret=0
-			_arguments "$bleck[@]" && ret=0
-
-			;;
-	esac
-
-	return ret
+    local curcontext="$curcontext" state common_options
+    common_options=(
+          '--verbose[Be chatty]: :'
+          {-n,--dry}'[Don_t run actions that make changes]: :'
+          '--project PROJECT[Which project to use]: :'
+          '--url URL[Set jira base url]: :'
+          {-h,--help}'[Display help documentation]: :'
+          {-v,--version}'[Display version information]: :'
+          {-t,--trace}'[Display backtrace when an error occurs]: :'
+    
+    )
+    _arguments -C \
+         ${common_options} \
+        '(-): :->command' \
+        '(-)*:: :->option-or-argument'
+    case $state in
+        (command)
+            __jm_top_commands
+            ;;
+        (option-or-argument)
+            curcontext=${curcontext%:*:*}:jm-$words[1]:
+            __jm_subcommand
+            ;;
+    esac
 }
 
 
+#  vim: set ai et sw=2 ts=2 :

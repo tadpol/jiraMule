@@ -1,0 +1,57 @@
+#compdef jm
+
+__jm_top_commands () {
+  local -a list
+  list=(
+  <%- for name, command in @commands.sort -%>
+    <%- unless alias? name -%>
+      <%= command.name %>:'<%= command.summary || command.description.lines[0] -%>'
+    <%- end -%>
+  <%- end -%>
+  )
+  _describe -t top-commands 'top commands' list
+}
+
+__oc_subcommand () {
+  case "$words[1]" in
+  <%- for name, command in @commands.sort -%>
+    <%- unless alias? name -%>
+      <%- if command.options.count > 0 -%>
+      (<%= name %>)
+        _arguments \
+        <%- for option in command.options -%>
+          <%= optionLine option %> \
+        <%- end %>
+        ;;
+    <%- end -%>
+    <%- end %>
+  <%- end -%>
+    (*)
+      _message 'Unknown sub command'
+  esac
+}
+
+_jm () {
+    local curcontext="$curcontext" state common_options
+    common_options=(
+    <% for option in @options -%>
+      <%= optionLine option %>
+    <% end %>
+    )
+    _arguments -C \
+         ${common_options} \
+        '(-): :->command' \
+        '(-)*:: :->option-or-argument'
+    case $state in
+        (command)
+            __jm_top_commands
+            ;;
+        (option-or-argument)
+            curcontext=${curcontext%:*:*}:jm-$words[1]:
+            __jm_subcommand
+            ;;
+    esac
+}
+
+
+#  vim: set ai et sw=2 ts=2 :

@@ -1,10 +1,31 @@
 require 'pp'
 require 'erb'
 
+class CompletionContext < ::Commander::HelpFormatter::Context
+end 
+
+class ::Commander::Runner
+  def optionLine(option, title=' ')
+    if option[:description].lines.count > 1 then
+      desc = option[:description].lines[0].chomp.gsub(/'/, '_')
+    else
+      desc = option[:description].chomp.gsub(/'/, '_')
+    end
+    values = ''
+    switch = option[:switches].join(',')
+
+    if option[:switches].count > 1 then
+      return "{#{switch}}'[#{desc}]:#{title}:#{values}'"
+    else
+      return "'#{switch}[#{desc}]:#{title}:#{values}'"
+    end
+  end
+end
+
 command :completion do |c|
   c.syntax = %{jm completion [options] }
-  c.summary = %{Tool for getting bits for tab completion.
-
+  c.summary = %{Tool for getting bits for tab completion.}
+  c.description = %{
   For starts, this is zsh only. Because that is what I use.
 }
   c.option '--subs', 'List sub commands'
@@ -15,10 +36,21 @@ command :completion do |c|
 
   # it feels like I could make a HelpFormatter that actually dumps in a completion
   # script format. Yes, but it doesn't save any work to do it that way.
+  # well it might.
+  #
+  # Changing direction.
+  # Will poop out the file to be included as the completion script.
 
   c.action do |args, options|
 
     runner = ::Commander::Runner.instance
+
+    tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-')
+
+    pc = CompletionContext.new(runner)
+    say tmpl.result(pc.get_binding)
+
+
 
     #pp runner
     if options.gopts then
