@@ -12,12 +12,22 @@ class ::Commander::Runner
       desc = option[:description].chomp.gsub(/'/, '_')
     end
     values = ''
-    switch = option[:switches].join(',')
 
-    if option[:switches].count > 1 then
-      return "{#{switch}}'[#{desc}]:#{title}:#{values}'"
+    # if there is a --[no-]foo format, break that into two switches.
+    switches = option[:switches].map{ |s| 
+      # TODO: figure out if the switch takes a value, and add the '='
+      # Better to figure out what it takes so that can be completed too
+      if s =~ /\[no-\]/ then
+        [s.sub(/\[no-\]/, ''), s.gsub(/[\[\]]/,'')]
+      else
+        s
+      end
+    }.flatten
+
+    if switches.count > 1 then
+      return "{#{switches.join(',')}}'[#{desc}]:#{title}:#{values}'"
     else
-      return "'#{switch}[#{desc}]:#{title}:#{values}'"
+      return "'#{switches.first}[#{desc}]:#{title}:#{values}'"
     end
   end
 end
@@ -45,29 +55,13 @@ command :completion do |c|
 
     runner = ::Commander::Runner.instance
 
-    tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-')
-
-    pc = CompletionContext.new(runner)
-    say tmpl.result(pc.get_binding)
-
-
-
     #pp runner
     if options.gopts then
       opts = runner.instance_variable_get(:@options)
       opts.each do |o|
-
-        desc = o[:description].lines[0].chomp.gsub(/'/, '_')
-        values = ''
-        switch = o[:switches].join(',')
-
-        #say "#{switch}[#{desc}]:Global Option:#{values}"
-        if o[:switches].count > 1 then
-          say "{#{switch}}[#{desc}]:GlobalOption:#{values}"
-        else
-          say "#{switch}[#{desc}]:GlobalOption:#{values}"
-        end
+        puts runner.optionLine o, 'GlobalOption'
       end
+      return
     end
 
     if options.subs then
@@ -75,26 +69,30 @@ command :completion do |c|
         #desc = cmd.instance_variable_get(:@summary) #.lines[0]
         #say "#{name}:'#{desc}'"
         say "#{name}"
+        if runner.alias? name then
+          pp cmd
+          pp cmd.name
+          pp cmd.summary
+        end
       end
+      return
     end
 
     if options.opts then
       cmds = runner.instance_variable_get(:@commands)
       cmds[options.opts].options.each do |o|
-        #say "{#{o[:switches].join(',')}}: :'#{o[:description]}'"
-        desc = o[:description] #
-        desc = desc.lines[0].chomp.gsub(/'/, '_') if desc.lines.count > 1
-        values = ''
-        switch = o[:switches].join(',')
-
-        #say "#{switch}[#{desc}]:Global Option:#{values}"
-        if o[:switches].count > 1 then
-          say "{#{switch}}'[#{desc}]: :#{values}'"
-        else
-          say "'#{switch}[#{desc}]: :#{values}'"
-        end
+        #pp o
+        puts runner.optionLine o
       end
+      return
     end
+
+
+    tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-<>')
+
+    pc = CompletionContext.new(runner)
+    puts tmpl.result(pc.get_binding)
+
 
   end
 end

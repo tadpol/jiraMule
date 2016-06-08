@@ -16,13 +16,26 @@ __jm_top_commands () {
       progress:'Show progress on issues'
       query:'Get the keys from a jira query'
       release:'Little tool for releasing a version in Jira'
-      testReady:'Little tool for setting the fix version on testable
-issues'
+      testReady:'Little tool for setting the fix version on testable issues'
   )
   _describe -t top-commands 'top commands' list
 }
 
-__oc_subcommand () {
+__jm_aliases () {
+  local -a list
+  list=(
+       lw:'Alias for logwork '
+       move:'Alias for goto '
+       mw:'Alias for mapwork '
+       q:'Alias for query '
+       qq:'Alias for query '
+       status:'Alias for kanban --style status'
+       tp:'Alias for kanban --style taskpaper'
+    )
+  _describe -t aliased-commands 'aliases' list
+}
+
+__jm_subcommand () {
   case "$words[1]" in
       (attach)
         _arguments \
@@ -48,7 +61,7 @@ __oc_subcommand () {
 
       (kanban)
         _arguments \
-          '--[no-]raw[Do not prefix queries with project and assignee]: :' \
+          {--raw,--no-raw}'[Do not prefix queries with project and assignee]: :' \
           {-w,--width WIDTH}'[Width of the terminal]: :' \
           {-s,--style STYLE}'[Which style to use]: :' \
           '--heading STYLE[Format for heading]: :' \
@@ -88,10 +101,9 @@ __oc_subcommand () {
 
       (query)
         _arguments \
-          '--[no-]raw[Do not prefix query with project and assignee]: :' \
-          '--[no-]json[Output json reply instead of summary]: :' \
-          '--fields FIELDS[Which fields to return. Set to empty to get all
-fields.]: :' \
+          {--raw,--no-raw}'[Do not prefix query with project and assignee]: :' \
+          {--json,--no-json}'[Output json reply instead of summary]: :' \
+          '--fields FIELDS[Which fields to return. Set to empty to get all fields.]: :' \
 
         ;;
 
@@ -102,10 +114,9 @@ fields.]: :' \
         ;;
 
 
-
       (testReady)
         _arguments \
-          {-r,--[no-]reassign}'[Also reassign to Default]: :' \
+          {-r,--reassign,--no-reassign}'[Also reassign to Default]: :' \
           {-a,--assign USER}'[Assign to USER]: :' \
 
         ;;
@@ -135,6 +146,7 @@ _jm () {
     case $state in
         (command)
             __jm_top_commands
+            __jm_aliases
             ;;
         (option-or-argument)
             curcontext=${curcontext%:*:*}:jm-$words[1]:

@@ -1,6 +1,6 @@
-#compdef jm
+#compdef <%= program :name %>
 
-__jm_top_commands () {
+__<%= program :name %>_sub_commands () {
   local -a list
   list=(
   <%- for name, command in @commands.sort -%>
@@ -9,10 +9,20 @@ __jm_top_commands () {
     <%- end -%>
   <%- end -%>
   )
-  _describe -t top-commands 'top commands' list
+  _describe -t sub-commands 'sub commands' list
 }
 
-__oc_subcommand () {
+__<%= program :name %>_aliases () {
+  local -a list
+  list=(
+  <% for alias_name, args in @aliases.sort -%>
+     <%= alias_name %>:'Alias for <%= command(alias_name).name %> <%= args.join(' ') -%>'
+  <% end -%>
+  )
+  _describe -t aliased-commands 'aliases' list
+}
+
+__<%= program :name %>_subcommand () {
   case "$words[1]" in
   <%- for name, command in @commands.sort -%>
     <%- unless alias? name -%>
@@ -31,7 +41,7 @@ __oc_subcommand () {
   esac
 }
 
-_jm () {
+_<%= program :name %> () {
     local curcontext="$curcontext" state common_options
     common_options=(
     <% for option in @options -%>
@@ -44,11 +54,12 @@ _jm () {
         '(-)*:: :->option-or-argument'
     case $state in
         (command)
-            __jm_top_commands
+            __<%= program :name %>_sub_commands
+            __<%= program :name %>_aliases
             ;;
         (option-or-argument)
             curcontext=${curcontext%:*:*}:jm-$words[1]:
-            __jm_subcommand
+            __<%= program :name %>_subcommand
             ;;
     esac
 }
