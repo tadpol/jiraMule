@@ -30,7 +30,11 @@ __<%= program :name %>_subcommand () {
       (<%= name %>)
         _arguments \
         <%- for option in command.options -%>
-          <%= optionLine option %> \
+          <%- if flatswitches(option).count > 1 -%>
+            {<%= flatswitches(option).join(',') %>}"[<%= optionDesc option %>]: :" \
+          <%- else -%>
+            "<%= flatswitches(option).first %>[<%= optionDesc option %>]: :" \
+          <%- end -%>
         <%- end %>
         ;;
     <%- end -%>
@@ -45,7 +49,11 @@ _<%= program :name %> () {
     local curcontext="$curcontext" state common_options
     common_options=(
     <% for option in @options -%>
-      <%= optionLine option %>
+      <%- if flatswitches(option).count > 1 -%>
+        {<%= flatswitches(option).join(',') %>}"[<%= optionDesc option %>]: :"
+      <%- else -%>
+        "<%= flatswitches(option).first %>[<%= optionDesc option %>]: :"
+      <%- end -%>
     <% end %>
     )
     _arguments -C \

@@ -5,6 +5,9 @@ class CompletionContext < ::Commander::HelpFormatter::Context
 end 
 
 class ::Commander::Runner
+
+  # For supporting other shells, this should get replaced with methods that 
+  # return parts. Not just a zsh-opt-line.
   def optionLine(option, title=' ')
     if option[:description].lines.count > 1 then
       desc = option[:description].lines[0].chomp.gsub(/'/, '_')
@@ -30,6 +33,31 @@ class ::Commander::Runner
       return "'#{switches.first}[#{desc}]:#{title}:#{values}'"
     end
   end
+
+  # Not so sure this should go in Runner, but where else?
+  def flatswitches(option)
+    # if there is a --[no-]foo format, break that into two switches.
+    option[:switches].map{ |switch| 
+      switch.sub!(/\s.*$/,'') # drop argument spec if exists.
+      if switch =~ /\[no-\]/ then
+        [switch.sub(/\[no-\]/, ''), switch.gsub(/[\[\]]/,'')]
+      else
+        switch
+      end
+    }.flatten
+  end
+  def takeArg(option)
+      # TODO: figure out if the switch takes a value, and add the '='
+      # Better to figure out what it takes so that can be completed too
+
+  end
+
+  def optionDesc(option)
+    option[:description].sub(/\n.*$/,'')
+  end
+end
+
+class ::Commander::Command::Options
 end
 
 command :completion do |c|
@@ -69,21 +97,18 @@ command :completion do |c|
         #desc = cmd.instance_variable_get(:@summary) #.lines[0]
         #say "#{name}:'#{desc}'"
         say "#{name}"
-        if runner.alias? name then
-          pp cmd
-          pp cmd.name
-          pp cmd.summary
-        end
       end
       return
     end
 
     if options.opts then
       cmds = runner.instance_variable_get(:@commands)
-      cmds[options.opts].options.each do |o|
-        #pp o
-        puts runner.optionLine o
-      end
+      pp cmds[options.opts].options
+#      cmds[options.opts].options.each do |o|
+#        pp o
+#        #puts runner.optionLine o
+#        puts o.truncDescription
+#      end
       return
     end
 

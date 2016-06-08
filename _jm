@@ -1,6 +1,6 @@
 #compdef jm
 
-__jm_top_commands () {
+__jm_sub_commands () {
   local -a list
   list=(
       attach:'Attach file to an Issue'
@@ -18,7 +18,7 @@ __jm_top_commands () {
       release:'Little tool for releasing a version in Jira'
       testReady:'Little tool for setting the fix version on testable issues'
   )
-  _describe -t top-commands 'top commands' list
+  _describe -t sub-commands 'sub commands' list
 }
 
 __jm_aliases () {
@@ -39,21 +39,21 @@ __jm_subcommand () {
   case "$words[1]" in
       (attach)
         _arguments \
-          {-z,--zip}'[Zip the file[s] first]: :' \
+            {-z,--zip}"[Zip the file[s] first]: :" \
 
         ;;
 
       (completion)
         _arguments \
-          '--subs[List sub commands]: :' \
-          '--opts CMD[List options for subcommand]: :' \
-          '--gopts[List global options]: :' \
+            "--subs[List sub commands]: :" \
+            "--opts[List options for subcommand]: :" \
+            "--gopts[List global options]: :" \
 
         ;;
 
       (goto)
         _arguments \
-          {-m,--map MAPNAME}'[Which workflow map to use]: :' \
+            {-m,--map}"[Which workflow map to use]: :" \
 
         ;;
 
@@ -61,22 +61,22 @@ __jm_subcommand () {
 
       (kanban)
         _arguments \
-          {--raw,--no-raw}'[Do not prefix queries with project and assignee]: :' \
-          {-w,--width WIDTH}'[Width of the terminal]: :' \
-          {-s,--style STYLE}'[Which style to use]: :' \
-          '--heading STYLE[Format for heading]: :' \
-          '--item STYLE[Format for items]: :' \
-          {-c,--column NAME=QUERY}'[]: :' \
-          {-f,--fields FIELDS}'[Which fields to return]: :' \
-          {-d,--dump}'[Dump the style to STDOUT as yaml]: :' \
-          '--file FILE[Style definition file to load]: :' \
+            {--raw,--no-raw}"[Do not prefix queries with project and assignee]: :" \
+            {-w,--width}"[Width of the terminal]: :" \
+            {-s,--style}"[Which style to use]: :" \
+            "--heading[Format for heading]: :" \
+            "--item[Format for items]: :" \
+            {-c,--column}"[]: :" \
+            {-f,--fields}"[Which fields to return]: :" \
+            {-d,--dump}"[Dump the style to STDOUT as yaml]: :" \
+            "--file[Style definition file to load]: :" \
 
         ;;
 
       (logwork)
         _arguments \
-          {-m,--message MSG}'[Message to add to work log]: :' \
-          '--date DATE[When this work was done]: :' \
+            {-m,--message}"[Message to add to work log]: :" \
+            "--date[When this work was done]: :" \
 
         ;;
 
@@ -87,13 +87,13 @@ __jm_subcommand () {
 
       (next)
         _arguments \
-          {-m,--map MAPNAME}'[Which workflow map to use]: :' \
+            {-m,--map}"[Which workflow map to use]: :" \
 
         ;;
 
       (progress)
         _arguments \
-          {-s,--status STATUSES}'[Which status to limit to]: :' \
+            {-s,--status}"[Which status to limit to]: :" \
 
         ;;
 
@@ -101,23 +101,23 @@ __jm_subcommand () {
 
       (query)
         _arguments \
-          {--raw,--no-raw}'[Do not prefix query with project and assignee]: :' \
-          {--json,--no-json}'[Output json reply instead of summary]: :' \
-          '--fields FIELDS[Which fields to return. Set to empty to get all fields.]: :' \
+            {--raw,--no-raw}"[Do not prefix query with project and assignee]: :" \
+            {--json,--no-json}"[Output json reply instead of summary]: :" \
+            "--fields[Which fields to return. Set to empty to get all fields.]: :" \
 
         ;;
 
       (release)
         _arguments \
-          '--some-switch[Some switch that does something]: :' \
+            "--some-switch[Some switch that does something]: :" \
 
         ;;
 
 
       (testReady)
         _arguments \
-          {-r,--reassign,--no-reassign}'[Also reassign to Default]: :' \
-          {-a,--assign USER}'[Assign to USER]: :' \
+            {-r,--reassign,--no-reassign}"[Also reassign to Default]: :" \
+            {-a,--assign}"[Assign to USER]: :" \
 
         ;;
 
@@ -130,13 +130,13 @@ __jm_subcommand () {
 _jm () {
     local curcontext="$curcontext" state common_options
     common_options=(
-          '--verbose[Be chatty]: :'
-          {-n,--dry}'[Don_t run actions that make changes]: :'
-          '--project PROJECT[Which project to use]: :'
-          '--url URL[Set jira base url]: :'
-          {-h,--help}'[Display help documentation]: :'
-          {-v,--version}'[Display version information]: :'
-          {-t,--trace}'[Display backtrace when an error occurs]: :'
+            "--verbose[Be chatty]: :"
+            {-n,--dry}"[Don't run actions that make changes]: :"
+            "--project[Which project to use]: :"
+            "--url[Set jira base url]: :"
+            {-h,--help}"[Display help documentation]: :"
+            {-v,--version}"[Display version information]: :"
+            {-t,--trace}"[Display backtrace when an error occurs]: :"
     
     )
     _arguments -C \
@@ -145,7 +145,7 @@ _jm () {
         '(-)*:: :->option-or-argument'
     case $state in
         (command)
-            __jm_top_commands
+            __jm_sub_commands
             __jm_aliases
             ;;
         (option-or-argument)
