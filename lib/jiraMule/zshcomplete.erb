@@ -31,9 +31,9 @@ __<%= program :name %>_subcommand () {
         _arguments \
         <%- for option in command.options -%>
           <%- if flatswitches(option).count > 1 -%>
-            {<%= flatswitches(option).join(',') %>}"[<%= optionDesc option %>]: :" \
+            {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
           <%- else -%>
-            "<%= flatswitches(option).first %>[<%= optionDesc option %>]: :" \
+            "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
           <%- end -%>
         <%- end %>
         ;;
@@ -50,14 +50,9 @@ _<%= program :name %> () {
     common_options=(
     <% for option in @options -%>
       <%- if flatswitches(option).count > 1 -%>
-        {<%= flatswitches(option).join(',') %>}"[<%= optionDesc option %>]: :"
+        {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :"
       <%- else -%>
-        "<%= flatswitches(option).first %>[<%= optionDesc option %>]: :"
-      <%- end -%>
-      <%- if takesArg(option) -%>
-        =
-      <%- else -%>
-        JJ
+        "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :"
       <%- end -%>
     <% end %>
     )

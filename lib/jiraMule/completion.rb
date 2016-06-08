@@ -7,10 +7,13 @@ end
 class ::Commander::Runner
 
   # Not so sure this should go in Runner, but where else?
+
+  ##
+  # Change the '--[no-]foo' switch into '--no-foo' and '--foo'
   def flatswitches(option)
     # if there is a --[no-]foo format, break that into two switches.
     option[:switches].map{ |switch| 
-      switch.sub!(/\s.*$/,'') # drop argument spec if exists.
+      switch = switch.sub(/\s.*$/,'') # drop argument spec if exists.
       if switch =~ /\[no-\]/ then
         [switch.sub(/\[no-\]/, ''), switch.gsub(/[\[\]]/,'')]
       else
@@ -18,18 +21,22 @@ class ::Commander::Runner
       end
     }.flatten
   end
-  def takesArg(option)
-    # TODO: figure out if the switch takes a value, and add the '='
-    # Better to figure out what it takes so that can be completed too
-    not option[:switches].select { |switch| switch =~ /\s\S+$/ }.empty?
+
+  ##
+  # If the switches take an argument, retun =
+  def takesArg(option, yes='=', no='')
+    if option[:switches].select { |switch| switch =~ /\s\S+$/ }.empty? then
+      no
+    else
+      yes
+    end
   end
 
+  ##
+  # truncate the description of an option
   def optionDesc(option)
     option[:description].sub(/\n.*$/,'')
   end
-end
-
-class ::Commander::Command::Options
 end
 
 command :completion do |c|
@@ -77,7 +84,8 @@ command :completion do |c|
 
     if options.opts then
       cmds = runner.instance_variable_get(:@commands)
-      pp cmds[options.opts].options
+      cmd = cmds[options.opts]
+      pp cmd.syntax
 #      cmds[options.opts].options.each do |o|
 #        pp o
 #        #puts runner.optionLine o

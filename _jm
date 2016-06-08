@@ -46,14 +46,14 @@ __jm_subcommand () {
       (completion)
         _arguments \
             "--subs[List sub commands]: :" \
-            "--opts[List options for subcommand]: :" \
+            "--opts=[List options for subcommand]: :" \
             "--gopts[List global options]: :" \
 
         ;;
 
       (goto)
         _arguments \
-            {-m,--map}"[Which workflow map to use]: :" \
+            {-m,--map}="[Which workflow map to use]: :" \
 
         ;;
 
@@ -62,21 +62,21 @@ __jm_subcommand () {
       (kanban)
         _arguments \
             {--raw,--no-raw}"[Do not prefix queries with project and assignee]: :" \
-            {-w,--width}"[Width of the terminal]: :" \
-            {-s,--style}"[Which style to use]: :" \
-            "--heading[Format for heading]: :" \
-            "--item[Format for items]: :" \
-            {-c,--column}"[]: :" \
-            {-f,--fields}"[Which fields to return]: :" \
+            {-w,--width}="[Width of the terminal]: :" \
+            {-s,--style}="[Which style to use]: :" \
+            "--heading=[Format for heading]: :" \
+            "--item=[Format for items]: :" \
+            {-c,--column}="[]: :" \
+            {-f,--fields}="[Which fields to return]: :" \
             {-d,--dump}"[Dump the style to STDOUT as yaml]: :" \
-            "--file[Style definition file to load]: :" \
+            "--file=[Style definition file to load]: :" \
 
         ;;
 
       (logwork)
         _arguments \
-            {-m,--message}"[Message to add to work log]: :" \
-            "--date[When this work was done]: :" \
+            {-m,--message}="[Message to add to work log]: :" \
+            "--date=[When this work was done]: :" \
 
         ;;
 
@@ -87,13 +87,13 @@ __jm_subcommand () {
 
       (next)
         _arguments \
-            {-m,--map}"[Which workflow map to use]: :" \
+            {-m,--map}="[Which workflow map to use]: :" \
 
         ;;
 
       (progress)
         _arguments \
-            {-s,--status}"[Which status to limit to]: :" \
+            {-s,--status}="[Which status to limit to]: :" \
 
         ;;
 
@@ -103,7 +103,7 @@ __jm_subcommand () {
         _arguments \
             {--raw,--no-raw}"[Do not prefix query with project and assignee]: :" \
             {--json,--no-json}"[Output json reply instead of summary]: :" \
-            "--fields[Which fields to return. Set to empty to get all fields.]: :" \
+            "--fields=[Which fields to return. Set to empty to get all fields.]: :" \
 
         ;;
 
@@ -117,7 +117,7 @@ __jm_subcommand () {
       (testReady)
         _arguments \
             {-r,--reassign,--no-reassign}"[Also reassign to Default]: :" \
-            {-a,--assign}"[Assign to USER]: :" \
+            {-a,--assign}="[Assign to USER]: :" \
 
         ;;
 
@@ -132,8 +132,8 @@ _jm () {
     common_options=(
             "--verbose[Be chatty]: :"
             {-n,--dry}"[Don't run actions that make changes]: :"
-            "--project[Which project to use]: :"
-            "--url[Set jira base url]: :"
+            "--project=[Which project to use]: :"
+            "--url=[Set jira base url]: :"
             {-h,--help}"[Display help documentation]: :"
             {-v,--version}"[Display version information]: :"
             {-t,--trace}"[Display backtrace when an error occurs]: :"
