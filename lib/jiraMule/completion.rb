@@ -6,34 +6,6 @@ end
 
 class ::Commander::Runner
 
-  # For supporting other shells, this should get replaced with methods that 
-  # return parts. Not just a zsh-opt-line.
-  def optionLine(option, title=' ')
-    if option[:description].lines.count > 1 then
-      desc = option[:description].lines[0].chomp.gsub(/'/, '_')
-    else
-      desc = option[:description].chomp.gsub(/'/, '_')
-    end
-    values = ''
-
-    # if there is a --[no-]foo format, break that into two switches.
-    switches = option[:switches].map{ |s| 
-      # TODO: figure out if the switch takes a value, and add the '='
-      # Better to figure out what it takes so that can be completed too
-      if s =~ /\[no-\]/ then
-        [s.sub(/\[no-\]/, ''), s.gsub(/[\[\]]/,'')]
-      else
-        s
-      end
-    }.flatten
-
-    if switches.count > 1 then
-      return "{#{switches.join(',')}}'[#{desc}]:#{title}:#{values}'"
-    else
-      return "'#{switches.first}[#{desc}]:#{title}:#{values}'"
-    end
-  end
-
   # Not so sure this should go in Runner, but where else?
   def flatswitches(option)
     # if there is a --[no-]foo format, break that into two switches.
@@ -46,10 +18,10 @@ class ::Commander::Runner
       end
     }.flatten
   end
-  def takeArg(option)
-      # TODO: figure out if the switch takes a value, and add the '='
-      # Better to figure out what it takes so that can be completed too
-
+  def takesArg(option)
+    # TODO: figure out if the switch takes a value, and add the '='
+    # Better to figure out what it takes so that can be completed too
+    not option[:switches].select { |switch| switch =~ /\s\S+$/ }.empty?
   end
 
   def optionDesc(option)
@@ -86,9 +58,11 @@ command :completion do |c|
     #pp runner
     if options.gopts then
       opts = runner.instance_variable_get(:@options)
-      opts.each do |o|
-        puts runner.optionLine o, 'GlobalOption'
-      end
+      pp opts.first
+      pp runner.takesArg(opts.first)
+#      opts.each do |o|
+#        puts runner.optionLine o, 'GlobalOption'
+#      end
       return
     end
 
