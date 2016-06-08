@@ -44,6 +44,11 @@ command :completion do |c|
   c.summary = %{Tool for getting bits for tab completion.}
   c.description = %{
   For starts, this is zsh only. Because that is what I use.
+
+  eval "$(jm completion)"
+  or
+  jm completion > _jm
+  source _jm
 }
   c.option '--subs', 'List sub commands'
   c.option '--opts CMD', 'List options for subcommand'
