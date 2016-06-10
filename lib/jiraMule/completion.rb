@@ -54,12 +54,6 @@ command :completion do |c|
   c.option '--opts CMD', 'List options for subcommand'
   c.option '--gopts', 'List global options'
 
-  # - dump a completion file that can be loaded into shell
-
-  # it feels like I could make a HelpFormatter that actually dumps in a completion
-  # script format. Yes, but it doesn't save any work to do it that way.
-  # well it might.
-  #
   # Changing direction.
   # Will poop out the file to be included as the completion script.
 
@@ -91,11 +85,13 @@ command :completion do |c|
       cmds = runner.instance_variable_get(:@commands)
       cmd = cmds[options.opts]
       pp cmd.syntax
-#      cmds[options.opts].options.each do |o|
-#        pp o
-#        #puts runner.optionLine o
-#        puts o.truncDescription
-#      end
+      # looking at OptionParser to help figure out what kind of params a switch
+      # gets. And hopefully derive a completer for it
+      # !!!!! OptionParser::Completion  what is this?
+      opts = OptionParser.new
+      cmds[options.opts].options.each do |o|
+        pp opts.make_switch(o[:args])
+      end
       return
     end
 
