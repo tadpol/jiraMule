@@ -2,14 +2,14 @@ require 'vine'
 require 'pp'
 
 command :next do |c|
-  c.syntax = 'jm next [options] [keys]'
-  c.summary = 'Move issue to the next state'
-  c.description = %{
+	c.syntax = 'jm next [options] [keys]'
+	c.summary = 'Move issue to the next state'
+	c.description = %{
 	Move to the next state. For states with multiple exits, use the 'preferred' one.
 	}
-  c.example 'Move BUG-4 into the next state.', %{jm next BUG-4}
+	c.example 'Move BUG-4 into the next state.', %{jm next BUG-4}
 	c.option '-m', '--map MAPNAME', String, 'Which workflow map to use'
-  c.action do |args, options|
+	c.action do |args, options|
 		options.default :map=>'PSStandard'
 		jira = JiraUtils.new(args, options)
 
@@ -21,9 +21,11 @@ command :next do |c|
 		keys.each do |key|
 			# First see if there is a single exit. If so, just do that.
 			trans = jira.transitionsFor(key)
-			if trans.length == 1 then
-				puts "Taking single exit" if options.verbose
-				id = trans.first['id']
+			# TODO: ignore Blocked and Closed because everything can go to them.
+			check = trans.reject{|t| t['name'] == "Closed" or t['name'] == "Blocked" }
+			if check.length == 1 then
+				id = check.first['id']
+				puts "Taking single exit: '#{check.first['name']}'" if options.verbose
 				jira.transition(key, id)
 				# TODO: deal with required fields.
 			else
