@@ -44,6 +44,7 @@ command :init do |c|
         pswd = nil
 
         p.open('w') { |io| io << cfg.to_yaml }
+        p.chmod(0600)
         puts "Created #{p.to_s}"
       end
 
