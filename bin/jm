@@ -23,15 +23,15 @@ global_option('-n', '--dry', "Don't run actions that make changes") {
   $cfg['tool.dry'] = true
   $cfg['tool.verbose'] = true # dry implies verbose
 }
-global_option('--username USERNAME') {|un|
-  $cfg['jira.userpass'] = un
-}
-global_option('--project PROJECT', "Which project to use") {|project|
-  $cfg['jira.project'] = project
-}
-global_option('--url URL', "Set jira base url") {|url|
-  $cfg['jira.url'] = url
-}
+#global_option('--username USERNAME') {|un|
+#  $cfg['jira.userpass'] = un
+#}
+#global_option('--project PROJECT', "Which project to use") {|project|
+#  $cfg['jira.project'] = project
+#}
+#global_option('--url URL', "Set jira base url") {|url|
+#  $cfg['jira.url'] = url
+#}
 global_option('-L', '--curl', 'Print out a curl command for each network call') {
   $cfg['tool.curldebug'] = true
 }

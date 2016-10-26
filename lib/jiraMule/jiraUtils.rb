@@ -5,6 +5,8 @@ require 'json'
 require 'date'
 require 'pp'
 require 'JiraMule/Config'
+require 'JiraMule/Passwords'
+require 'JiraMule/http'
 require 'JiraMule/verbosing'
 
 module JiraMule
@@ -14,6 +16,7 @@ module JiraMule
 
     class JiraUtils
         include Verbose
+        include Http
 
         def initialize(args, options={}, cfg=$cfg)
             @args = args
@@ -25,14 +28,14 @@ module JiraMule
             @username = up[:email]
             @password = up[:password]
         end
-        attr_reader :username
+        attr_reader :username, :password
 
         def jiraEndPoint
             endPoint()
         end
 
         def endPoint(path='')
-          URI('https://' + $cfg['net.host'] + '/rest/api/2/' + path.to_s)
+          URI($cfg['net.url'] + '/rest/api/2/' + path.to_s)
         end
 
         def project
@@ -102,28 +105,10 @@ module JiraMule
         ##
         # Run a JQL query and get issues with the selected fields
         def getIssues(query, fields=[ 'key', 'summary' ])
-            r = jiraEndPoint()
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                request = Net::HTTP::Post.new(r + 'search')
-                request.content_type = 'application/json'
-                request.basic_auth(username(), password())
-                request.body = JSON.generate({
-                    'jql' => query,
-                    'fields' => fields
-                })
-
-                verbose "Get keys: #{query}"
-                response = http.request(request)
-                case response
-                when Net::HTTPSuccess
-                    issues = JSON.parse(response.body)
-                    #return issues
-                    return issues['issues']
-
-                else
-                    return []
-                end
-            end
+            # TODO convert to workit.
+            verbose "Get keys: #{query}"
+            data = post('search', {:jql=>query, :fields=>fields})
+            data[:issues]
         end
 
         ##

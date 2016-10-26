@@ -9,7 +9,7 @@ command :query do |c|
 	c.option '--fields FIELDS', Array, 'Which fields to return. Set to empty to get all fields.'
   c.action do |args, options|
 		options.defaults :json => false
-		jira = JiraUtils.new(args, options)
+		jira = JiraMule::JiraUtils.new(args, options)
 		args.unshift("assignee = #{jira.username} AND") unless options.raw
 		args.unshift("project = #{jira.project} AND") unless options.raw
 		q = args.join(' ')
@@ -22,7 +22,7 @@ command :query do |c|
 			puts JSON.dump(issues)
 		else
 			keys = issues.map {|item|
-				"#{item['key']} #{(item.access('fields.summary') or '')}"
+				"#{item[:key]} #{(item.access('fields.summary') or '')}"
 			}
 			keys.each {|k| puts k}
 		end
