@@ -105,7 +105,6 @@ module JiraMule
         ##
         # Run a JQL query and get issues with the selected fields
         def getIssues(query, fields=[ 'key', 'summary' ])
-            # TODO convert to workit.
             verbose "Get keys: #{query}"
             data = post('search', {:jql=>query, :fields=>fields})
             data[:issues]
