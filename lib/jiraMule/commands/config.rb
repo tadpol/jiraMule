@@ -1,6 +1,7 @@
+require 'jiraMule/Config'
 
 command :config do |c|
-  c.syntax = %{mr config [options] <key> [<new value>]}
+  c.syntax = %{jm config [options] <key> [<new value>]}
   c.summary = %{Get and set options}
   c.description = %{
   You can get, set, or query config options with this command.  All config
@@ -8,18 +9,18 @@ command :config do |c|
   that the keys can be saved in.
   }
 
-  c.example %{See what the current combined config is}, 'mr config --dump'
-  c.example %{Query a value}, 'mr config solution.id'
-  c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
+  c.example %{See what the current combined config is}, 'jm config --dump'
+  c.example %{Query a value}, 'jm config jira.project'
+  c.example %{Set a new value; writing to the project config file}, 'jm config jira.project XXXXXXXX'
+  c.example %{Set a new value; writing to the user config file}, 'jm config --user user.name my@email.address'
   c.example %{Unset a value in a configfile. (lower scopes will become visible if set)},
-    'mr config diff.cmd --unset'
+    'jm config diff.cmd --unset'
 
 
-  c.option '--system', 'Use only the system config file. (/etc/mrmuranorc)'
-  c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
-  c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
-  c.option '--env', 'Use only the config file from $MR_CONFIGFILE'
+  c.option '--system', 'Use only the system config file. (/etc/jiramulerc)'
+  c.option '--user', 'Use only the config file in $HOME (.jiramulerc)'
+  c.option '--project', 'Use only the config file in the project (.jiramulerc)'
+  c.option '--env', 'Use only the config file from $JM_CONFIGFILE'
   c.option '--specified', 'Use only the config file from the --config option.'
 
   c.option '--unset', 'Remove key from config file.'
@@ -42,7 +43,7 @@ command :config do |c|
       scopes << :project if options.project
       scopes << :env if options.env
       scopes << :specified if options.specified
-      scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
+      scopes = JiraMule::Config::CFG_SCOPES if scopes.empty?
 
       say $cfg.get(args[0], scopes)
     else

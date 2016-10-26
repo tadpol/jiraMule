@@ -1,15 +1,15 @@
 require 'pathname'
 require 'inifile'
 
-module MrMurano
+module JiraMule
   class Config
     #
     #  internal    transient this-run-only things (also -c options)
     #  specified   from --configfile
-    #  env         from ENV['MR_CONFIGFILE']
-    #  project     .mrmuranorc at project dir
-    #  user        .mrmuranorc at $HOME
-    #  system      .mrmuranorc at /etc
+    #  env         from ENV['JM_CONFIGFILE']
+    #  project     .jiramulerc at project dir
+    #  user        .jiramulerc at $HOME
+    #  system      .jiramulerc at /etc
     #  defaults    Internal hardcoded defaults
     #
     ConfigFile = Struct.new(:kind, :path, :data) do
@@ -35,29 +35,25 @@ module MrMurano
     attr_reader :projectDir
 
     CFG_SCOPES=%w{internal specified env project private user system defaults}.map{|i| i.to_sym}.freeze
-    CFG_FILE_NAME = '.mrmuranorc'.freeze
-    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
-    CFG_DIR_NAME = '.mrmurano'.freeze
-    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
-    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
+    CFG_FILE_NAME = '.jiramulerc'.freeze
+    CFG_DIR_NAME = '.jiramule'.freeze
+    CFG_ALTRC_NAME = '.jiramule/config'.freeze
+    CFG_SYS_NAME = '/etc/jiramulerc'.freeze
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      unless ENV['MR_CONFIGFILE'].nil? then
+      unless ENV['JM_CONFIGFILE'].nil? then
         # if it exists, must be a file
         # if it doesn't exist, that's ok
-        ep = Pathname.new(ENV['MR_CONFIGFILE'])
+        ep = Pathname.new(ENV['JM_CONFIGFILE'])
         if ep.file? or not ep.exist? then
           @paths << ConfigFile.new(:env, ep)
         end
       end
       @projectDir = findProjectDir()
       unless @projectDir.nil? then
-        if (@projectDir + CFG_PRVT_NAME).exist? then
-          say_warning "!!! Using .mrmuranorc.private is deprecated"
-        end
         @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
         @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
         fixModes(@projectDir + CFG_DIR_NAME)
@@ -72,35 +68,19 @@ module MrMurano
       set('tool.debug', false, :defaults)
       set('tool.dry', false, :defaults)
 
-      set('net.host', 'bizapi.hosted.exosite.io', :defaults)
-
-      set('location.base', @projectDir, :defaults) unless @projectDir.nil?
-      set('location.files', 'files', :defaults)
-      set('location.endpoints', 'endpoints', :defaults)
-      set('location.modules', 'modules', :defaults)
-      set('location.eventhandlers', 'eventhandlers', :defaults)
-      set('location.roles', 'roles.yaml', :defaults)
-      set('location.users', 'users.yaml', :defaults)
-
-      set('files.default_page', 'index.html', :defaults)
-
-      set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
-
-      set('diff.cmd', 'diff -u', :defaults)
     end
 
     ## Find the root of this project Directory.
     #
     # The Project dir is the directory between PWD and HOME that has one of (in
     # order of preference):
-    # - .mrmuranorc
-    # - .mrmuranorc.private
-    # - .mrmurano/config
-    # - .mrmurano/
+    # - .jiramulerc
+    # - .jiramule/config
+    # - .jiramule/
     # - .git/
     def findProjectDir()
       result=nil
-      fileNames=[CFG_FILE_NAME, CFG_PRVT_NAME, CFG_ALTRC_NAME]
+      fileNames=[CFG_FILE_NAME, CFG_ALTRC_NAME]
       dirNames=[CFG_DIR_NAME]
       home = Pathname.new(Dir.home)
       pwd = Pathname.new(Dir.pwd)
@@ -240,25 +220,6 @@ module MrMurano
 
   end
 
-  ##
-  # IF none of -same, then -same; else just the ones listed.
-  def self.checkSAME(opt)
-    unless opt.files or opt.endpoints or opt.modules or
-        opt.eventhandlers or opt.roles or opt.users or opt.spec then
-      opt.files = true
-      opt.endpoints = true
-      opt.modules = true
-      opt.eventhandlers = true
-    end
-    if opt.all then
-      opt.files = true
-      opt.endpoints = true
-      opt.modules = true
-      opt.eventhandlers = true
-      opt.roles = true
-      opt.users = true
-    end
-  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
