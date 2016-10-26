@@ -54,7 +54,6 @@ module JiraMule
       end
       @projectDir = findProjectDir()
       unless @projectDir.nil? then
-        @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
         @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
         fixModes(@projectDir + CFG_DIR_NAME)
       end
