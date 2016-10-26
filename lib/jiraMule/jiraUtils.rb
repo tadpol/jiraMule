@@ -284,30 +284,14 @@ module JiraMule
         # +notes+:: Any notes to add.
         # +on+:: When this work happened. (default is now)
         def logWork(key, timespent, notes="", on=nil)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                request = Net::HTTP::Post.new(r + ('issue/' + key + '/worklog'))
-                request.content_type = 'application/json'
-                request.basic_auth(username(), password())
-                body = {
-                    :comment => notes,
-                    :timeSpentSeconds => timespent,
-                }
-                body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
-                request.body = JSON.generate(body)
+            body = {
+                :comment => notes,
+                :timeSpentSeconds => timespent,
+            }
+            body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
 
-                verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
-                return if @options.dry
-                response = http.request(request)
-                case response
-                when Net::HTTPSuccess
-                else
-                    ex = JiraUtilsException.new("Failed to log work on #{key}")
-                    ex.request = request
-                    ex.response = response
-                    raise ex
-                end
-            end
+            verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
+            post('issue/' + key + '/worklog', body) unless $cfg['tool.dry']
         end
 
         # Attach a file to an issue.
@@ -326,9 +310,8 @@ module JiraMule
             req = Net::HTTP::Post::Multipart.new(uri, 'file'=> UploadIO.new(File.new(file), type, name) )
             set_def_headers(req)
             req['X-Atlassian-Token'] = 'nocheck'
-            if not @options.dry
-                workit(req)
-            end
+
+            workit(req) unless $cfg['tool.dry']
         end
 
     end

@@ -2,6 +2,7 @@
 require 'chronic_duration'
 require 'vine'
 require 'date'
+require 'JiraMule/jiraUtils'
 
 command :logwork do |c|
   c.syntax = 'jm logwork [options] <key> <time spent...>'
@@ -14,7 +15,7 @@ command :logwork do |c|
 
   c.action do |args, options|
     options.defaults :harvest => true, :message => ''
-    jira = JiraUtils.new(args, options)
+    jira = JiraMule::JiraUtils.new(args, options)
     harvest = HarvestUtils.new(args, options)
 
     key = jira.expandKeys(args).shift
@@ -40,13 +41,13 @@ command :logwork do |c|
         tid=$2.to_i
       end
     end
-    printVars(:pid=>pid, :tid=>tid) if options.verbose
+    jira.printVars(:pid=>pid, :tid=>tid) if options.verbose
 
     # if pid and/or tid are still nil here, the values in the project config will be
     # used instead.
     pid, tid = harvest.taskIDfromProjectAndName(pid, tid)
     raise "Cannot figure out which havest code to use" if pid.nil? or tid.nil?
-    printVars(:k=>key, :ts=>ts, :m=>options.message, :pt=>[pid['name'],tid['name']])
+    jira.printVars(:k=>key, :ts=>ts, :m=>options.message, :pt=>[pid['name'],tid['name']])
 
     jmsg = %{[#{pid['code']}] #{pid['name']} - #{tid['name']}: #{options.message}}
     hmsg =  %{#{key}: #{options.message}}
@@ -56,7 +57,7 @@ command :logwork do |c|
       harvest.logWork(pid['id'], tid['id'], ts, hmsg, options.date)
     rescue JiraUtilsException => e
       pp e.response.body
-      
+
     rescue HarvestUtilsException => e
       pp e.response.body
     end
