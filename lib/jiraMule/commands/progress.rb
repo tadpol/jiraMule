@@ -30,7 +30,7 @@ command :progress do |c|
   query << ' AND (' unless options.status.empty?
   query << options.status.map{|s| %{status="#{s}"}}.join(' OR ') unless options.status.empty?
   query << ')' unless options.status.empty?
-  #jira.printVars(:q=>query)
+  jira.printVars(:q=>query)
   progresses = jira.getIssues(query, ['key', 'workratio', 'aggregatetimespent',
                                      'duedate', 'aggregatetimeoriginalestimate'])
 

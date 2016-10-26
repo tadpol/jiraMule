@@ -316,30 +316,18 @@ module JiraMule
         # +type+:: MIME type of the fiel data
         # +name+:: Aternate name of file being uploaded
         def attach(key, file, type="application/octect", name=nil)
-            r = jiraEndPoint
             if name.nil? then
                 name = File.basename(file)
             end
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                path = r + ('issue/' + key + '/attachments')
-                request = Net::HTTP::Post::Multipart.new(path,
-                                                         'file'=> UploadIO.new(File.new(file), type, name) )
-                #request.content_type = 'application/json'
-                request.basic_auth(username, password)
-                request['X-Atlassian-Token'] = 'nocheck'
 
-                verbose "Going to upload #{file} to #{key}"
-                if not @options.dry
-                    response = http.request(request)
-                    case response
-                    when Net::HTTPSuccess
-                    else
-                        ex = JiraUtilsException.new("Failed to POST #{file} to #{key}")
-                        ex.request = request
-                        ex.response = response
-                        raise ex
-                    end
-                end
+            verbose "Going to upload #{file} to #{key}"
+
+            uri = endPoint('issue/' + key + '/attachments')
+            req = Net::HTTP::Post::Multipart.new(uri, 'file'=> UploadIO.new(File.new(file), type, name) )
+            set_def_headers(req)
+            req['X-Atlassian-Token'] = 'nocheck'
+            if not @options.dry
+                workit(req)
             end
         end
 
