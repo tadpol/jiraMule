@@ -53,7 +53,7 @@ module JiraMule
 
   class Account
     def loginInfo
-      host = $cfg['net.host']
+      host = $cfg['net.url']
       user = $cfg['user.name']
       if user.nil? then
         say_error("No Jira user account found; please login")

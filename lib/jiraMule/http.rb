@@ -31,7 +31,7 @@ module JiraMule
     end
 
     def http
-      uri = URI('https://' + $cfg['net.host'])
+      uri = URI($cfg['net.url'])
       if not defined?(@http) or @http.nil? then
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
@@ -45,7 +45,7 @@ module JiraMule
 
     def set_def_headers(request)
       request.content_type = 'application/json'
-      request['Authorization'] = 'token ' + token #FIXME broken
+      request.basic_auth(username(), password())
       request['User-Agent'] = "JiraMule/#{JiraMule::VERSION}"
       request
     end
