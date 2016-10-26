@@ -40,13 +40,13 @@ class JiraUtils
 
 	def username
 		return @username unless @username.nil?
-		userpass = @cfg['.jira.userpass']
+		userpass = @cfg['jira.userpass']
 		if userpass.include? ':'
 			@username, @password = userpass.split(':')
 		else
 			@username = userpass
 			# if darwin
-			@password = `security 2>&1 >/dev/null find-internet-password -gs "#{@cfg['.jira.url']}" -a "#{@username}"`
+			@password = `security 2>&1 >/dev/null find-internet-password -gs "#{@cfg['jira.url']}" -a "#{@username}"`
 			@password.strip!
 			@password.sub!(/^password: "(.*)"$/, '\1')
 		end
@@ -54,13 +54,13 @@ class JiraUtils
 	end
 	def password
 		return @password unless @username.nil?
-		userpass = @cfg['.jira.userpass']
+		userpass = @cfg['jira.userpass']
 		if userpass.include? ':'
 			@username, @password = userpass.split(':')
 		else
 			@username = userpass
 			# if darwin
-			@password = `security 2>&1 >/dev/null find-internet-password -gs "#{@cfg['.jira.url']}" -a "#{@username}"`
+			@password = `security 2>&1 >/dev/null find-internet-password -gs "#{@cfg['jira.url']}" -a "#{@username}"`
 			@password.strip!
 			@password.sub!(/^password: "(.*)"$/, '\1')
 		end
@@ -69,15 +69,15 @@ class JiraUtils
 
 	def jiraEndPoint
 		return @jiraEndPoint unless @jiraEndPoint.nil?
-		base = @cfg['.jira.url']
+		base = @cfg['jira.url']
 		base = @options.url if @options.url
-		@jiraEndPoint = URI(@cfg['.jira.url'] + '/rest/api/2/')
+		@jiraEndPoint = URI(@cfg['jira.url'] + '/rest/api/2/')
 		return @jiraEndPoint
 	end
 
 	def project
 		return @project unless @project.nil?
-		@project = @cfg['.jira.project']
+		@project = @cfg['jira.project']
 		@project = @options.project if @options.project
 		return @project
 	end
@@ -123,8 +123,8 @@ class JiraUtils
 	# +map+:: The lookup map to use
 	def getPath(at, to, map)
 		verbose "In '#{map}', getting path from '#{at}' to '#{to}'"
-		transMap = $cfg[".jira.goto.#{map}"]
-		transMap = $cfg[".jira.goto.*"] if transMap.nil?
+		transMap = $cfg[".jira.goto.#{map}"] # FIXME config broken
+		transMap = $cfg[".jira.goto.*"] if transMap.nil? # FIXME config broken
 		raise "No maps for #{map}" if transMap.nil?
 
 		starts = transMap.keys.select {|k| k == at}
