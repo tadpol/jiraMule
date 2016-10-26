@@ -4,8 +4,8 @@ require 'net/http/post/multipart'
 require 'json'
 require 'date'
 require 'pp'
-require 'jiraMule/Config'
-require 'jiraMule/verbosing'
+require 'JiraMule/Config'
+require 'JiraMule/verbosing'
 
 module JiraMule
     class JiraUtilsException < Exception

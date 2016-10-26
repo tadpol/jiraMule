@@ -1,4 +1,4 @@
-require 'jiraMule/Config'
+require 'JiraMule/Config'
 
 command :config do |c|
   c.syntax = %{jm config [options] <key> [<new value>]}
