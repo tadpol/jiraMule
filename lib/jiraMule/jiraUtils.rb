@@ -24,8 +24,8 @@ module JiraMule
             up = acc.loginInfo
             @username = up[:email]
             @password = up[:password]
-
         end
+        attr_reader :username
 
         def jiraEndPoint
             endPoint()
