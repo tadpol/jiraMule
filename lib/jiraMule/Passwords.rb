@@ -52,11 +52,6 @@ module JiraMule
   end
 
   class Account
-
-    def endPoint(path)
-      URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
-    end
-
     def loginInfo
       host = $cfg['net.host']
       user = $cfg['user.name']
