@@ -1,56 +1,82 @@
 require 'vine'
 require 'pp'
+require 'JiraMule/jiraUtils'
 
 command :next do |c|
-	c.syntax = 'jm next [options] [keys]'
-	c.summary = 'Move issue to the next state'
-	c.description = %{
-	Move to the next state. For states with multiple exits, use the 'preferred' one.
-	}
-	c.example 'Move BUG-4 into the next state.', %{jm next BUG-4}
-	c.option '-m', '--map MAPNAME', String, 'Which workflow map to use'
-	c.action do |args, options|
-		options.default :map=>'PSStandard'
-		jira = JiraUtils.new(args, options)
+  c.syntax = 'jm next [options] [keys]'
+  c.summary = 'Move issue to the next state'
+  c.description = %{
+  Move to the next state. For states with multiple exits, use the 'preferred' one.
+  }
+  c.example 'Move BUG-4 into the next state.', %{jm next BUG-4}
+  c.option '--[no-]save-next', %{Save this }
 
-		# keys can be with or without the project prefix.
-		keys = jira.expandKeys(args)
-		printVars(:keys=>keys)
-		return if keys.empty?
+  c.action do |args, options|
+    jira = JiraMule::JiraUtils.new(args, options)
 
-		keys.each do |key|
-			# First see if there is a single exit. If so, just do that.
-			trans = jira.transitionsFor(key)
-			# TODO: ignore Blocked and Closed because everything can go to them.
-			check = trans.reject{|t| t['name'] == "Closed" or t['name'] == "Blocked" }
-			if check.length == 1 then
-				id = check.first['id']
-				puts "Taking single exit: '#{check.first['name']}'" if options.verbose
-				jira.transition(key, id)
-				# TODO: deal with required fields.
-			else
+    # keys can be with or without the project prefix.
+    keys = jira.expandKeys(args)
+    jira.printVars(:keys=>keys)
+    return if keys.empty?
 
-				# Where we are.
-				query = "assignee = #{jira.username} AND project = #{jira.project} AND "
-				query << "key = #{key}"
-				issues = jira.getIssues(query, ["status"])
-				type = issues.first.access('fields.issuetype.name')
-				at = issues.first.access('fields.status.name')
+    keys.each do |key|
+      # First see if there is a single exit. If so, just do that.
+      trans = jira.transitionsFor(key)
+      pp trans
+      exit
+      if trans.length == 1 then
+        id = trans.first[:id]
+        jira.verbose "Taking single exit: '#{trans.first[:name]}'"
+        jira.transition(key, id)
 
-				# Look up what the preferred next step is, and do that.
-				nxt = $cfg[".jira.next.#{options.map}.#{at}"]
-				raise "Not sure which state is next after #{at} in #{options.map}" if nxt.nil?
+      else
+        # If more than one:
 
-				direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
-				raise "Broken transition step on #{key} to #{nxt}" if direct.empty?
-				id = direct.first['id']
-				puts "Transitioning #{key} to #{direct.first['name']} (#{id})" if options.verbose
-				jira.transition(key, id)
-				# TODO: deal with required fields.
+        # Need to know the name of the state we are currently in
+        query = "assignee = #{jira.username} AND project = #{jira.project} AND "
+        query << "key = #{key}"
+        issues = jira.getIssues(query, ["status"])
+        at = issues.first.access('fields.status.name')
 
-			end
-		end
-	end
+        # If a preferred transition is set, use that
+        nxt = $cfg["next-preferred.#{at}"]
+        unless nxt.nil? then
+          direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
+          unless direct.empty? then
+            id = direct.first[:id]
+            jira.verbose "Transitioning #{key} to #{direct.first['name']} (#{id})"
+            jira.transition(key, id)
+            return
+          end
+        end
+
+        # Filter ignored transitions; If only one left, goto it.
+        skiplist = $cfg['next.ignore'] || []
+        check = trans.reject{|t| skiplist.include? t[:name] }
+        if check.length == 1 then
+          id = check.first['id']
+          jira.verbose "Taking filtered single exit: '#{check.first[:name]}'"
+          jira.transition(key, id)
+        end
+
+        # Otherwise, ask which transition to use.
+        # - save that as preferred
+        # - goto it.
+        choose do |menu|
+          menu.prompt = "Follow which transition?"
+          trans.each do |tr|
+            menu.choice(tr[:name]) do
+              # TODO save
+              jira.verbose "Transitioning #{key} to #{tr[:name]} (#{tr[:id]})"
+              jira.transition(key, tr[:id])
+            end
+          end
+        end
+
+      end
+
+    end #keys.each
+  end
 end
 
 

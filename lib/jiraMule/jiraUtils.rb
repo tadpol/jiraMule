@@ -206,52 +206,16 @@ module JiraMule
         # +key+:: The key to transition
         # +toID+:: The ID of the transition to make
         def transition(key, toID)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                update = JSON.generate({'transition'=>{'id'=> toID }})
-                request = Net::HTTP::Post.new(r + ('issue/' + key + '/transitions'))
-                request.content_type = 'application/json'
-                request.basic_auth(username, password)
-                request.body = update
-
-                verbose "Transitioning key #{key} to #{toID}"
-                if not @options.dry
-                    response = http.request(request)
-                    case response
-                    when Net::HTTPSuccess
-                    else
-                        ex = JiraUtilsException.new("Failed to transition #{key} to #{toID}")
-                        ex.request = request
-                        ex.response = response
-                        raise ex
-                    end
-                end
-            end
+            verbose "Transitioning key #{key} to #{toID}"
+            post('issue/' + key + '/transitions', {:transition=>{:id=>toID}})
         end
 
         # Get the transitions that a key can move to.
         # +key+:: The issue
         def transitionsFor(key)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                # *sigh* Need to transition by ID, buts what's the ID? So look that up
-                request = Net::HTTP::Get.new(r + ('issue/' + key + '/transitions'))
-                request.content_type = 'application/json'
-                request.basic_auth(username, password)
-                verbose "Fetching transitions for #{key}"
-                response = http.request(request)
-                case response
-                when Net::HTTPSuccess
-                    trans = JSON.parse(response.body)
-                    closed = trans['transitions']
-                else
-                    ex = JiraUtilsException.new("Failed to get transitions for #{key}")
-                    ex.request = request
-                    ex.response = response
-                    raise ex
-                end
-                return closed
-            end
+            verbose "Fetching transitions for #{key}"
+            data = get('issue/' + key + '/transitions')
+            data[:transitions]
         end
 
         # Get the status for a project
