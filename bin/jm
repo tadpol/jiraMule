@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'commander/import'
-require 'jiraMule'
+require 'JiraMule'
 require 'pp'
 require 'json'
 
