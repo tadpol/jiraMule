@@ -28,13 +28,8 @@ command :logwork do |c|
       end
     end
 
-    # if pid and/or tid are still nil here, the values in the project config will be
-    # used instead.
-
-    jmsg = %{[#{pid['code']}] #{pid['name']} - #{tid['name']}: #{options.message}}
-
     begin
-      jira.logWork(key, ts, jmsg, options.date)
+      jira.logWork(key, ts, options.message, options.date)
     rescue JiraUtilsException => e
       pp e.response.body
     end
