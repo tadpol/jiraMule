@@ -1,4 +1,10 @@
 
+def printErr(msg)
+	$stdout.print("\033[1m=!\033[0m ")
+	$stdout.print(msg)
+	$stdout.print("\n")
+end
+
 command :testReady do |c|
 	c.syntax = 'jm testReady [options] [version]'
 	c.summary = 'Little tool for setting the fix version on testable issues'

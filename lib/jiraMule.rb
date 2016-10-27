@@ -1,6 +1,7 @@
-require 'jiraMule/version'
-require 'jiraMule/projectConfig'
-require 'jiraMule/jiraUtils'
-require 'jiraMule/gitUtils'
-require 'jiraMule/harvest'
+require 'JiraMule/version'
+require 'JiraMule/Config'
+require 'JiraMule/jiraUtils'
+require 'JiraMule/gitUtils'
+require 'JiraMule/harvest'
 
+require 'JiraMule/commands'
