@@ -1,7 +1,6 @@
 require 'JiraMule/commands/attach.rb'
 require 'JiraMule/commands/config.rb'
 require 'JiraMule/commands/goto.rb'
-require 'JiraMule/commands/init.rb'
 require 'JiraMule/commands/kanban.rb'
 require 'JiraMule/commands/logWork.rb'
 require 'JiraMule/commands/next.rb'
