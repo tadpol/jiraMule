@@ -2,12 +2,12 @@ source 'http://rubygems.org'
 
 gemspec
 
+gem 'commander'
 gem 'chronic_duration'
 gem 'multipart-post'
 gem 'mustache'
-gem 'commander'
-gem 'vine'
 gem 'terminal-table'
+gem 'vine'
 gem 'zip'
 
 

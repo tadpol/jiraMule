@@ -25,12 +25,15 @@ already.  Rather this is specific to things I need.
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_runtime_dependency('commander', '~> 4.3.4')
-  #s.add_runtime_dependency('chronic_duration', '~> 0.10.6')
-  #s.add_runtime_dependency('multipart-post', '~> 2.0.0')
-  s.add_dependency('mustache', '~> 1.0')
+  s.add_runtime_dependency('commander', '~> 4.4.0')
+  s.add_runtime_dependency('chronic_duration', '~> 0.10.6')
+  s.add_runtime_dependency('multipart-post', '~> 2.0.0')
+  s.add_runtime_dependency('mustache', '~> 1.0')
+  s.add_runtime_dependency('terminal-table', '~> 1.4.5')
+  s.add_runtime_dependency('vine', '~> 0.2')
+  s.add_runtime_dependency('zip', '~> 2.0.0')
 
-  s.add_development_dependency('bundler', '~> 1.7.6')
+  s.add_development_dependency('bundler', '~> 1.12.0')
   s.add_development_dependency('rspec', '~> 3.2')
   s.add_development_dependency('rake')
 end
