@@ -16,7 +16,7 @@ line app.
 This very specifically does not try to be a generic jira tool; those exist
 already.  Rather this is specific to things I need.
 }
-global_option('--verbose', 'Be chatty') {
+global_option('-V', '--verbose', 'Be chatty') {
   $cfg['tool.verbose'] = true
 }
 global_option('-n', '--dry', "Don't run actions that make changes") {
