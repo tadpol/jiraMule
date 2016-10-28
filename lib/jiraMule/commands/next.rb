@@ -9,7 +9,8 @@ command :next do |c|
   Move to the next state. For states with multiple exits, use the 'preferred' one.
   }
   c.example 'Move BUG-4 into the next state.', %{jm next BUG-4}
-  c.option '--[no-]save-next', %{Save this }
+  c.option '--[no-]save-next', %{Save transition as preferred}
+  c.option '--force-choice', %{Always show menu of transitions (if more than one)}
 
   c.action do |args, options|
     jira = JiraMule::JiraUtils.new(args, options)
@@ -22,8 +23,6 @@ command :next do |c|
     keys.each do |key|
       # First see if there is a single exit. If so, just do that.
       trans = jira.transitionsFor(key)
-      pp trans
-      exit
       if trans.length == 1 then
         id = trans.first[:id]
         jira.verbose "Taking single exit: '#{trans.first[:name]}'"
@@ -33,30 +32,34 @@ command :next do |c|
         # If more than one:
 
         # Need to know the name of the state we are currently in
-        query = "assignee = #{jira.username} AND project = #{jira.project} AND "
-        query << "key = #{key}"
+        #query = "assignee = #{jira.username} AND project = #{jira.project} AND "
+        query = "key = #{key}"
         issues = jira.getIssues(query, ["status"])
+        raise "Cannot find #{key}" if issues.empty?
         at = issues.first.access('fields.status.name')
 
-        # If a preferred transition is set, use that
-        nxt = $cfg["next-preferred.#{at}"]
-        unless nxt.nil? then
-          direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
-          unless direct.empty? then
-            id = direct.first[:id]
-            jira.verbose "Transitioning #{key} to #{direct.first['name']} (#{id})"
-            jira.transition(key, id)
-            return
+        unless options.force_choice then
+          # If a preferred transition is set, use that
+          nxt = $cfg["next-preferred.#{at}"]
+          unless nxt.nil? then
+            direct = trans.select {|item| jira.fuzzyMatchStatus(item, nxt) }
+            unless direct.empty? then
+              id = direct.first[:id]
+              jira.verbose "Taking preferred exit #{key} to #{direct.first['name']} (#{id})"
+              jira.transition(key, id)
+              exit
+            end
           end
-        end
 
-        # Filter ignored transitions; If only one left, goto it.
-        skiplist = $cfg['next.ignore'] || []
-        check = trans.reject{|t| skiplist.include? t[:name] }
-        if check.length == 1 then
-          id = check.first['id']
-          jira.verbose "Taking filtered single exit: '#{check.first[:name]}'"
-          jira.transition(key, id)
+          # Filter ignored transitions; If only one left, goto it.
+          skiplist = $cfg['next.ignore'] || []
+          check = trans.reject{|t| skiplist.include? t[:name] }
+          if check.length == 1 then
+            id = check.first[:id]
+            jira.verbose "Taking filtered single exit: '#{check.first[:name]}'"
+            jira.transition(key, id)
+            exit
+          end
         end
 
         # Otherwise, ask which transition to use.
@@ -66,7 +69,9 @@ command :next do |c|
           menu.prompt = "Follow which transition?"
           trans.each do |tr|
             menu.choice(tr[:name]) do
-              # TODO save
+              if options.save_next then
+                $cfg.set("next-preferred.#{at}", tr[:name], :project)
+              end
               jira.verbose "Transitioning #{key} to #{tr[:name]} (#{tr[:id]})"
               jira.transition(key, tr[:id])
             end

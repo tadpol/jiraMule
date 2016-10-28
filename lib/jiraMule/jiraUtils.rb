@@ -67,7 +67,7 @@ module JiraMule
         # +transition+:: The transition hash to match against
         # +couldBe+:: The string from a human to match for
         def fuzzyMatchStatus(transition, couldBe)
-            return transition['id'] == couldBe if couldBe =~ /^\d+$/
+            return transition[:id] == couldBe if couldBe =~ /^\d+$/
 
             # Build a regexp for all sorts of variations.
 
@@ -75,8 +75,8 @@ module JiraMule
             cb = couldBe.gsub(/\s+/, '[-_\s]*')
 
             matcher = Regexp.new(cb, Regexp::IGNORECASE)
-            verbose "Fuzzing: #{transition['name']} =~ #{cb}"
-            return transition['name'] =~ matcher
+            debug "Fuzzing: #{transition[:name]} =~ #{cb}"
+            return transition[:name] =~ matcher
         end
 
         ##
@@ -207,7 +207,7 @@ module JiraMule
         # +toID+:: The ID of the transition to make
         def transition(key, toID)
             verbose "Transitioning key #{key} to #{toID}"
-            post('issue/' + key + '/transitions', {:transition=>{:id=>toID}})
+            post('issue/' + key + '/transitions', {:transition=>{:id=>toID}}) unless $cfg['tool.dry']
         end
 
         # Get the transitions that a key can move to.
