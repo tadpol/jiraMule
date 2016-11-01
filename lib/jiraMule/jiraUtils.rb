@@ -221,24 +221,8 @@ module JiraMule
         # Get the status for a project
         # +project+:: The project to fetch status from
         def statusesFor(project)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                request = Net::HTTP::Get.new(r + ('project/' + project + '/statuses'))
-                request.content_type = 'application/json'
-                request.basic_auth(username, password)
-                verbose "Fetching statuses for #{project}"
-                response = http.request(request)
-                case response
-                when Net::HTTPSuccess
-                    statuses = JSON.parse(response.body)
-                else
-                    ex = JiraUtilsException.new("Failed to get statuses for #{project}")
-                    ex.request = request
-                    ex.response = response
-                    raise ex
-                end
-                return statuses
-            end
+            verbose "Fetching statuses for #{project}"
+            get('project/' + project + '/statuses')
         end
 
 
