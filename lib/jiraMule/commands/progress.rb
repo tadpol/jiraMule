@@ -11,25 +11,32 @@ command :progress do |c|
   # Show only unstarted (timespent == 0)
   # Show only Started (timespent > 0)
   c.option '-s', '--status STATUSES', Array, 'Which status to limit to'
+  c.option '--thisweek', 'Show things worked on this week.'
+
   c.example 'Show how current project is going', %{jm progress}
   c.example 'Show how work on task 5 is going', %{jm progress 5}
 
   c.action do |args, options|
     options.default :status=>[]
 
-  jira = JiraMule::JiraUtils.new(args, options)
-  keys = jira.expandKeys(args)
-  if keys.empty? and options.status.empty? then
-    options.status << 'In Progress'
-  end
+    jira = JiraMule::JiraUtils.new(args, options)
+    if not options.thisweek then
+      keys = jira.expandKeys(args)
+      if keys.empty? and options.status.empty? then
+        options.status << 'In Progress'
+      end
 
-  query = %{assignee = #{jira.username} AND project = #{jira.project}}
-  query << ' AND (' unless keys.empty?
-  query << keys.map{|k| "key=#{k}"}.join(' OR ') unless keys.empty?
-  query << ')' unless keys.empty?
-  query << ' AND (' unless options.status.empty?
-  query << options.status.map{|s| %{status="#{s}"}}.join(' OR ') unless options.status.empty?
-  query << ')' unless options.status.empty?
+      query = %{assignee = #{jira.username} AND project = #{jira.project}}
+      query << ' AND (' unless keys.empty?
+      query << keys.map{|k| "key=#{k}"}.join(' OR ') unless keys.empty?
+      query << ')' unless keys.empty?
+      query << ' AND (' unless options.status.empty?
+      query << options.status.map{|s| %{status="#{s}"}}.join(' OR ') unless options.status.empty?
+      query << ')' unless options.status.empty?
+    else
+      query = %{worklogAuthor = #{jira.username} AND worklogDate > startOfWeek()}
+    end
+
   jira.printVars(:q=>query)
   progresses = jira.getIssues(query, ['key', 'workratio', 'aggregatetimespent',
                                      'duedate', 'aggregatetimeoriginalestimate'])

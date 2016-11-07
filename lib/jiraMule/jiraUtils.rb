@@ -242,6 +242,13 @@ module JiraMule
             post('issue/' + key + '/worklog', body) unless $cfg['tool.dry']
         end
 
+        # Get the work log for an Issue
+        # +key+:: The issue to retrive the work log for
+        def workLogs(key)
+            verbose "Fetched work logs for #{key}"
+            get('issue/' + key + '/worklog')
+        end
+
         # Attach a file to an issue.
         # +key+:: The issue to attach to
         # +file+:: Full path to the file to be attached

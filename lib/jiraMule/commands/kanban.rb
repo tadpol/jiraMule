@@ -108,7 +108,7 @@ Formatting is done with Mustash.
         }
       },
     }
-    # TODO: Load styles from project file
+    # TODO: Load styles from project dir
 
     if options.file.nil? then
       theStyle = allOfThem[options.style.to_sym]
