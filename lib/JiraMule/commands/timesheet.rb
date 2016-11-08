@@ -6,34 +6,42 @@ require 'JiraMule/jiraUtils'
 
 command :timesheet do |c|
   c.syntax = 'jm timesheet [options]'
-  c.summary = 'Show worklog'
-  c.description = %{Show the work done
-
+  c.summary = 'Show work done this week'
+  c.description = %{Show the work done this week
   }
   c.example 'Show work done this week', 'jm timesheet'
-  c.example 'Show work done today', 'jm timesheet --day'
   c.example 'Show work done for project', 'jm timesheet --project DEV'
-  c.example 'Show work done for projects', 'jm timesheet --project DEV --project PROD'
+  c.example 'Show work done for projects', 'jm timesheet --project DEV,PROD'
   c.example 'Show work done for keys', 'jm timesheet 12 PROD-15 99 STG-6'
 
-  c.option '--project PROJECT', Array, 'Limit results to project'
-  c.option '--day'
+  c.option '--project PROJECTS', Array, 'Limit results to specific projects'
 
+  #c.option '--prev COUNT', Integer, 'Look at previous weeks'
+  c.option '--starts_on DAY', String, 'Which day does the week start on'
 
   c.action do |args, options|
+    options.default :starts_on => 'Sat'
 
     jira = JiraMule::JiraUtils.new
     tempo = JiraMule::Tempo.new
+
+    #Days Of Week
+    dows = [:Sun,:Mon,:Tue,:Wed,:Thu,:Fri,:Sat]
+    pp options.starts_on
+    dayShift = dows.index{|i| options.starts_on.downcase.start_with? i.to_s.downcase}
+    workweek = dows.rotate dayShift
+
+    dayTo = Date.today
+    dayFrom = dayTo
+    while not dayFrom.wday == dayShift do
+      dayFrom = dayFrom.prev_day
+    end
 
     # Get keys to get worklogs from
     keys = jira.expandKeys(args)
     if keys.empty? then
       query = %{worklogAuthor = #{jira.username}}
-      if options.day then
-        query << %{ AND worklogDate > startOfDay()}
-      else
-        query << %{ AND worklogDate > startOfWeek()}
-      end
+      query << %{ AND worklogDate >= #{dayFrom.iso8601}}
 
       if options.project and not options.project.empty? then
         query << ' AND '
@@ -45,15 +53,6 @@ command :timesheet do |c|
     end
     jira.printVars(:keys=>keys)
 
-    dayTo = Date.today
-    dayFrom = dayTo
-    # XXX Hardcoded assumption that week starts on Saturday.
-    unless options.day then
-      while not dayFrom.saturday? do
-        dayFrom = dayFrom.prev_day
-      end
-    end
-
     wls = tempo.workLogs(jira.username, dayFrom.iso8601, dayTo.iso8601)
 
     # filter out entries not in keys.
@@ -62,7 +61,6 @@ command :timesheet do |c|
     # build table; each row is a key. each column is hours worked in SSMTWTF
     # multiple passes.
     # 1: build hash by issue, each value is a hash by week day.
-    dows = [:Sun,:Mon,:Tue,:Wed,:Thu,:Fri,:Sat]
     hrows = {}
     selected.each do |isu|
       k = isu.access('issue.key')
@@ -73,7 +71,6 @@ command :timesheet do |c|
       hrows[k][dow] += isu[:timeSpentSeconds]
     end
 
-    workweek = [:Sat,:Sun,:Mon,:Tue,:Wed,:Thu,:Fri]
     totals = Hash[ *(workweek.map{|i| [i,0]}.flatten) ]
     # 2: reshape into Array or Arrays.
     rows = hrows.to_a.map do |row|
