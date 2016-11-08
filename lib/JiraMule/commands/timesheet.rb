@@ -3,6 +3,7 @@ require 'date'
 require 'terminal-table'
 require 'vine'
 require 'JiraMule/jiraUtils'
+require 'JiraMule/Tempo'
 
 command :timesheet do |c|
   c.syntax = 'jm timesheet [options]'
@@ -27,7 +28,6 @@ command :timesheet do |c|
 
     #Days Of Week
     dows = [:Sun,:Mon,:Tue,:Wed,:Thu,:Fri,:Sat]
-    pp options.starts_on
     dayShift = dows.index{|i| options.starts_on.downcase.start_with? i.to_s.downcase}
     workweek = dows.rotate dayShift
 
@@ -48,10 +48,9 @@ command :timesheet do |c|
         query << options.project.map{|p| %{project="#{p}"}}.join(' OR ')
       end
 
-      jira.printVars(:q=>query)
       keys = jira.getIssues(query, ['key']).map{|k| k[:key]}
     end
-    jira.printVars(:keys=>keys)
+    jira.printVars(:keys=>keys) if $cfg['tool.verbose']
 
     wls = tempo.workLogs(jira.username, dayFrom.iso8601, dayTo.iso8601)
 
@@ -108,5 +107,6 @@ command :timesheet do |c|
     puts table
   end
 end
+alias_command :ts, :timesheet
 
 #  vim: set sw=2 ts=2 :

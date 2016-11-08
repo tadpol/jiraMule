@@ -25,7 +25,6 @@ module JiraMule
 
         # Get worklogs from Tempo plugin
         def workLogs(username, dateFrom=nil, dateTo=nil, project=nil)
-            verbose "Fetching worklogs for #{username}"
             q = {:username => username}
             q[:dateFrom] = DateTime.parse(dateFrom).to_date.iso8601 unless dateFrom.nil?
             q[:dateTo] = DateTime.parse(dateTo).to_date.iso8601 unless dateTo.nil?
@@ -33,6 +32,7 @@ module JiraMule
             #q[:accountKey]
             #q[:teamId]
 
+            verbose "Fetching worklogs for #{q}"
             get('worklogs', q)
         end
 
