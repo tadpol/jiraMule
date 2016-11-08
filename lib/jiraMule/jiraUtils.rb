@@ -84,6 +84,7 @@ module JiraMule
         # +at+:: The starting state
         # +to+:: The stopping state
         # +map+:: The lookup map to use
+        # FIXME: so broken. Transistion maps are not in cfg anymore.
         def getPath(at, to, map)
             verbose "In '#{map}', getting path from '#{at}' to '#{to}'"
             transMap = $cfg[".jira.goto.#{map}"] # FIXME config broken
