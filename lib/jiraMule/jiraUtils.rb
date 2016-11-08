@@ -163,9 +163,15 @@ module JiraMule
             end
         end
 
+        # Update fields on a key
+        # +keys+:: Array of keys to update
+        # +update+:: Hash of fields to update. (see https://docs.atlassian.com/jira/REST/6.4.7/#d2e261)
         def updateKeys(keys, update)
-            verbose "Updating key #{key} with #{update}"
-            post("issue/#{key}", {:update=>update}) unless $cfg['tool.dry']
+            keys = [keys] unless keys.kind_of? Array
+            keys.each do |key|
+                verbose "Updating key #{key} with #{update}"
+                put("issue/#{key}", {:update=>update}) unless $cfg['tool.dry']
+            end
         end
 
         # Transition key into a new status
