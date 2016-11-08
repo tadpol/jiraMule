@@ -121,44 +121,23 @@ module JiraMule
             return userKeys
         end
 
-        # TODO rewrite using post() and put()
+        ##
+        # Create a new version for release.
+        # TODO: test this.
         def createVersion(project, version)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                ### Create new version
-                request = Net::HTTP::Post.new(r + 'version')
-                request.content_type = 'application/json'
-                request.basic_auth(username(), password())
-                request.body = JSON.generate({
+            verbose "Creating #{request.body}"
+            unless $cfg['tool.dry'] then
+                data = post('version', {
                     'name' => version,
                     'archived' => false,
                     'released' => true,
                     'releaseDate' => DateTime.now.strftime('%Y-%m-%d'),
                     'project' => project,
                 })
-
-                verbose "Creating #{request.body}"
-                if not @options.dry
-                    response = http.request(request)
-                    case response
-                    when Net::HTTPSuccess
-                        vers = JSON.parse(response.body)
-                        if !vers['released']
-                            # Sometimes setting released on create doesn't work.
-                            # So modify it.
-                            request = Net::HTTP::Put.new(r + ('version/' + vers['id']))
-                            request.content_type = 'application/json'
-                            request.basic_auth(username(), password())
-                            request.body = JSON.generate({ 'released' => true })
-                            response = http.request(request)
-
-                        end
-                    else
-                        ex = JiraUtilsException.new("Failed to create version #{version} in project #{project}")
-                        ex.request = request
-                        ex.response = response
-                        raise ex
-                    end
+                unless data[:released] then
+                    # Sometimes setting released on create doesn't work.
+                    # So modify it.
+                    put("version/#{data[:id]}", {:released=>true})
                 end
             end
         end
