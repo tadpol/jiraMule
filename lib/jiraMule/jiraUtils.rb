@@ -113,29 +113,15 @@ module JiraMule
         ##
         # make sure #user is an actual user in the system.
         def checkUser(user, keyMatch=true)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                r = r + 'user/search'
-                r.query = "username=#{user}"
-                request = Net::HTTP::Get.new(r)
-                request.basic_auth(username(), password())
-
-                verbose "Get user: #{r}"
-                response = http.request(request)
-                case response
-                when Net::HTTPSuccess
-                    users = JSON.parse(response.body)
-                    userKeys = users.map{|i| i['key']}
-                    return [user] if keyMatch and userKeys.index(user)
-                    return userKeys
-
-                else
-                    puts response
-                    return []
-                end
-            end
+            verbose "Get user: #{r}"
+            users = getq("user/search", {:username=>user})
+            return [] if users.empty?
+            userKeys = users.map{|i| i[:key]}
+            return [user] if keyMatch and userKeys.index(user)
+            return userKeys
         end
 
+        # TODO rewrite using post() and put()
         def createVersion(project, version)
             r = jiraEndPoint
             Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
@@ -178,28 +164,8 @@ module JiraMule
         end
 
         def updateKeys(keys, update)
-            r = jiraEndPoint
-            Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-                keys.each do |key|
-                    request = Net::HTTP::Put.new(r + ('issue/' + key))
-                    request.content_type = 'application/json'
-                    request.basic_auth(username(), password())
-                    request.body = JSON.generate({ 'update' => update })
-
-                    verbose "Updating key #{key} with #{update}"
-                    if not @options.dry
-                        response = http.request(request)
-                        case response
-                        when Net::HTTPSuccess
-                        else
-                            ex = JiraUtilsException.new("Failed to update #{key} with #{update}")
-                            ex.request = request
-                            ex.response = response
-                            raise ex
-                        end
-                    end
-                end
-            end
+            verbose "Updating key #{key} with #{update}"
+            post("issue/#{key}", {:update=>update}) unless $cfg['tool.dry']
         end
 
         # Transition key into a new status

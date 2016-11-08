@@ -105,9 +105,11 @@ module JiraMule
       end
     end
 
-    def get(path='', &block)
+    def get(path='', query=nil, &block)
       uri = endPoint(path)
-      workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
+      req = Net::HTTP::Get.new(uri)
+      req.query = URI.encode_www_form(query) unless query.nil?
+      workit(set_def_headers(req), &block)
     end
 
     def post(path='', body={}, &block)
