@@ -1,6 +1,4 @@
-#
 require 'chronic_duration'
-require 'vine'
 require 'date'
 require 'JiraMule/jiraUtils'
 
@@ -13,7 +11,7 @@ command :logwork do |c|
   c.example 'Log some work done on an issue', %{jm logwork BUG-42 1h 12m}
 
   c.action do |args, options|
-    options.defaults :message => ''
+    options.default :message => ''
     jira = JiraMule::JiraUtils.new(args, options)
 
     key = jira.expandKeys(args).shift
