@@ -1,14 +1,15 @@
-require 'JiraMule/commands/attach.rb'
-require 'JiraMule/commands/config.rb'
-#require 'JiraMule/commands/goto.rb'
-require 'JiraMule/commands/kanban.rb'
-require 'JiraMule/commands/logWork.rb'
-require 'JiraMule/commands/next.rb'
-require 'JiraMule/commands/progress.rb'
-require 'JiraMule/commands/query.rb'
+require 'JiraMule/commands/attach'
+require 'JiraMule/commands/config'
+#require 'JiraMule/commands/goto'
+require 'JiraMule/commands/kanban'
+require 'JiraMule/commands/logWork'
+require 'JiraMule/commands/next'
+require 'JiraMule/commands/progress'
+require 'JiraMule/commands/query'
+require 'JiraMule/commands/timesheet'
 
-#require 'JiraMule/commands/release.rb'
-#require 'JiraMule/commands/testReady.rb'
+#require 'JiraMule/commands/release'
+#require 'JiraMule/commands/testReady'
 # difference between testReady and release is two things:
 # 1. testReady also assigns
 # 2. release also transitions
