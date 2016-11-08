@@ -18,11 +18,8 @@ module JiraMule
         include Verbose
         include Http
 
-        def initialize(args, options={}, cfg=$cfg)
-            @args = args
-            @options = options
-            @cfg = cfg
-
+        # TODO: all params are now optional.
+        def initialize(args=nil, options=nil, cfg=nil)
             acc = Account.new
             up = acc.loginInfo
             @username = up[:email]
@@ -40,8 +37,7 @@ module JiraMule
 
         def project
             return @project unless @project.nil?
-            @project = @cfg['jira.project']
-            @project = @options.project if @options.project # XXX New cfg replaces this.
+            @project = $cfg['jira.project']
             return @project
         end
 
@@ -197,7 +193,7 @@ module JiraMule
         # Get the work log for an Issue
         # +key+:: The issue to retrive the work log for
         def workLogs(key)
-            verbose "Fetched work logs for #{key}"
+            verbose "Fetching work logs for #{key}"
             get('issue/' + key + '/worklog')
         end
 
