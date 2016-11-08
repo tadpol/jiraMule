@@ -44,8 +44,9 @@ command :timesheet do |c|
       query << %{ AND worklogDate >= #{dayFrom.iso8601}}
 
       if options.project and not options.project.empty? then
-        query << ' AND '
+        query << ' AND ('
         query << options.project.map{|p| %{project="#{p}"}}.join(' OR ')
+        query << ')'
       end
 
       keys = jira.getIssues(query, ['key']).map{|k| k[:key]}
