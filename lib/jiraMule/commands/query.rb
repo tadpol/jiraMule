@@ -1,4 +1,5 @@
 require 'terminal-table'
+require 'mustache'
 
 command :query do |c|
   c.syntax = 'jm query [options] query'
@@ -9,9 +10,33 @@ command :query do |c|
   c.option '--[no-]json', 'Output json reply instead of summary'
   c.option '--fields FIELDS', Array, 'Which fields to return.'
   c.option '--all_fields', 'Return all fields'
+  c.option '--format STYLE', String, 'Format for keys'
+  c.option '--style STYLE', String, 'Which style to use'
 
   c.action do |args, options|
-    options.defaults :json => false, :all_fields => false
+    options.default :json => false, :all_fields => false, :style => 'basic'
+
+    allOfThem = {
+      :basic => {
+        :fields => [:key, :summary],
+        :format => %{{{key}} {{summary}}},
+      },
+      :info => {
+        :fields => [:key, :description, :assignee, :reporter, :priority, :issuetype,
+                    :status, :resolution, :votes, :watches],
+        :format => %{{{key}}
+   Reporter: {{reporter.displayName}}
+   Assignee: {{assignee.displayName}}
+       Type: {{issuetype.name}} ({{priority.name}})
+     Status: {{status.name}} (Resolution: {{resolution.name}})
+    Watches: {{watches.watchCount}}  Votes: {{votes.votes}}
+Description: {{description}}
+        }
+      },
+    }
+
+    theStyle = allOfThem[options.style.to_sym]
+    theStyle[:fields] = options.fields if options.fields
 
     jira = JiraMule::JiraUtils.new(args, options)
     args.unshift("assignee = #{jira.username} AND") unless options.raw
@@ -19,16 +44,21 @@ command :query do |c|
     q = args.join(' ')
     if options.all_fields then
       issues = jira.getIssues(q, [])
-    elsif options.fields then
-      issues = jira.getIssues(q, options.fields)
     else
-      issues = jira.getIssues(q)
+      issues = jira.getIssues(q, theStyle[:fields])
     end
     if options.json then
       puts JSON.dump(issues)
     else
-      keys = issues.map {|item| "#{item[:key]} #{(item.access('fields.summary') or '')}" }
+
+      format = theStyle[:format]
+      keys = issues.map do |issue|
+        Mustache.render(format, issue.merge(issue[:fields]))
+      end
       keys.each {|k| puts k}
+
+
+
 
 #      headers = [:key]
 #      rows = issues.map do |item|
