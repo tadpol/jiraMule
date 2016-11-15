@@ -210,10 +210,12 @@ module JiraMule
             verbose "Going to upload #{file} to #{key}"
 
             uri = endPoint('issue/' + key + '/attachments')
-            req = Net::HTTP::Post::Multipart.new(uri, 'file'=> UploadIO.new(File.new(file), type, name) )
-            set_def_headers(req)
+            fuio = UploadIO.new(File.new(file), type, name)
+            req = Net::HTTP::Post::Multipart.new(uri, 'file'=> fuio )
+            req.basic_auth(username(), password())
+            req['User-Agent'] = "JiraMule/#{JiraMule::VERSION}"
+            #set_def_headers(req)
             req['X-Atlassian-Token'] = 'nocheck'
-
             workit(req) unless $cfg['tool.dry']
         end
 

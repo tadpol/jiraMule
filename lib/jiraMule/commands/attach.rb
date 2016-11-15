@@ -53,7 +53,7 @@ command :attach do |c|
         end
       end
 
-    rescue JiraUtilsException => e
+    rescue JiraMule::JiraUtilsException => e
       puts "= #{e}"
       puts "= #{e.request}"
       puts "= #{e.response}"
