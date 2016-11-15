@@ -174,6 +174,18 @@ module JiraMule
             get('project/' + project + '/statuses')
         end
 
+        # Assign issues to a user
+        # +keys+:: Array of keys to assign
+        # +to+:: The user to assign to (or -1 for default)
+        def assignTo(keys, to="-1")
+            keys = [keys] unless keys.kind_of? Array
+            r=[]
+            keys.each do |key|
+                verbose "Assigning #{key} to #{to}"
+                r << put("issue/#{key}/assignee", {:name=>to}) unless $cfg['tool.dry']
+            end
+            r
+        end
 
         # Log a work entry to Jira
         # +key+:: The issue to log work on
