@@ -48,7 +48,7 @@ command :attach do |c|
           raise "Cannot send directories! #{file}" if File.directory?(file)
           raise "No such file! #{file}" unless File.exists? file
           mime=`file -I -b #{file}`
-          mime='application/octect' if mime.nil?
+          # if mime.nil? use ruby built in.
           jira.attach(key, file, mime)
         end
       end

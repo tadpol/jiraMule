@@ -4,6 +4,7 @@ require 'net/http/post/multipart'
 require 'json'
 require 'date'
 require 'pp'
+require 'mime/types'
 require 'JiraMule/Config'
 require 'JiraMule/Passwords'
 require 'JiraMule/http'
@@ -202,15 +203,20 @@ module JiraMule
         # +file+:: Full path to the file to be attached
         # +type+:: MIME type of the fiel data
         # +name+:: Aternate name of file being uploaded
-        def attach(key, file, type="application/octect", name=nil)
-            if name.nil? then
-                name = File.basename(file)
+        def attach(key, file, type=nil, name=nil)
+            file = Pathname.new(file) unless file.kind_of? Pathname
+
+            name = file.basename if name.nil?
+
+            if type.nil? then
+                mime = MIME::Types.type_for(file.to_s)[0] || MIME::Types["application/octet-stream"][0]
+                type = mime.simplified
             end
 
-            verbose "Going to upload #{file} to #{key}"
+            verbose "Going to upload #{file} [#{type}] to #{key}"
 
             uri = endPoint('issue/' + key + '/attachments')
-            fuio = UploadIO.new(File.new(file), type, name)
+            fuio = UploadIO.new(file.open, type, name)
             req = Net::HTTP::Post::Multipart.new(uri, 'file'=> fuio )
             req.basic_auth(username(), password())
             req['User-Agent'] = "JiraMule/#{JiraMule::VERSION}"
