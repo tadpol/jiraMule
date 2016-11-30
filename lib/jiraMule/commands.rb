@@ -1,6 +1,6 @@
 require 'JiraMule/commands/attach'
 require 'JiraMule/commands/config'
-#require 'JiraMule/commands/goto'
+require 'JiraMule/commands/goto'
 require 'JiraMule/commands/kanban'
 require 'JiraMule/commands/logWork'
 require 'JiraMule/commands/next'
