@@ -1,3 +1,4 @@
+require 'JiraMule/commands/assign'
 require 'JiraMule/commands/attach'
 require 'JiraMule/commands/config'
 require 'JiraMule/commands/goto'
