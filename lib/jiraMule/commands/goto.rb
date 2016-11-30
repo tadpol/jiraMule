@@ -42,6 +42,11 @@ command :goto do |c|
         #type = issues.first.access('fields.issuetype.name')
         at = issues.first.access('fields.status.name')
 
+        if at == to then
+          say "All ready at '#{to}'"
+          exit
+        end
+
         # Get the
         transMap = jira.getPath(at, to)
         if transMap.nil? or transMap.empty? then
@@ -85,11 +90,12 @@ command :goto do |c|
         else
 
           # Now move thru
+          jira.printVars(:key=>key, :tm=>transMap)
           transMap.each do |step|
             trans = jira.transitionsFor(key)
             direct = trans.select {|item| jira.fuzzyMatchStatus(item, step) }
             raise "Broken transition step on #{key} to #{step}" if direct.empty?
-            id = direct.first['id']
+            id = direct.first[:id]
             jira.transition(key, id)
             # TODO: deal with required field.
           end
