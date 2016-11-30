@@ -14,15 +14,14 @@ command :goto do |c|
   So these need to be added to your config.
   }
   c.example 'Move BUG-4 into the In Progress state.', %{jm goto 'In Progress' BUG-4}
-  c.option '-m', '--map MAPNAME', String, 'Which workflow map to use'
+
   c.action do |args, options|
-    options.default :map=>'PSStandard'
-    jira = JiraUtils.new(args, options)
+    jira = JiraMule::JiraUtils.new(args, options)
     to = args.shift
 
     # keys can be with or without the project prefix.
     keys = jira.expandKeys(args)
-    printVars(:to=>to, :keys=>keys)
+    jira.printVars(:to=>to, :keys=>keys)
     raise "No keys to transition" if keys.empty?
 
     keys.each do |key|
@@ -44,7 +43,7 @@ command :goto do |c|
         at = issues.first.access('fields.status.name')
 
         # Get the
-        transMap = jira.getPath(at, to, options.map)
+        transMap = jira.getPath(at, to)
         if transMap.nil? or transMap.empty? then
           say "No transision map found between '#{at}' and '#{to}'"
           y=ask("Would you like to build one? [Yn]")
@@ -56,7 +55,7 @@ command :goto do |c|
           loop do
             issues = jira.getIssues("key = #{key}", ["status"])
             at = issues.first.access('fields.status.name')
-            break if jira.fuzzyMatchStatus(at, to)
+            break if at == to
             trans = jira.transitionsFor(key)
             if trans.length == 1 then
               id = trans.first[:id]

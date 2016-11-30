@@ -80,14 +80,13 @@ module JiraMule
         # Lookup a path from one state to another in a map
         # +at+:: The starting state
         # +to+:: The stopping state
-        # +map+:: The lookup map to use
-        def getPath(at, to, map)
-            verbose "In '#{map}', getting path from '#{at}' to '#{to}'"
+        def getPath(at, to)
+            verbose "Getting path from '#{at}' to '#{to}'"
 
             # [goto-map]
             # at-to: each, step, to, end
             tr = $cfg["goto-maps.#{at.gsub(/\W+/,'_')}-#{to.gsub(/\W+/,'_')}"]
-            tr.split(/,/).map{|p| p.strip}
+            (tr or "").split(/,/).map{|p| p.strip}
         end
 
         ##
