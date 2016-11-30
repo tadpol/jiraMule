@@ -9,16 +9,21 @@ command :assign do |c|
     jira = JiraMule::JiraUtils.new(args, options)
 
     muser = args.shift
-    to = jira.checkUser(muser)
-    if to.count > 1 then
-      say "Username '#{muser}' is ambigious."
-      say "Could be: #{to.join(' ')}"
-      exit 4
-    elsif to.empty? then
-      say "No such user: '#{muser}'"
-      exit 4
+    if muser == '-1' or muser =~ /^:de/ then
+      # assign to default
+      to = '-1'
+    else
+      to = jira.checkUser(muser)
+      if to.count > 1 then
+        say "Username '#{muser}' is ambigious."
+        say "Could be: #{to.join(' ')}"
+        exit 4
+      elsif to.empty? then
+        say "No such user: '#{muser}'"
+        exit 4
+      end
+      to = to.first
     end
-    to = to.first
 
     # keys can be with or without the project prefix.
     keys = jira.expandKeys(args)
