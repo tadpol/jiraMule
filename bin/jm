@@ -6,6 +6,8 @@ require 'JiraMule'
 require 'pp'
 require 'json'
 
+Signal.trap('INT', 'EXIT') # Don't drop traces on ^C
+
 program :version, JiraMule::VERSION
 program :description, %{A collection of things that I do with jira.
 
