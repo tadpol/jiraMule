@@ -20,4 +20,11 @@ task :run do
 	sh %{ruby -Ilib bin/jm }
 end
 
+desc "Prints a cmd to test this in another directory"
+task :testwith do
+    pwd=Dir.pwd.sub(Dir.home, '~')
+    puts "ruby -I#{pwd}/lib #{pwd}/bin/jm "
+end
+
+
 #  vim: set sw=4 ts=4 :
