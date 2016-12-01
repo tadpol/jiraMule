@@ -30,7 +30,7 @@ So these need to be added to your config.
       direct = trans.select {|item| jira.fuzzyMatchStatus(item, to) }
       if not direct.empty? then
         # We can just go right there.
-        id = direct.first['id']
+        id = direct.first[:id]
         jira.transition(key, id)
         # TODO: deal with required field.
       else
