@@ -5,14 +5,14 @@ command :goto do |c|
   c.syntax = 'jm goto [options] [status] [keys]'
   c.summary = 'Move issue to a status; making multiple transitions if needed'
   c.description = %{
-  Named for the bad command that sometimes there is nothing better to use.
+Named for the bad command that sometimes there is nothing better to use.
 
-  Your issue has a status X, and you need it in Y, and there are multiple steps from
-  X to Y.  Why would you do something a computer can do better?  Hence goto.
+Your issue has a status X, and you need it in Y, and there are multiple steps from
+X to Y.  Why would you do something a computer can do better?  Hence goto.
 
-  The down side is there is no good way to automatically get mutli-step transitions.
-  So these need to be added to your config.
-  }
+The down side is there is no good way to automatically get mutli-step transitions.
+So these need to be added to your config.
+}
   c.example 'Move BUG-4 into the In Progress state.', %{jm goto 'In Progress' BUG-4}
 
   c.action do |args, options|
