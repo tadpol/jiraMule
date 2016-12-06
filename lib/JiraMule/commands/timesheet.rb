@@ -21,7 +21,7 @@ command :timesheet do |c|
   c.option '--starts_on DAY', String, 'Which day does the week start on'
 
   c.action do |args, options|
-    options.default :starts_on => 'Sat'
+    options.default :starts_on => 'Mon'
 
     jira = JiraMule::JiraUtils.new
     tempo = JiraMule::Tempo.new
