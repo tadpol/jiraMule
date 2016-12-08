@@ -100,8 +100,8 @@ module JiraMule
         ##
         # make sure #user is an actual user in the system.
         def checkUser(user, keyMatch=true)
-            verbose "Get user: #{r}"
-            users = getq("user/search", {:username=>user})
+            verbose "Get user: #{user}"
+            users = post("user/search", {:username=>user})
             return [] if users.empty?
             userKeys = users.map{|i| i[:key]}
             return [user] if keyMatch and userKeys.index(user)
