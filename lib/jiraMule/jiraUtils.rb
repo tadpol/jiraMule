@@ -199,6 +199,29 @@ module JiraMule
             get('issue/' + key + '/worklog')
         end
 
+        ## Get links on an issue
+        # +key+:: The issue to retrive the remote links for
+        def remote_links(key)
+            get("issue/#{key}/remotelink")
+        end
+
+        ## Attach a URL to an issue
+        # +key+:: The issue to set a remote link on
+        # +url+:: The URL to link to
+        # +title+:: The title of the link
+        def linkTo(key, url, title)
+            verbose "Attaching [#{title}](#{url}) to #{key}"
+            post("issue/#{key}/remotelink", {
+                :object=>{
+                    :url=>url,
+                    :title=>title,
+                }
+            })
+        end
+
+        def linkKeys(key, toKey, relation='related to')
+        end
+
         # Attach a file to an issue.
         # +key+:: The issue to attach to
         # +file+:: Full path to the file to be attached
