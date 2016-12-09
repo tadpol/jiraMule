@@ -1,7 +1,7 @@
 require 'JiraMule/jiraUtils'
 
 command :links do |c|
-  c.syntax = %{jm links}
+  c.syntax = %{jm links <keys>}
   c.summary = %{Show all remote links}
 
   c.action do |args, options|
@@ -24,9 +24,9 @@ command :addLink do |c|
   c.summary = %{Add a remote link to an issue}
   c.action do |args, options|
     jira = JiraMule::JiraUtils.new(args, options)
-    key = jira.expandKeys(arg[0])
-    url = arg[1]
-    title = arg[2]
+    key = jira.expandKeys([args[0]]).first
+    url = args[1]
+    title = args[2]
     if url.nil? then
       say_error "Missing URL"
     elsif title.nil? then

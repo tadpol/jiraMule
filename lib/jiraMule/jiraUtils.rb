@@ -217,6 +217,7 @@ module JiraMule
                     :title=>title,
                 }
             })
+            # XXX Lookup favicon for site and include?
         end
 
         def linkKeys(key, toKey, relation='related to')
