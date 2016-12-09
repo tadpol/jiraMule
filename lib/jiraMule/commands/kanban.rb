@@ -173,6 +173,8 @@ Formatting is done with Mustash.
       qBase = []
       qBase.unshift("assignee = #{jira.username} AND") unless options.raw
       qBase.unshift("project = #{jira.project} AND") unless options.raw
+      qBase.unshift('(' + args.join(' ') + ') AND') unless args.empty? 
+
       results = {}
       columns.each_pair do |name, query|
         query = [query] unless query.is_a? Array
