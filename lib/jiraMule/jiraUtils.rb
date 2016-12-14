@@ -129,6 +129,37 @@ module JiraMule
             end
         end
 
+        ##
+        # Create a new issue
+        # +type+:: The type of issue this is
+        # +summary+:: Short title text
+        # +description+:: Full details.
+        def createIssue(type, summary, description)
+            verbose "Creating #{type} issue for #{summary}"
+            unless $cfg['tool.dry'] then
+                post('issue', {
+                    :fields=>{
+                        :issuetype=>{:name=>type},
+                        :project=>{:key=>project},
+                        :summary=>summary,
+                        :description=>description,
+                        :labels=>['auto-imported'],
+                    }
+                })
+            else
+                {:key=>'_'}
+            end
+        end
+
+        ##
+        # Check this issue type in current project
+        def checkIssueType(type='bug')
+            rt = Regexp.new(type.gsub(/\s+/, '[-_\s]*'), Regexp::IGNORECASE)
+            cmeta = get('issue/createmeta')
+            prj = cmeta[:projects].select{|p| p[:key] == project}.first
+            prj[:issuetypes].select{|it| it[:name] =~ rt}
+        end
+
         # Update fields on a key
         # +keys+:: Array of keys to update
         # +update+:: Hash of fields to update. (see https://docs.atlassian.com/jira/REST/6.4.7/#d2e261)
@@ -211,13 +242,15 @@ module JiraMule
         # +title+:: The title of the link
         def linkTo(key, url, title)
             verbose "Attaching [#{title}](#{url}) to #{key}"
-            post("issue/#{key}/remotelink", {
-                :object=>{
-                    :url=>url,
-                    :title=>title,
-                }
-            })
+            unless $cfg['tool.dry'] then
+                post("issue/#{key}/remotelink", {
+                    :object=>{
+                        :url=>url,
+                        :title=>title,
+                    }
+                })
             # XXX Lookup favicon for site and include?
+            end
         end
 
         def linkKeys(key, toKey, relation='related to')

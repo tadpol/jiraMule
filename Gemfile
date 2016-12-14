@@ -9,6 +9,7 @@ gem 'mime-types', '~> 1.25.1'
 gem 'mime-types-data', '~> 3.2016'
 gem 'multipart-post'
 gem 'mustache'
+gem "octokit", "~> 4.0"
 gem 'terminal-table'
 gem 'vine'
 gem 'zip'

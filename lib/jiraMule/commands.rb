@@ -1,6 +1,7 @@
 require 'JiraMule/commands/assign'
 require 'JiraMule/commands/attach'
 require 'JiraMule/commands/config'
+require 'JiraMule/commands/githubImport'
 require 'JiraMule/commands/goto'
 require 'JiraMule/commands/kanban'
 require 'JiraMule/commands/link'
