@@ -1,6 +1,7 @@
 require 'date'
 require 'json'
 require 'pp'
+require 'vine'
 require 'JiraMule/Config'
 require 'JiraMule/Passwords'
 require 'JiraMule/http'
@@ -24,7 +25,7 @@ module JiraMule
         end
 
         # Get worklogs from Tempo plugin
-        def workLogs(username, dateFrom=nil, dateTo=nil, project=nil)
+        def workLogs(username=@username, dateFrom=nil, dateTo=nil, project=nil)
             q = {:username => username}
             q[:dateFrom] = DateTime.parse(dateFrom).to_date.iso8601 unless dateFrom.nil?
             q[:dateTo] = DateTime.parse(dateTo).to_date.iso8601 unless dateTo.nil?
@@ -36,6 +37,37 @@ module JiraMule
             get('worklogs', q)
         end
 
+        ## Submit a timesheet for approval.
+        def submitForApproval(period=nil, name=@username, comment='')
+          if period.nil? then
+            # First day of work week
+            cur = currentApprovalStatus(nil, name)
+            period = cur.access 'period.dateFrom'
+          end
+          verbose "Submitting timesheet for #{period}"
+          post('timesheet-approval/', {
+            :user=>{
+              :name=>name,
+            },
+            :period=>{
+              :dateFrom=>period,
+            },
+            :action=>{
+              :name=>:submit,
+              :comment=>comment,
+            }
+          }) unless $cfg['tool.dry']
+        end
+
+        def currentApprovalStatus(period=nil, name=@username)
+          verbose "Getting current approval status; #{period} #{name}"
+          q = {
+            :username => name,
+          }
+          q[:periodStartDate] = period unless period.nil?
+
+          get('timesheet-approval/current/', q)
+        end
     end
 
 end
