@@ -1,6 +1,6 @@
 require "bundler/gem_tasks"
 
-#task :default => []
+task :default => [:test]
 
 tagName = "v#{Bundler::GemHelper.gemspec.version}"
 gemName = "jiraMule-#{Bundler::GemHelper.gemspec.version}.gem"
@@ -91,5 +91,11 @@ task :testwith do
     puts "ruby -I#{pwd}/lib #{pwd}/bin/jm "
 end
 
+desc 'Run RSpec'
+task :rspec do
+    Dir.mkdir("report") unless File.directory?("report")
+    sh %{rspec --format html --out report/index.html --format progress}
+end
+task :test => [:rspec]
 
 #  vim: set sw=4 ts=4 :
