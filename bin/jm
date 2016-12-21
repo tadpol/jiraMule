@@ -45,8 +45,15 @@ global_option('-C', '--configfile FILE', %{Load additional configuration file}) 
 }
 global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
   key, value = param.split('=', 2)
+  # a=b :> ["a","b"]
+  # a= :> ["a",""]
+  # a :> ["a"]
   raise "Bad config '#{param}'" if key.nil?
-  $cfg[key] = value
+  if value.nil? then
+    $cfg[key] = 'true'
+  else
+    $cfg[key] = value
+  end
 }
 
 default_command :help
