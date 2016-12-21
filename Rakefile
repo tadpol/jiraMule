@@ -8,12 +8,12 @@ builtGem = "pkg/#{gemName}"
 
 desc "Install gem in user dir"
 task :bob do
-	sh %{gem install --user-install #{builtGem}}
+    sh %{gem install --user-install #{builtGem}}
 end
 
 desc "Uninstall from user dir"
 task :unbob do
-	sh %{gem uninstall --user-install #{builtGem}}
+    sh %{gem uninstall --user-install #{builtGem}}
 end
 
 task :echo do
@@ -82,7 +82,7 @@ namespace :push do
 end
 
 task :run do
-	sh %{ruby -Ilib bin/jm }
+    sh %{ruby -Ilib bin/jm }
 end
 
 desc "Prints a cmd to test this in another directory"
