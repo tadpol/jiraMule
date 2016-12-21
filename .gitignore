@@ -6,9 +6,11 @@ Icon
 cookies
 .jiraProject
 .rpjProject
+.jiramulerc
+jiraMule-*.gem
+tags
 
 xcuserdata
-xcshareddata
 Pods/
 
 # Thumbnails

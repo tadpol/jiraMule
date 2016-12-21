@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
-require 'jiraTool/version'
+require 'jiraMule/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'jira'
-  s.version     = JiraTool::VERSION
+  s.name        = 'jiraMule'
+  s.version     = JiraMule::VERSION
   s.authors     = ['Michael Conrad Tadpol Tilstra']
   s.email       = ['tadpol@tadpol.org']
   s.license     = 'MIT'
@@ -25,9 +25,18 @@ already.  Rather this is specific to things I need.
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_runtime_dependency('commander', '~> 4.3.4')
+  s.add_runtime_dependency('chronic_duration', '~> 0.10.6')
+  s.add_runtime_dependency('commander', '~> 4.4.0')
+  s.add_runtime_dependency('inifile', '~> 3.0')
+  s.add_runtime_dependency('mime-types', '~> 1.25.1')
+  s.add_runtime_dependency('mime-types-data', '~> 3.2016')
+  s.add_runtime_dependency('multipart-post', '~> 2.0.0')
+  s.add_runtime_dependency('mustache', '~> 1.0')
+  s.add_runtime_dependency('terminal-table', '~> 1.4.5')
+  s.add_runtime_dependency('vine', '~> 0.2')
+  s.add_runtime_dependency('zip', '~> 2.0.0')
 
-  s.add_development_dependency('bundler', '~> 1.7.6')
+  s.add_development_dependency('bundler', '~> 1.12.0')
   s.add_development_dependency('rspec', '~> 3.2')
   s.add_development_dependency('rake')
 end

@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'commander/import'
+require 'JiraMule'
+require 'pp'
+require 'json'
+
+Signal.trap('INT', 'EXIT') # Don't drop traces on ^C
+
+program :version, JiraMule::VERSION
+program :description, %{A collection of things that I do with jira.
+
+Many of which are either big batch operations, or need bits of info from
+the command line.  All of which turn out to be better handled as a command
+line app.
+
+This very specifically does not try to be a generic jira tool; those exist
+already.  Rather this is specific to things I need.
+}
+global_option('-V', '--verbose', 'Be chatty') {
+  $cfg['tool.verbose'] = true
+}
+global_option('-n', '--dry', "Don't run actions that make changes") {
+  $cfg['tool.dry'] = true
+  $cfg['tool.verbose'] = true # dry implies verbose
+}
+#global_option('--username USERNAME') {|un|
+#  $cfg['jira.userpass'] = un
+#}
+#global_option('--project PROJECT', "Which project to use") {|project|
+#  $cfg['jira.project'] = project
+#}
+#global_option('--url URL', "Set jira base url") {|url|
+#  $cfg['jira.url'] = url
+#}
+global_option('-L', '--curl', 'Print out a curl command for each network call') {
+  $cfg['tool.curldebug'] = true
+}
+global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad.}
+
+global_option('-C', '--configfile FILE', %{Load additional configuration file}) {|file|
+  # this is called after all of the top level code in this file.
+  $cfg.load_specific(file)
+}
+global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
+  key, value = param.split('=', 2)
+  # a=b :> ["a","b"]
+  # a= :> ["a",""]
+  # a :> ["a"]
+  raise "Bad config '#{param}'" if key.nil?
+  if value.nil? then
+    $cfg[key] = 'true'
+  else
+    $cfg[key] = value
+  end
+}
+
+default_command :help
+
+$cfg = JiraMule::Config.new
+$cfg.load
+
+# Look for plug-ins
+pgds = [
+  Pathname.new(Dir.home) + '.jiramule' + 'plugins'
+]
+# Add plugin dirs from configs
+# This is run before the command line options are parsed, so need to check old way.
+if not ARGV.include? '--skip-plugins' then
+  pgds << Pathname.new(ENV['JIRAMULE_PLUGIN_DIR']) if ENV.has_key? 'JIRAMULE_PLUGIN_DIR'
+  pgds.each do |path|
+    next unless path.exist?
+    path.each_child do |plugin|
+      next if plugin.directory?
+      next unless plugin.readable?
+      next if plugin.basename.fnmatch('.*') # don't read anything starting with .
+      begin
+        require plugin.to_s
+      rescue Exception => e
+        $stderr.puts "Failed to load plugin at #{plugin} because #{e}"
+      end
+    end
+  end
+end
+
+#  vim: set sw=2 ts=2 :
