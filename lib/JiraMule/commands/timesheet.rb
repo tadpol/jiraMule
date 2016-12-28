@@ -36,6 +36,9 @@ command :timesheet do |c|
     while not dayFrom.wday == dayShift do
       dayFrom = dayFrom.prev_day
     end
+    while not dayTo.wday == (7-dayShift) do
+      dayTo = dayTo.next_day
+    end
 
     # Get keys to get worklogs from
     keys = jira.expandKeys(args)
