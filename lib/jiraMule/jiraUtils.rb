@@ -190,9 +190,10 @@ module JiraMule
 
         # Get the status for a project
         # +project+:: The project to fetch status from
-        def statusesFor(project)
-            verbose "Fetching statuses for #{project}"
-            get('project/' + project + '/statuses')
+        def statusesFor(prj=nil)
+            prj = project if prj.nil?
+            verbose "Fetching statuses for #{prj}"
+            get('project/' + prj + '/statuses')
         end
 
         # Assign issues to a user
