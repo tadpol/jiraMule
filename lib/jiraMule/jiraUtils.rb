@@ -136,6 +136,7 @@ module JiraMule
         # +description+:: Full details.
         def createIssue(type, summary, description)
             verbose "Creating #{type} issue for #{summary}"
+
             unless $cfg['tool.dry'] then
                 post('issue', {
                     :fields=>{
@@ -155,7 +156,7 @@ module JiraMule
         # Check this issue type in current project
         def checkIssueType(type='bug')
             rt = Regexp.new(type.gsub(/\s+/, '[-_\s]*'), Regexp::IGNORECASE)
-            cmeta = get('issue/createmeta')
+            cmeta = get("issue/createmeta?projectKeys=#{project}")
             prj = cmeta[:projects].select{|p| p[:key] == project}.first
             prj[:issuetypes].select{|it| it[:name] =~ rt}
         end
