@@ -4,14 +4,18 @@ require 'mustache'
 command :query do |c|
   c.syntax = 'jm query [options] query'
   c.summary = 'Get the keys from a jira query'
-  c.description = 'Run a query. '
-  c.example 'Get Open issues and dump everything', %{jm query status=Open --fields "" --json}
+  c.description = 'Run a JQL query. '
+  c.example 'Get Open issues and dump everything', %{jm query status=Open --all_fields --json}
+  c.example 'Get All Open issues and dump everything', %{jm query --raw status=Open --all_fields --json}
+
+  c.option '--style STYLE', String, 'Which output style to use'
+
   c.option '--[no-]raw', 'Do not prefix query with project and assignee'
   c.option '--[no-]json', 'Output json reply instead of summary'
+
   c.option '--fields FIELDS', Array, 'Which fields to return.'
   c.option '--all_fields', 'Return all fields'
-  c.option '--format STYLE', String, 'Format for keys'
-  c.option '--style STYLE', String, 'Which style to use'
+  #c.option '--format STYLE', String, 'Format for keys'
 
   c.action do |args, options|
     options.default :json => false, :all_fields => false, :style => 'basic'
