@@ -38,7 +38,14 @@ command 'github import' do |c|
       exit 3
     end
 
-    jissue = jira.createIssue(it.first[:name], gissue[:title], gissue[:body])
+    by = gissue[:user]
+    qubody = []
+    qubody << %{From [#{by[:login]}|#{by[:html_url]}]:}
+    qubody << '{quote}'
+    qubody << gissue[:body]
+    qubody << '{quote}'
+
+    jissue = jira.createIssue(it.first[:name], gissue[:title], qubody.join("\n"))
     jira.verbose "Created #{jissue[:key]}"
 
     # Link
