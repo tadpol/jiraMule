@@ -39,8 +39,15 @@ command 'github import' do |c|
     end
 
     by = gissue[:user]
+    # See if they have same user name in Jira.  If so, assume its them and mention.
+    jby = jira.checkUser(by[:login])
+
     qubody = []
-    qubody << %{From [#{by[:login]}|#{by[:html_url]}]:}
+    if not jby.nil? and not jby.empty? then
+      qubody << %{From [#{by[:login]}|#{by[:html_url]}] [~#{jby.first}]:}
+    else
+      qubody << %{From [#{by[:login]}|#{by[:html_url]}]:}
+    end
     qubody << '{quote}'
     qubody << gissue[:body]
     qubody << '{quote}'
