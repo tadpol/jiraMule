@@ -33,5 +33,5 @@ jm config jira.project <Project ID>
 
 #### Jira API Docs
 
-[https://docs.atlassian.com/jira/REST/6.4.7/][]
+[https://docs.atlassian.com/jira/REST/7.2.4/][]
 
