@@ -28,7 +28,7 @@ command :logwork do |c|
 
     begin
       jira.logWork(key, ts, options.message, options.date)
-    rescue JiraUtilsException => e
+    rescue JiraMule::JiraUtilsException => e
       pp e.response.body
     end
 
