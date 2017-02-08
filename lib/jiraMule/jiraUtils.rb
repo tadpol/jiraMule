@@ -134,18 +134,18 @@ module JiraMule
         # +type+:: The type of issue this is
         # +summary+:: Short title text
         # +description+:: Full details.
-        def createIssue(type, summary, description)
+        def createIssue(type, summary, description, customfields={})
             verbose "Creating #{type} issue for #{summary}"
 
             unless $cfg['tool.dry'] then
                 post('issue', {
-                    :fields=>{
+                    :fields=>customfields.merge({
                         :issuetype=>{:name=>type},
                         :project=>{:key=>project},
                         :summary=>summary,
                         :description=>description,
                         :labels=>['auto-imported'],
-                    }
+                    })
                 })
             else
                 {:key=>'_'}
