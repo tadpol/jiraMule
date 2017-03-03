@@ -49,7 +49,7 @@ module JiraMule
         # So on project APP, from %w{1 56 BUG-78} you get %w{APP-1 APP-56 BUG-78}
         def expandKeys(keys)
             return keys.map do |k|
-                k.match(/([a-zA-Z]+-)?(\d+)/) do |m|
+                k.match(/([a-zA-Z0-9]+-)?(\d+)/) do |m|
                     if m[1].nil? then
                         "#{project}-#{m[2]}"
                     else
