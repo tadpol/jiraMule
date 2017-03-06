@@ -20,14 +20,14 @@ command :testReady do |c|
 		options.default :reassign => false
 
 		if args[0].nil? then
-			version = GitUtils.getVersion
+			version = JiraMule::GitUtils.getVersion
 			newver = ask("\033[1m=?\033[0m Enter the version you want to release (#{version}) ")
 			version = newver unless newver == ''
 		else
 			version = args[0]
 		end
 
-		jira = JiraUtils.new(args, options)
+		jira = JiraMule::JiraUtils.new(args, options)
 		project = jira.project
 
 		if !options.assign.nil? then

@@ -112,7 +112,7 @@ module JiraMule
         # Create a new version for release.
         # TODO: test this.
         def createVersion(project, version)
-            verbose "Creating #{request.body}"
+            verbose "Creating #{version} in #{project}"
             unless $cfg['tool.dry'] then
                 data = post('version', {
                     'name' => version,
