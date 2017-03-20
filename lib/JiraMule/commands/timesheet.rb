@@ -113,4 +113,29 @@ command :timesheet do |c|
 end
 alias_command :ts, :timesheet
 
+
+command 'timesheet submit' do |c|
+  c.syntax = 'jm timesheet submit [options]'
+  c.summary = 'Submit work week for review'
+  c.option '--week FFFFFF', String, %{Which week to submit}
+  c.option '-m', '--message MSG', String, %{optional message to submit with}
+
+  c.action do |args, options|
+    options.default :week => nil, :message => ''
+
+    #jira = JiraMule::JiraUtils.new
+    tempo = JiraMule::Tempo.new
+
+    week = options.week
+    unless week.nil? then
+      week = DateTime.parse(options.week)
+      week = week.strftime('%Y-%m-%d')
+    end
+
+    tempo.submitForApproval(week, options.message)
+
+  end
+end
+alias_command :tss, 'timesheet submit'
+
 #  vim: set sw=2 ts=2 :

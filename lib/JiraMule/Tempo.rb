@@ -38,7 +38,7 @@ module JiraMule
         end
 
         ## Submit a timesheet for approval.
-        def submitForApproval(period=nil, name=@username, comment='')
+        def submitForApproval(period=nil, comment='', name=@username)
           if period.nil? then
             # First day of work week
             cur = currentApprovalStatus(nil, name)
@@ -60,7 +60,7 @@ module JiraMule
         end
 
         def currentApprovalStatus(period=nil, name=@username)
-          verbose "Getting current approval status; #{period} #{name}"
+          verbose "Getting current approval status; #{period} : #{name} :"
           q = {
             :username => name,
           }
