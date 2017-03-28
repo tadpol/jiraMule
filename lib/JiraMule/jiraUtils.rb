@@ -94,7 +94,8 @@ module JiraMule
         def getIssues(query, fields=[ 'key', 'summary' ])
             verbose "Get keys: #{query}"
             data = post('search', {:jql=>query, :fields=>fields})
-            data[:issues]
+            return data[:issues] if data.kind_of?(Hash) and data.has_key?(:issues)
+            []
         end
 
         ##
