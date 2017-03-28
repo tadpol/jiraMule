@@ -18,7 +18,12 @@ command :query do |c|
   #c.option '--format STYLE', String, 'Format for keys'
 
   c.action do |args, options|
-    options.default :json => false, :all_fields => false, :style => 'basic'
+    options.default(
+      :json => false,
+      :all_fields => false,
+      :style => 'basic',
+      :raw=> true
+    )
 
     allOfThem = {
       :basic => {
@@ -45,7 +50,11 @@ Description: {{description}}
     jira = JiraMule::JiraUtils.new(args, options)
     args.unshift("assignee = #{jira.username} AND") unless options.raw
     args.unshift("project = #{jira.project} AND") unless options.raw
-    q = args.join(' ')
+    if args.count == 1 and not args.first.include?('=') then
+      q = "key=#{args.first}"
+    else
+      q = args.join(' ')
+    end
     if options.all_fields then
       issues = jira.getIssues(q, [])
     else
