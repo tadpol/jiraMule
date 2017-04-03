@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'net/http/post/multipart'
 require 'json'
+require 'yaml'
 require 'date'
 require 'pp'
 require 'mime/types'
@@ -135,8 +136,13 @@ module JiraMule
         # +type+:: The type of issue this is
         # +summary+:: Short title text
         # +description+:: Full details.
-        def createIssue(type, summary, description, customfields={})
+        def createIssue(type, summary, description)
             verbose "Creating #{type} issue for #{summary}"
+
+            customfields = {}
+            cust = $cfg['customfields.create']
+            customfields = YAML.load(cust, 'cfg->customfields.create') unless cust.nil?
+            verbose " With custom fields: #{cust.to_json}" unless cust.nil?
 
             unless $cfg['tool.dry'] then
                 post('issue', {

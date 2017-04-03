@@ -53,7 +53,7 @@ command 'github import' do |c|
     qubody << '{quote}'
 
     jissue = jira.createIssue(it.first[:name], gissue[:title], qubody.join("\n"))
-    jira.verbose "Created #{jissue[:key]}"
+    say "Created #{jissue[:key]}"
 
     # Link
     jira.linkTo(jissue[:key], gissue[:html_url], gissue[:title])
