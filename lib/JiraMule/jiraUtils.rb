@@ -228,7 +228,7 @@ module JiraMule
             }
             body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
 
-            verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
+            verbose "Logging #{timespent} of work on #{body[:started] or 'now'} to #{key} with note \"#{notes}\""
             post('issue/' + key + '/worklog', body) unless $cfg['tool.dry']
         end
 

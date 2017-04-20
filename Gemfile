@@ -2,6 +2,7 @@ source 'http://rubygems.org'
 
 gemspec
 
+gem 'chronic'
 gem 'chronic_duration'
 gem 'commander'
 gem 'inifile', '~> 3.0'
