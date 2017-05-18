@@ -70,7 +70,12 @@ Formatting is done with Mustash.
                %{status = "Reopened" OR},
                %{status = "Testing (Signoff)" OR},
                %{status = "Testing (Review)" OR},
-               %{status = "Testing - Bug Found")}],
+               %{status = "Testing - Bug Found" OR},
+               %{status = "Backlog" OR},
+               %{status = "Ready For Dev" OR},
+               %{status = "Ready For QA" OR},
+               %{status = "To Do" OR},
+               %{status = "Release Package")},],
         },
 
       },
@@ -173,7 +178,7 @@ Formatting is done with Mustash.
       qBase = []
       qBase.unshift("assignee = #{jira.username} AND") unless options.raw
       qBase.unshift("project = #{jira.project} AND") unless options.raw
-      qBase.unshift('(' + args.join(' ') + ') AND') unless args.empty? 
+      qBase.unshift('(' + args.join(' ') + ') AND') unless args.empty?
 
       results = {}
       columns.each_pair do |name, query|

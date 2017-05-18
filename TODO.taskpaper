@@ -1,6 +1,5 @@
 
 New commands:
 	- 'comment' for adding a comment. If no '-m' then open $EDITOR
-	- 'assign' Assign to another user.
 
 

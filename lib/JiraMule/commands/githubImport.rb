@@ -16,6 +16,7 @@ command 'github import' do |c|
 
     oc = Octokit::Client.new(:access_token => okey)
     if oc.nil? then
+      say_error "cannot create client"
       exit 3
     end
     oc.login
@@ -31,10 +32,28 @@ command 'github import' do |c|
 
     jira = JiraMule::JiraUtils.new(args, options)
     # Create Issue
-    it = jira.checkIssueType
+    it = jira.checkIssueType # TODO Look at github labels and pick issue type
+    if it.nil? then
+      say_error "Cannot make an Issue of type 'bug'"
+      exit 3
+    end
 
-    jissue = jira.createIssue(it.first[:name], gissue[:title], gissue[:body])
-    jira.verbose "Created #{jissue[:key]}"
+    by = gissue[:user]
+    # See if they have same user name in Jira.  If so, assume its them and mention.
+    jby = jira.checkUser(by[:login])
+
+    qubody = []
+    if not jby.nil? and not jby.empty? then
+      qubody << %{From [#{by[:login]}|#{by[:html_url]}] [~#{jby.first}]:}
+    else
+      qubody << %{From [#{by[:login]}|#{by[:html_url]}]:}
+    end
+    qubody << '{quote}'
+    qubody << gissue[:body]
+    qubody << '{quote}'
+
+    jissue = jira.createIssue(it.first[:name], gissue[:title], qubody.join("\n"))
+    say "Created #{jissue[:key]}"
 
     # Link
     jira.linkTo(jissue[:key], gissue[:html_url], gissue[:title])

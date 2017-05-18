@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'net/http/post/multipart'
 require 'json'
+require 'yaml'
 require 'date'
 require 'pp'
 require 'mime/types'
@@ -49,7 +50,7 @@ module JiraMule
         # So on project APP, from %w{1 56 BUG-78} you get %w{APP-1 APP-56 BUG-78}
         def expandKeys(keys)
             return keys.map do |k|
-                k.match(/([a-zA-Z]+-)?(\d+)/) do |m|
+                k.match(/([a-zA-Z0-9]+-)?(\d+)/) do |m|
                     if m[1].nil? then
                         "#{project}-#{m[2]}"
                     else
@@ -94,7 +95,8 @@ module JiraMule
         def getIssues(query, fields=[ 'key', 'summary' ])
             verbose "Get keys: #{query}"
             data = post('search', {:jql=>query, :fields=>fields})
-            data[:issues]
+            return data[:issues] if data.kind_of?(Hash) and data.has_key?(:issues)
+            []
         end
 
         ##
@@ -112,7 +114,7 @@ module JiraMule
         # Create a new version for release.
         # TODO: test this.
         def createVersion(project, version)
-            verbose "Creating #{request.body}"
+            verbose "Creating #{version} in #{project}"
             unless $cfg['tool.dry'] then
                 data = post('version', {
                     'name' => version,
@@ -136,15 +138,21 @@ module JiraMule
         # +description+:: Full details.
         def createIssue(type, summary, description)
             verbose "Creating #{type} issue for #{summary}"
+
+            customfields = {}
+            cust = $cfg['customfields.create']
+            customfields = YAML.load(cust, 'cfg->customfields.create') unless cust.nil?
+            verbose " With custom fields: #{cust.to_json}" unless cust.nil?
+
             unless $cfg['tool.dry'] then
                 post('issue', {
-                    :fields=>{
+                    :fields=>customfields.merge({
                         :issuetype=>{:name=>type},
                         :project=>{:key=>project},
                         :summary=>summary,
                         :description=>description,
                         :labels=>['auto-imported'],
-                    }
+                    })
                 })
             else
                 {:key=>'_'}
@@ -155,7 +163,7 @@ module JiraMule
         # Check this issue type in current project
         def checkIssueType(type='bug')
             rt = Regexp.new(type.gsub(/\s+/, '[-_\s]*'), Regexp::IGNORECASE)
-            cmeta = get('issue/createmeta')
+            cmeta = get("issue/createmeta?projectKeys=#{project}")
             prj = cmeta[:projects].select{|p| p[:key] == project}.first
             prj[:issuetypes].select{|it| it[:name] =~ rt}
         end
@@ -189,9 +197,10 @@ module JiraMule
 
         # Get the status for a project
         # +project+:: The project to fetch status from
-        def statusesFor(project)
-            verbose "Fetching statuses for #{project}"
-            get('project/' + project + '/statuses')
+        def statusesFor(prj=nil)
+            prj = project if prj.nil?
+            verbose "Fetching statuses for #{prj}"
+            get('project/' + prj + '/statuses')
         end
 
         # Assign issues to a user
@@ -219,7 +228,7 @@ module JiraMule
             }
             body[:started] = on.to_time.strftime('%FT%T.%3N%z') unless on.nil?
 
-            verbose "Logging #{timespent} of work to #{key} with note \"#{notes}\""
+            verbose "Logging #{timespent} of work on #{body[:started] or 'now'} to #{key} with note \"#{notes}\""
             post('issue/' + key + '/worklog', body) unless $cfg['tool.dry']
         end
 

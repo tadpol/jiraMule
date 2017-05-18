@@ -100,7 +100,7 @@ module JiraMule
           end
         else
           showHttpError(request, response)
-          raise response
+          #raise response
         end
       end
     end
