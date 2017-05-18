@@ -31,9 +31,10 @@ command :query do |c|
         :format => %{{{key}} {{summary}}},
       },
       :info => {
-        :fields => [:key, :description, :assignee, :reporter, :priority, :issuetype,
-                    :status, :resolution, :votes, :watches],
+        :fields => [:key, :summary, :description, :assignee, :reporter, :priority,
+                    :issuetype, :status, :resolution, :votes, :watches],
         :format => %{{{key}}
+    Summary: {{summary}}
    Reporter: {{reporter.displayName}}
    Assignee: {{assignee.displayName}}
        Type: {{issuetype.name}} ({{priority.name}})
