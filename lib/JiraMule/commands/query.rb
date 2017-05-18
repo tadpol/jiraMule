@@ -51,7 +51,7 @@ Description: {{description}}
     args.unshift("assignee = #{jira.username} AND") unless options.raw
     args.unshift("project = #{jira.project} AND") unless options.raw
     if args.count == 1 and not args.first.include?('=') then
-      q = "key=#{args.first}"
+      q = "key=#{jira.expandKeys([args.first]).first}"
     else
       q = args.join(' ')
     end
@@ -89,5 +89,6 @@ Description: {{description}}
   end
 end
 alias_command :q, :query
+alias_command :info, :query, '--style', 'info'
 
 #  vim: set sw=2 ts=2 :
