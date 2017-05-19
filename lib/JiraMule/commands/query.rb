@@ -30,11 +30,13 @@ command :query do |c|
     allOfThem = {
       :basic => {
         :fields => [:key, :summary],
+        :format_type => :strings,
         :format => %{{{key}} {{summary}}},
       },
       :info => {
         :fields => [:key, :summary, :description, :assignee, :reporter, :priority,
                     :issuetype, :status, :resolution, :votes, :watches],
+        :format_type => :strings,
         :format => %{{{key}}
     Summary: {{summary}}
    Reporter: {{reporter.displayName}}
@@ -45,16 +47,11 @@ command :query do |c|
 Description: {{description}}
         }
       },
-      :test_string => {
-        :fields => [],
-        :format_type => :strings, # :table_rows, :table_columns
-        :format => %{}
-      },
       :test_table => {
-        :fields => [],
-        :format_type => :table_rows, # :table_columns
+        :fields => [:key, :assignee],
+        :format_type => :table_columns,
         :header => [],
-        :format => [%{{{key}}}, %{W{{watches.watchCount}}}]
+        :format => [%{{{key}}}, %{{{assignee.displayName}}}]
       },
       :prgs => {
         :fields => [:key, :workratio, :aggregatetimespent, :duedate,
@@ -75,6 +72,7 @@ Description: {{description}}
       say_error "No style \"#{options.style}\""
       exit 2
     end
+    #### look for command line overrides
     theStyle[:fields] = options.fields if options.fields
 
     jira = JiraMule::JiraUtils.new(args, options)
@@ -102,7 +100,7 @@ Description: {{description}}
       end
       keys.each {|k| puts k}
 
-    elsif format_type == :table_rows then
+    elsif format_type == :table_rows or format_type == :table_columns then
       format = theStyle[:format] or []
       format = [format] unless format.kind_of? Array
       rows = issues.map do |issue|
@@ -110,7 +108,10 @@ Description: {{description}}
           Mustache.render(col, issue.merge(issue[:fields]))
         end
       end
-      puts Terminal::Table.new :headings => theStyle[:header], :rows=>rows
+      if format_type == :table_columns then
+        rows = rows.transpose
+      end
+      puts Terminal::Table.new :headings => (theStyle[:header] or []), :rows=>rows
     end
 
   end
