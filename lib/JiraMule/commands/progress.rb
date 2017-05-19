@@ -40,6 +40,7 @@ command :progress do |c|
                                         'duedate', 'aggregatetimeoriginalestimate'])
 
     rows = progresses.map do |issue|
+      # This is creating new columns that are functions of other columns.
       estimate = (issue.access('fields.aggregatetimeoriginalestimate') or 0)/3600.0
       progress = (issue.access('fields.aggregatetimespent') or 0)/3600.0
       due = issue.access('fields.duedate')
