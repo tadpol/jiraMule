@@ -13,11 +13,10 @@ command :query do |c|
   c.option '--style STYLE', String, 'Which output style to use'
 
   c.option '--[no-]raw', 'Do not prefix query with project and assignee'
-  c.option '--[no-]json', 'Output json reply instead of summary'
+  c.option '--[no-]json', 'Output json reply instead of styled output'
 
   c.option '--fields FIELDS', Array, 'Which fields to return.'
   c.option '--all_fields', 'Return all fields'
-  #c.option '--format STYLE', String, 'Format for keys'
 
   c.action do |args, options|
     options.default(
@@ -100,7 +99,7 @@ Description: {{description}}
       end
       keys.each {|k| puts k}
 
-    elsif format_type == :table_rows or format_type == :table_columns then
+    elsif [:table, :table_rows, :table_columns].include? format_type then
       format = theStyle[:format] or []
       format = [format] unless format.kind_of? Array
       rows = issues.map do |issue|
