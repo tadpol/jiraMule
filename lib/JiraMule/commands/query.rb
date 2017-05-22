@@ -62,7 +62,29 @@ Description: {{description}}
                     %{{{aggregatetimespent}}},
                     %{{{duedate}}},
                     %{{{aggregatetimeoriginalestimate}}},
-        ]
+        ],
+        # I'm not sure.
+        :methods => {
+          :estimate => lambda do |issue|
+            "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]
+          end,
+          :progress => lambda do |issue|
+            "%.2f"%[(issue[:aggregatetimespent] or 0) / 3600.0]
+          end,
+          :percent => lambda do |issue|
+            percent = issue[:workratio]
+            if percent < 0 then
+              estimate = (issue[:aggregatetimeoriginalestimate] or 0) / 3600.0
+              if estimate > 0 then
+                progress = (issue[:aggregatetimespent] or 0) / 3600.0
+                percent = (progress / estimate * 100).floor
+              else
+                percent = 100
+              end
+            end
+            "%.1f"%[percent]
+          end
+        }
       },
     }
 
