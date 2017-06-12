@@ -59,13 +59,13 @@ Description: {{description}}
         :format_type => :table_rows, # :table_columns
         :header => [:key, :estimated, :progress, :percent, :due],
         :format => [%{{{key}}},
-                    %{{{estimate}}},
-                    %{{{progress}}},
-                    %{{{percent}}},
-                    %{{{duedate}}},
+                    {:value=>%{{{estimate}}},:alignment=>:right},
+                    {:value=>%{{{progress}}},:alignment=>:right},
+                    {:value=>%{{{percent}}},:alignment=>:right},
+                    {:value=>%{{{duedate}}},:alignment=>:center},
         ],
-        # TODO: Add options to set column alignments.
         # TODO: Add bolding rule for rows and/or cells.
+        # TODO: Add default query
       },
     }
 
@@ -95,6 +95,7 @@ Description: {{description}}
 
     if options.json then
       puts JSON.dump(issues)
+
     elsif format_type == :strings then
       format = theStyle[:format]
       keys = issues.map do |issue|
@@ -107,7 +108,13 @@ Description: {{description}}
       format = [format] unless format.kind_of? Array
       rows = issues.map do |issue|
         format.map do |col|
-          JiraMule::IssueRender.render(col, issue.merge(issue[:fields]))
+          if col.kind_of? Hash then
+            str = col[:value] or ""
+            col[:value] = JiraMule::IssueRender.render(str, issue.merge(issue[:fields]))
+            col
+          else
+            JiraMule::IssueRender.render(col, issue.merge(issue[:fields]))
+          end
         end
       end
       if format_type == :table_columns then
