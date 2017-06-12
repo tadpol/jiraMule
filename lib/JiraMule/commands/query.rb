@@ -18,6 +18,8 @@ command :query do |c|
   c.option '--fields FIELDS', Array, 'Which fields to return.'
   c.option '--all_fields', 'Return all fields'
 
+  c.option '-d', '--dump', 'Dump the style to STDOUT as yaml'
+
   c.action do |args, options|
     options.default(
       :json => false,
@@ -65,7 +67,7 @@ Description: {{description}}
                     {:value=>%{{{duedate}}},:alignment=>:center},
         ],
         # TODO: Add bolding rule for rows and/or cells.
-        # TODO: Add default query
+        # TODO: Add default query (This should replace the --raw thing.)
       },
     }
 
@@ -76,6 +78,11 @@ Description: {{description}}
     end
     #### look for command line overrides
     theStyle[:fields] = options.fields if options.fields
+
+    if options.dump then
+      puts theStyle.to_yaml
+      exit 0
+    end
 
     jira = JiraMule::JiraUtils.new(args, options)
     args.unshift("assignee = #{jira.username} AND") unless options.raw
