@@ -26,6 +26,7 @@ command :query do |c|
       :raw=> true
     )
 
+    # TODO: Create a ruby DSL for defining Styles.
     allOfThem = {
       :basic => {
         :fields => [:key, :summary],
@@ -52,17 +53,19 @@ Description: {{description}}
         :header => [],
         :format => [%{{{key}}}, %{{{assignee.displayName}}}]
       },
-      :prgs => {
+      :progress => {
         :fields => [:key, :workratio, :aggregatetimespent, :duedate,
                     :aggregatetimeoriginalestimate],
         :format_type => :table_rows, # :table_columns
-        :header => [:key, :workratio, :aggregatetimespent, :duedate,
-                    :aggregatetimeoriginalestimate],
-        :format => [%{{{key}}}, %{{{workratio}}},
-                    %{{{aggregatetimespent}}},
+        :header => [:key, :estimated, :progress, :percent, :due],
+        :format => [%{{{key}}},
+                    %{{{estimate}}},
+                    %{{{progress}}},
+                    %{{{percent}}},
                     %{{{duedate}}},
-                    %{{{aggregatetimeoriginalestimate}}},
-        ]
+        ],
+        # TODO: Add options to set column alignments.
+        # TODO: Add bolding rule for rows and/or cells.
       },
     }
 
@@ -95,7 +98,7 @@ Description: {{description}}
     elsif format_type == :strings then
       format = theStyle[:format]
       keys = issues.map do |issue|
-        Mustache.render(format, issue.merge(issue[:fields]))
+        JiraMule::IssueRender.render(format, issue.merge(issue[:fields]))
       end
       keys.each {|k| puts k}
 
@@ -104,7 +107,7 @@ Description: {{description}}
       format = [format] unless format.kind_of? Array
       rows = issues.map do |issue|
         format.map do |col|
-          Mustache.render(col, issue.merge(issue[:fields]))
+          JiraMule::IssueRender.render(col, issue.merge(issue[:fields]))
         end
       end
       if format_type == :table_columns then
