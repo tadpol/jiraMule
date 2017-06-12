@@ -26,6 +26,7 @@ command :query do |c|
       :raw=> true
     )
 
+    # TODO: Create a ruby DSL for defining Styles.
     allOfThem = {
       :basic => {
         :fields => [:key, :summary],
@@ -139,5 +140,25 @@ Description: {{description}}
 end
 alias_command :q, :query
 alias_command :info, :query, '--style', 'info'
+
+#module Foo
+#  def two
+#    '2'
+#  end
+#end
+#
+class IssueRender < Mustache
+  def initialize(hsh)
+    hsh.each_pair do |k,v|
+      self.class.send(:define_method, k.to_sym) {v}
+    end
+    @issue = hsh
+    self.class.send(:define_method, :issue) {@issue}
+  end
+end
+
+#r = IssueRender.new({:one=>'1'})
+#r.extend(Foo)
+#r.render(": {{one}} : {{two}} :")
 
 #  vim: set sw=2 ts=2 :
