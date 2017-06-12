@@ -15,7 +15,7 @@
 
 ## Setup
 
-You need to set a few config keys before anyhting really works.
+You need to set a few config keys before anything really works.
 
 Globally:
 ```
