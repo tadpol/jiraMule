@@ -53,39 +53,17 @@ Description: {{description}}
         :header => [],
         :format => [%{{{key}}}, %{{{assignee.displayName}}}]
       },
-      :prgs => {
+      :progress => {
         :fields => [:key, :workratio, :aggregatetimespent, :duedate,
                     :aggregatetimeoriginalestimate],
         :format_type => :table_rows, # :table_columns
-        :header => [:key, :workratio, :aggregatetimespent, :duedate,
-                    :aggregatetimeoriginalestimate],
-        :format => [%{{{key}}}, %{{{workratio}}},
-                    %{{{aggregatetimespent}}},
+        :header => [:key, :estimated, :progress, :percent, :due],
+        :format => [%{{{key}}},
+                    %{{{estimate}}},
+                    %{{{progress}}},
+                    %{{{percent}}},
                     %{{{duedate}}},
-                    %{{{aggregatetimeoriginalestimate}}},
         ],
-        # I'm not sure.
-        :methods => {
-          :estimate => lambda do |issue|
-            "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]
-          end,
-          :progress => lambda do |issue|
-            "%.2f"%[(issue[:aggregatetimespent] or 0) / 3600.0]
-          end,
-          :percent => lambda do |issue|
-            percent = issue[:workratio]
-            if percent < 0 then
-              estimate = (issue[:aggregatetimeoriginalestimate] or 0) / 3600.0
-              if estimate > 0 then
-                progress = (issue[:aggregatetimespent] or 0) / 3600.0
-                percent = (progress / estimate * 100).floor
-              else
-                percent = 100
-              end
-            end
-            "%.1f"%[percent]
-          end
-        }
       },
     }
 
@@ -118,7 +96,10 @@ Description: {{description}}
     elsif format_type == :strings then
       format = theStyle[:format]
       keys = issues.map do |issue|
-        Mustache.render(format, issue.merge(issue[:fields]))
+        #Mustache.render(format, issue.merge(issue[:fields]))
+        r = JiraMule::IssueRender.new(issue.merge(issue[:fields]))
+        r.extend(JiraMule::IRExtend)
+        r.render(col)
       end
       keys.each {|k| puts k}
 
@@ -127,7 +108,10 @@ Description: {{description}}
       format = [format] unless format.kind_of? Array
       rows = issues.map do |issue|
         format.map do |col|
-          Mustache.render(col, issue.merge(issue[:fields]))
+          #Mustache.render(col, issue.merge(issue[:fields]))
+          r = JiraMule::IssueRender.new(issue.merge(issue[:fields]))
+          r.extend(JiraMule::IRExtend)
+          r.render(col)
         end
       end
       if format_type == :table_columns then
@@ -141,21 +125,6 @@ end
 alias_command :q, :query
 alias_command :info, :query, '--style', 'info'
 
-#module Foo
-#  def two
-#    '2'
-#  end
-#end
-#
-class IssueRender < Mustache
-  def initialize(hsh)
-    hsh.each_pair do |k,v|
-      self.class.send(:define_method, k.to_sym) {v}
-    end
-    @issue = hsh
-    self.class.send(:define_method, :issue) {@issue}
-  end
-end
 
 #r = IssueRender.new({:one=>'1'})
 #r.extend(Foo)
