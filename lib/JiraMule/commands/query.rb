@@ -64,6 +64,8 @@ Description: {{description}}
                     %{{{percent}}},
                     %{{{duedate}}},
         ],
+        # TODO: Add options to set column alignments.
+        # TODO: Add bolding rule for rows and/or cells.
       },
     }
 
@@ -96,10 +98,7 @@ Description: {{description}}
     elsif format_type == :strings then
       format = theStyle[:format]
       keys = issues.map do |issue|
-        #Mustache.render(format, issue.merge(issue[:fields]))
-        r = JiraMule::IssueRender.new(issue.merge(issue[:fields]))
-        r.extend(JiraMule::IRExtend)
-        r.render(col)
+        JiraMule::IssueRender.render(format, issue.merge(issue[:fields]))
       end
       keys.each {|k| puts k}
 
@@ -108,10 +107,7 @@ Description: {{description}}
       format = [format] unless format.kind_of? Array
       rows = issues.map do |issue|
         format.map do |col|
-          #Mustache.render(col, issue.merge(issue[:fields]))
-          r = JiraMule::IssueRender.new(issue.merge(issue[:fields]))
-          r.extend(JiraMule::IRExtend)
-          r.render(col)
+          JiraMule::IssueRender.render(col, issue.merge(issue[:fields]))
         end
       end
       if format_type == :table_columns then
@@ -124,10 +120,5 @@ Description: {{description}}
 end
 alias_command :q, :query
 alias_command :info, :query, '--style', 'info'
-
-
-#r = IssueRender.new({:one=>'1'})
-#r.extend(Foo)
-#r.render(": {{one}} : {{two}} :")
 
 #  vim: set sw=2 ts=2 :

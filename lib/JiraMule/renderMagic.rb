@@ -20,6 +20,7 @@ module JiraMule
           percent = 100
         end
       end
+      percent = 100 if percent > 100
       "%.1f"%[percent]
     end
   end
@@ -32,8 +33,14 @@ module JiraMule
       @issue = hsh
       self.class.send(:define_method, :issue) {@issue}
     end
-  end
 
+    def self.render(tmpl, issue)
+      r = self.new(issue)
+      r.extend(IRExtend)
+      # TODO: also load user defined module. Or wait for DSL.
+      r.render(tmpl)
+    end
+  end
 
 end
 #  vim: set ai et sw=2 ts=2 :
