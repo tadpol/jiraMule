@@ -16,6 +16,7 @@ module JiraMule
       block.call(self)
     end
 
+    ######################################################
     def self.add(style, &block)
       @@styles = {} unless defined?(@@styles)
 
@@ -28,6 +29,43 @@ module JiraMule
 
     def self.fetch(name)
       @@styles[name.to_sym]
+    end
+
+    def self.list
+      @@styles.keys
+    end
+
+    ######################################################
+    # Apply this style to Issues
+    # @param issues [Array] Issues from the Jira query to format
+    # @return formatted string
+    def apply(issues)
+      if format_type == :strings then
+        format = theStyle[:format]
+        keys = issues.map do |issue|
+          JiraMule::IssueRender.render(format, issue.merge(issue[:fields]))
+        end
+        keys.join("\n")
+
+      elsif [:table, :table_rows, :table_columns].include? format_type then
+        format = theStyle[:format] or []
+        format = [format] unless format.kind_of? Array
+        rows = issues.map do |issue|
+          format.map do |col|
+            if col.kind_of? Hash then
+              str = col[:value] or ""
+              col[:value] = JiraMule::IssueRender.render(str, issue.merge(issue[:fields]))
+              col
+            else
+              JiraMule::IssueRender.render(col, issue.merge(issue[:fields]))
+            end
+          end
+        end
+        if format_type == :table_columns then
+          rows = rows.transpose
+        end
+        Terminal::Table.new :headings => (theStyle[:header] or []), :rows=>rows
+      end
     end
 
     ######################################################
@@ -65,46 +103,47 @@ module JiraMule
     end
     alias_method :format=, :format
 
+    # This will be for adding computed fields for the output formatter.
     def add_method(name, &block)
     end
   end
 
 
 
-#  Style(:basic) do |s|
-#    s.fields [:key, :summary]
-#    s.format %{{{key}} {{summary}}}
-#  end
-#
-#  Style(:info) do |s|
-#    s.fields [:key, :summary, :description, :assignee, :reporter, :priority,
-#              :issuetype, :status, :resolution, :votes, :watches]
-#    s.format %{{{key}}
-#    Summary: {{summary}}
-#   Reporter: {{reporter.displayName}}
-#   Assignee: {{assignee.displayName}}
-#       Type: {{issuetype.name}} ({{priority.name}})
-#     Status: {{status.name}} (Resolution: {{resolution.name}})
-#    Watches: {{watches.watchCount}}  Votes: {{votes.votes}}
-#Description: {{description}}
-#    }
-#  end
-#
-#  Style(:progress) do |s|
-#    s.fields [:key, :workratio, :aggregatetimespent, :duedate,
-#              :aggregatetimeoriginalestimate]
-#    s.format_type :table_rows
-#    s.header [:key, :estimated, :progress, :percent, :due]
-#    s.format [%{{{key}}},
-#              {:value=>%{{{estimate}}},:alignment=>:right},
-#              {:value=>%{{{progress}}},:alignment=>:right},
-#              {:value=>%{{{percent}}},:alignment=>:right},
-#              {:value=>%{{{duedate}}},:alignment=>:center},
-#    ]
-#
-#    s.add_method(:estimate) do
-#    end
-#  end
+  Style.add(:basic) do |s|
+    s.fields [:key, :summary]
+    s.format %{{{key}} {{summary}}}
+  end
+
+  Style.add(:info) do |s|
+    s.fields [:key, :summary, :description, :assignee, :reporter, :priority,
+              :issuetype, :status, :resolution, :votes, :watches]
+    s.format %{{{key}}
+    Summary: {{summary}}
+   Reporter: {{reporter.displayName}}
+   Assignee: {{assignee.displayName}}
+       Type: {{issuetype.name}} ({{priority.name}})
+     Status: {{status.name}} (Resolution: {{resolution.name}})
+    Watches: {{watches.watchCount}}  Votes: {{votes.votes}}
+Description: {{description}}
+    }
+  end
+
+  Style.add(:progress) do |s|
+    s.fields [:key, :workratio, :aggregatetimespent, :duedate,
+              :aggregatetimeoriginalestimate]
+    s.format_type :table_rows
+    s.header [:key, :estimated, :progress, :percent, :due]
+    s.format [%{{{key}}},
+              {:value=>%{{{estimate}}},:alignment=>:right},
+              {:value=>%{{{progress}}},:alignment=>:right},
+              {:value=>%{{{percent}}},:alignment=>:right},
+              {:value=>%{{{duedate}}},:alignment=>:center},
+    ]
+
+    s.add_method(:estimate) do
+    end
+  end
 
 end
 #  vim: set ai et sw=2 ts=2 :
