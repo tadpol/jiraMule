@@ -17,7 +17,6 @@ module JiraMule
       # TODO: Add default query (This should replace the --raw thing.)
 
       # TODO: Add bolding rule for rows and/or cells.
-      # Is this something special? or a function of method cells?
 
       block.call(self) if block_given?
     end
@@ -82,11 +81,26 @@ module JiraMule
     def build_query(*args)
       opts = {}
       opts = args.pop if args.last.kind_of? Hash
-      args.flatten!
+
+      # If nothing from user, and there is a default, start with that.
       args = @default_query if args.empty? and not @default_query.nil?
-      args.unshift(@prefix_query) unless @prefix_query.nil?
-      args.push(@suffix_query) unless @suffix_query.nil?
-      args.join(' ')
+      args = [args] unless args.kind_of? Array
+
+      # if prefix is an Array, stick it on the front.
+      args.unshift(@prefix_query) if not @prefix_query.nil? and @prefix_query.kind_of? Array
+      # if suffix is an Array, stick it on the back.
+      args.push(@suffix_query) if not @suffix_query.nil? and @suffix_query.kind_of? Array
+
+      # convert args to String with AND
+      query = args.flatten.compact.join(' AND ')
+
+      # We do this so we can prefix or suffix things without an 'AND'
+      # if prefix is a String, stick it on the front.
+      query.insert(0, @prefix_query + ' ') if not @prefix_query.nil? and @prefix_query.kind_of? String
+      # if suffix is a String, stick it on the back.
+      query.insert(-1, ' ' + @suffix_query) if not @suffix_query.nil? and @suffix_query.kind_of? String
+
+      query
     end
 
     # May need to split this into two classes. One that is the above methods
@@ -95,6 +109,9 @@ module JiraMule
     #
     # Maybe the above are in a Module, that is included as part of fetch?
     ######################################################
+
+    attr_accessor :prefix_query, :suffix_query, :default_query
+
     def name
       @name
     end
@@ -133,6 +150,7 @@ module JiraMule
     def add_tag(name, &block)
       @custom_tags[name.to_sym] = block
     end
+
   end
 
 
@@ -174,14 +192,15 @@ Description: {{description}}
               {:value=>%{{{percent}}},:alignment=>:right},
               {:value=>%{{{duedate}}},:alignment=>:center},
     ]
-#    s.prefix_query = %{assignee = #{$cfg['jira.user']} AND }
+    s.prefix_query = [%{assignee = -1},
+                      %{project = 44}]
 #    s.prefix_query do 
 #      r=[%{assignee = #{$cfg['jira.user']}}]
 #      r << %{project = #{$cfg['jira.project']}} unless $cfg['jira.project'].nil?
 #      r.join(' AND ')
 #    end
-#    s.default_query = %{status = "In Progress"}
-#    s.suffix_query = %{ ORDER BY Rank}
+    s.default_query = %{status = "In Progress"}
+    s.suffix_query = %{ORDER BY Rank}
 
     s.add_tag(:estimate) do
       "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]

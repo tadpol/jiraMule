@@ -28,7 +28,7 @@ command :query do |c|
       :raw=> true
     )
 
-    theStyle = JiraMule::Style.fetch(options.style)
+    theStyle = JiraMule::Style.fetch(options.style).dup
     if theStyle.nil? then
       say_error "No style \"#{options.style}\""
       say_error "Try one of: #{JiraMule::Style.list.join(', ')}"
@@ -46,8 +46,8 @@ command :query do |c|
 
     jira = JiraMule::JiraUtils.new(args, options)
     # TODO: Grab {prefix,suffix,default}_query from Style
-    args.unshift("assignee = #{jira.username} AND") unless options.raw
-    args.unshift("project = #{jira.project} AND") unless options.raw
+#    args.unshift("assignee = #{jira.username} AND") unless options.raw
+#    args.unshift("project = #{jira.project} AND") unless options.raw
     if args.count == 1 and not args.first.include?('=') then
       q = "key=#{jira.expandKeys([args.first]).first}"
     else
