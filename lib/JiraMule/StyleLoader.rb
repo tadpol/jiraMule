@@ -9,6 +9,12 @@ module JiraMule
       @format_type = :strings
       @format = %{{{key}} {{summary}}}
 
+      @prefix_query = nil
+      @default_query = nil
+      @suffix_query = nil
+        # TODO: Add default query (This should replace the --raw thing.)
+
+        # TODO: Add bolding rule for rows and/or cells.
       loadit(&block) if block_given?
     end
 
@@ -40,18 +46,16 @@ module JiraMule
     # @param issues [Array] Issues from the Jira query to format
     # @return formatted string
     def apply(issues)
-      if format_type == :strings then
-        format = theStyle[:format]
+      if @format_type == :strings then
         keys = issues.map do |issue|
-          JiraMule::IssueRender.render(format, issue.merge(issue[:fields]))
+          JiraMule::IssueRender.render(@format, issue.merge(issue[:fields]))
         end
         keys.join("\n")
 
-      elsif [:table, :table_rows, :table_columns].include? format_type then
-        format = theStyle[:format] or []
-        format = [format] unless format.kind_of? Array
+      elsif [:table, :table_rows, :table_columns].include? @format_type then
+        @format = [@format] unless @format.kind_of? Array
         rows = issues.map do |issue|
-          format.map do |col|
+          @format.map do |col|
             if col.kind_of? Hash then
               str = col[:value] or ""
               col[:value] = JiraMule::IssueRender.render(str, issue.merge(issue[:fields]))
@@ -61,10 +65,10 @@ module JiraMule
             end
           end
         end
-        if format_type == :table_columns then
+        if @format_type == :table_columns then
           rows = rows.transpose
         end
-        Terminal::Table.new :headings => (theStyle[:header] or []), :rows=>rows
+        Terminal::Table.new :headings => (@headers or []), :rows=>rows
       end
     end
 
@@ -74,7 +78,7 @@ module JiraMule
     end
 
     # takes a single flat array of key names.
-    def fields(args)
+    def fields(args=nil)
       return @fields if args.nil?
       @fields = args.flatten.map{|i| i.to_sym}
     end
@@ -127,6 +131,13 @@ module JiraMule
     Watches: {{watches.watchCount}}  Votes: {{votes.votes}}
 Description: {{description}}
     }
+  end
+
+  Style.add(:test_table) do |s|
+    s.fields [:key, :assignee]
+    s.format_type :table_columns
+    s.header nil
+    s.format [%{{{key}}}, %{{{assignee.displayName}}}]
   end
 
   Style.add(:progress) do |s|
