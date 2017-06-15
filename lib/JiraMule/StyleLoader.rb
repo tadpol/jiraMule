@@ -9,6 +9,8 @@ module JiraMule
       @format_type = :strings
       @format = %{{{key}} {{summary}}}
 
+      @custom_tags = {}
+
       @prefix_query = nil
       @default_query = nil
       @suffix_query = nil
@@ -16,11 +18,8 @@ module JiraMule
 
       # TODO: Add bolding rule for rows and/or cells.
       # Is this something special? or a function of method cells?
-      loadit(&block) if block_given?
-    end
 
-    def loadit(&block)
-      block.call(self)
+      block.call(self) if block_given?
     end
 
     ######################################################
@@ -51,7 +50,7 @@ module JiraMule
         keys = issues.map do |issue|
           fmt = @format
           fmt = fmt.join(' ') if fmt.kind_of? Array
-          JiraMule::IssueRender.render(fmt, issue.merge(issue[:fields]))
+          JiraMule::IssueRender.render(fmt, issue.merge(issue[:fields]), @custom_tags)
         end
         keys.join("\n")
 
@@ -62,10 +61,10 @@ module JiraMule
           @format.map do |col|
             if col.kind_of? Hash then
               str = col[:value] or ""
-              col[:value] = JiraMule::IssueRender.render(str, issue)
+              col[:value] = JiraMule::IssueRender.render(str, issue, @custom_tags)
               col
             else
-              JiraMule::IssueRender.render(col, issue)
+              JiraMule::IssueRender.render(col, issue, @custom_tags)
             end
           end
         end
@@ -130,9 +129,9 @@ module JiraMule
     end
     alias_method :format=, :format
 
-    # This will be for adding computed fields for the output formatter.
-    def add_method(name, &block)
-      # TODO figure this out
+    # Create a custom tag for formatted output
+    def add_tag(name, &block)
+      @custom_tags[name.to_sym] = block
     end
   end
 
@@ -175,11 +174,37 @@ Description: {{description}}
               {:value=>%{{{percent}}},:alignment=>:right},
               {:value=>%{{{duedate}}},:alignment=>:center},
     ]
-#    s.prefix_query = %{assignee = #{} AND }
+#    s.prefix_query = %{assignee = #{$cfg['jira.user']} AND }
+#    s.prefix_query do 
+#      r=[%{assignee = #{$cfg['jira.user']}}]
+#      r << %{project = #{$cfg['jira.project']}} unless $cfg['jira.project'].nil?
+#      r.join(' AND ')
+#    end
 #    s.default_query = %{status = "In Progress"}
 #    s.suffix_query = %{ ORDER BY Rank}
 
-    s.add_method(:estimate) do
+    s.add_tag(:estimate) do
+      "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]
+    end
+    s.add_tag(:progress) do
+      "%.2f"%[(issue[:aggregatetimespent] or 0) / 3600.0]
+    end
+    s.add_tag(:percent) do
+      percent = issue[:workratio]
+      if percent < 0 then
+        estimate = (issue[:aggregatetimeoriginalestimate] or 0) / 3600.0
+        if estimate > 0 then
+          progress = (issue[:aggregatetimespent] or 0) / 3600.0
+          percent = (progress / estimate * 100).floor
+        else
+          percent = 100 # XXX ??? what is this line doing? why is it here?
+        end
+      end
+      if percent > 1000 then
+        ">1000%"
+      else
+        "%.1f"%[percent]
+      end
     end
   end
 
