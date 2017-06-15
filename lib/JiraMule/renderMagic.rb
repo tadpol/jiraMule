@@ -17,11 +17,14 @@ module JiraMule
           progress = (issue[:aggregatetimespent] or 0) / 3600.0
           percent = (progress / estimate * 100).floor
         else
-          percent = 100
+          percent = 100 # XXX ??? what is this line doing? why is it here?
         end
       end
-      percent = 100 if percent > 100
-      "%.1f"%[percent]
+      if percent > 1000 then
+        ">1000%"
+      else
+        "%.1f"%[percent]
+      end
     end
   end
 
@@ -32,6 +35,11 @@ module JiraMule
       end
       @issue = hsh
       self.class.send(:define_method, :issue) {@issue}
+    end
+
+    # We're not doing HTML, so never escape.
+    def escapeHTML(str)
+      str
     end
 
     def self.render(tmpl, issue)
