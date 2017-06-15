@@ -78,9 +78,9 @@ module JiraMule
     end
 
     # takes a single flat array of key names.
-    def fields(args=nil)
-      return @fields if args.nil?
-      @fields = args.flatten.map{|i| i.to_sym}
+    def fields(*args)
+      return @fields if args.empty?
+      @fields = args.flatten.compact.map{|i| i.to_sym}
     end
     alias_method :fields=, :fields
 
@@ -92,16 +92,16 @@ module JiraMule
     end
     alias_method :format_type=, :format_type
 
-    def header(args)
-      return @header if args.nil?
-      @header = args.flatten.map{|i| i.to_sym}
+    def header(*args)
+      return @header if args.empty?
+      @header = args.flatten.compact.map{|i| i.to_sym}
     end
     alias_method :header=, :header
     alias_method :headers=, :header
     alias_method :headers, :header
 
-    def format(args)
-      return @format if args.nil?
+    def format(*args)
+      return @format if args.empty?
       args.flatten! if args.kind_of? Array
       @format = args
     end
