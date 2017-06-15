@@ -12,9 +12,10 @@ module JiraMule
       @prefix_query = nil
       @default_query = nil
       @suffix_query = nil
-        # TODO: Add default query (This should replace the --raw thing.)
+      # TODO: Add default query (This should replace the --raw thing.)
 
-        # TODO: Add bolding rule for rows and/or cells.
+      # TODO: Add bolding rule for rows and/or cells.
+      # Is this something special? or a function of method cells?
       loadit(&block) if block_given?
     end
 
@@ -57,13 +58,14 @@ module JiraMule
       elsif [:table, :table_rows, :table_columns].include? @format_type then
         @format = [@format] unless @format.kind_of? Array
         rows = issues.map do |issue|
+          issue = issue.merge(issue[:fields])
           @format.map do |col|
             if col.kind_of? Hash then
               str = col[:value] or ""
-              col[:value] = JiraMule::IssueRender.render(str, issue.merge(issue[:fields]))
+              col[:value] = JiraMule::IssueRender.render(str, issue)
               col
             else
-              JiraMule::IssueRender.render(col, issue.merge(issue[:fields]))
+              JiraMule::IssueRender.render(col, issue)
             end
           end
         end
