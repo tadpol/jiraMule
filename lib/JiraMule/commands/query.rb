@@ -49,10 +49,9 @@ command :query do |c|
 #    args.unshift("assignee = #{jira.username} AND") unless options.raw
 #    args.unshift("project = #{jira.project} AND") unless options.raw
     if args.count == 1 and not args.first.include?('=') then
-      q = "key=#{jira.expandKeys([args.first]).first}"
-    else
-      q = args.join(' ')
+      args = ["key=#{jira.expandKeys([args.first]).first}"]
     end
+    q = theStyle.build_query(*args)
     issues = jira.getIssues(q, fields)
 
     if options.json then

@@ -83,24 +83,41 @@ module JiraMule
       opts = args.pop if args.last.kind_of? Hash
 
       # If nothing from user, and there is a default, start with that.
-      args = @default_query if args.empty? and not @default_query.nil?
-      args = [args] unless args.kind_of? Array
+      if args.empty? and not @default_query.nil? then
+        case @default_query
+        when Array
+          args = @default_query.join(' AND ')
+        when Proc
+          args = @default_query.call()
+        else
+          args = @default_query.to_s
+        end
+        args = [args] unless args.kind_of? Array
+      end
 
-      # if prefix is an Array, stick it on the front.
-      args.unshift(@prefix_query) if not @prefix_query.nil? and @prefix_query.kind_of? Array
-      # if suffix is an Array, stick it on the back.
-      args.push(@suffix_query) if not @suffix_query.nil? and @suffix_query.kind_of? Array
+      # Get prefix as a String.
+      case @prefix_query
+      when Array
+        prefix = @prefix_query.join(' AND ') + ' AND'
+      when Proc
+        prefix = @prefix_query.call()
+      else
+        prefix = @prefix_query.to_s
+      end
+      args.unshift(prefix)
 
-      # convert args to String with AND
-      query = args.flatten.compact.join(' AND ')
+      # Get suffix as a String.
+      case @suffix_query
+      when Array
+        suffix = 'AND ' + @suffix_query.join(' AND ')
+      when Proc
+        suffix = @suffix_query.call()
+      else
+        suffix = @suffix_query.to_s
+      end
+      args.push(suffix)
 
-      # We do this so we can prefix or suffix things without an 'AND'
-      # if prefix is a String, stick it on the front.
-      query.insert(0, @prefix_query + ' ') if not @prefix_query.nil? and @prefix_query.kind_of? String
-      # if suffix is a String, stick it on the back.
-      query.insert(-1, ' ' + @suffix_query) if not @suffix_query.nil? and @suffix_query.kind_of? String
-
-      query
+      args.flatten.compact.join(' ')
     end
 
     # May need to split this into two classes. One that is the above methods
@@ -192,13 +209,13 @@ Description: {{description}}
               {:value=>%{{{percent}}},:alignment=>:right},
               {:value=>%{{{duedate}}},:alignment=>:center},
     ]
-    s.prefix_query = [%{assignee = -1},
-                      %{project = 44}]
-#    s.prefix_query do 
-#      r=[%{assignee = #{$cfg['jira.user']}}]
-#      r << %{project = #{$cfg['jira.project']}} unless $cfg['jira.project'].nil?
-#      r.join(' AND ')
-#    end
+    # Use lambda when there is logic that needs to be deferred.
+    s.prefix_query = lambda do
+      r = []
+      r << %{assignee = #{$cfg['user.name']}} unless $cfg['user.name'].nil?
+      r << %{project = #{$cfg['jira.project']}} unless $cfg['jira.project'].nil?
+      r.join(' AND ') + ' AND'
+    end
     s.default_query = %{status = "In Progress"}
     s.suffix_query = %{ORDER BY Rank}
 
