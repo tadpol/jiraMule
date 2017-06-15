@@ -48,7 +48,9 @@ module JiraMule
     def apply(issues)
       if @format_type == :strings then
         keys = issues.map do |issue|
-          JiraMule::IssueRender.render(@format, issue.merge(issue[:fields]))
+          fmt = @format
+          fmt = fmt.join(' ') if fmt.kind_of? Array
+          JiraMule::IssueRender.render(fmt, issue.merge(issue[:fields]))
         end
         keys.join("\n")
 
@@ -107,13 +109,13 @@ module JiraMule
     def format_type(type)
       return @format_type if type.nil?
       raise "Unknown format type: \"#{type}\"" unless FORMAT_TYPES.include? type
-      @type = type
+      @format_type = type
     end
     alias_method :format_type=, :format_type
 
     def header(*args)
-      return @header if args.empty?
-      @header = args.flatten.compact.map{|i| i.to_sym}
+      return @headers if args.empty?
+      @headers = args.flatten.compact.map{|i| i.to_sym}
     end
     alias_method :header=, :header
     alias_method :headers=, :header
