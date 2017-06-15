@@ -72,6 +72,25 @@ module JiraMule
       end
     end
 
+    # TODO: Dump method that outputs Ruby
+
+    # Build a query based on this Style and other bits from command line
+    # @param args [Array<String>] Other bits of JQL to use instead of default_query
+    def build_query(*args)
+      opts = {}
+      opts = args.pop if args.last.kind_of? Hash
+      args.flatten!
+      args = @default_query if args.empty? and not @default_query.nil?
+      args.unshift(@prefix_query) unless @prefix_query.nil?
+      args.push(@suffix_query) unless @suffix_query.nil?
+      args.join(' ')
+    end
+
+    # May need to split this into two classes. One that is the above methods
+    # and one that is the below methods.  The below one is used just for the
+    # construction of a Style. While the above is the usage of a style.
+    #
+    # Maybe the above are in a Module, that is included as part of fetch?
     ######################################################
     def name
       @name
@@ -109,6 +128,7 @@ module JiraMule
 
     # This will be for adding computed fields for the output formatter.
     def add_method(name, &block)
+      # TODO figure this out
     end
   end
 
@@ -151,6 +171,9 @@ Description: {{description}}
               {:value=>%{{{percent}}},:alignment=>:right},
               {:value=>%{{{duedate}}},:alignment=>:center},
     ]
+#    s.prefix_query = %{assignee = #{} AND }
+#    s.default_query = %{status = "In Progress"}
+#    s.suffix_query = %{ ORDER BY Rank}
 
     s.add_method(:estimate) do
     end
