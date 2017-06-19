@@ -5,14 +5,12 @@ command :query do |c|
   c.syntax = 'jm query [options] query'
   c.summary = 'Get the keys from a jira query'
   c.description = 'Run a JQL query. '
-  c.example 'Get Open issues and dump everything', %{jm query status=Open --all_fields --json}
-  c.example 'Get All Open issues and dump everything', %{jm query --raw status=Open --all_fields --json}
+  c.example 'Get all Open issues and dump everything', %{jm query status=Open --all_fields --json}
   c.example 'Show info about an issue', %{jm query --style info BUG-24}
   c.example 'Show info about an issue', %{jm info BUG-24}
 
   c.option '--style STYLE', String, 'Which output style to use'
 
-  c.option '--[no-]raw', 'Do not prefix query with project and assignee'
   c.option '--[no-]json', 'Output json reply instead of styled output'
 
   c.option '--fields FIELDS', Array, 'Which fields to return.'
@@ -24,8 +22,7 @@ command :query do |c|
     options.default(
       :json => false,
       :all_fields => false,
-      :style => 'basic',
-      :raw=> true
+      :style => 'basic'
     )
 
     theStyle = JiraMule::Style.fetch(options.style).dup
@@ -45,9 +42,6 @@ command :query do |c|
     end
 
     jira = JiraMule::JiraUtils.new(args, options)
-    # TODO: Grab {prefix,suffix,default}_query from Style
-#    args.unshift("assignee = #{jira.username} AND") unless options.raw
-#    args.unshift("project = #{jira.project} AND") unless options.raw
     if args.count == 1 and not args.first.include?('=') then
       args = ["key=#{jira.expandKeys([args.first]).first}"]
     end
