@@ -59,6 +59,7 @@ module JiraMule
           issue = issue.merge(issue[:fields])
           @format.map do |col|
             if col.kind_of? Hash then
+              col = col.dup
               str = col[:value] or ""
               col[:value] = JiraMule::IssueRender.render(str, issue, @custom_tags)
               col
@@ -219,13 +220,13 @@ Description: {{description}}
     s.default_query = %{status = "In Progress"}
     s.suffix_query = %{ORDER BY Rank}
 
-    s.add_tag(:estimate) do
+    s.add_tag(:estimate) do |issue|
       "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]
     end
-    s.add_tag(:progress) do
+    s.add_tag(:progress) do |issue|
       "%.2f"%[(issue[:aggregatetimespent] or 0) / 3600.0]
     end
-    s.add_tag(:percent) do
+    s.add_tag(:percent) do |issue|
       percent = issue[:workratio]
       if percent < 0 then
         estimate = (issue[:aggregatetimeoriginalestimate] or 0) / 3600.0
