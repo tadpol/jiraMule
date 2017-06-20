@@ -1,5 +1,3 @@
-require 'terminal-table'
-require 'mustache'
 
 command :query do |c|
   c.syntax = 'jm query [options] query'

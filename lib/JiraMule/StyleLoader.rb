@@ -14,9 +14,8 @@ module JiraMule
       @prefix_query = nil
       @default_query = nil
       @suffix_query = nil
-      # TODO: Add default query (This should replace the --raw thing.)
 
-      # TODO: Add bolding rule for rows and/or cells.
+      @bolden_tag = :bolden
 
       block.call(self) if block_given?
     end
@@ -49,7 +48,8 @@ module JiraMule
         keys = issues.map do |issue|
           fmt = @format
           fmt = fmt.join(' ') if fmt.kind_of? Array
-          JiraMule::IssueRender.render(fmt, issue.merge(issue[:fields]), @custom_tags)
+          res = JiraMule::IssueRender.render(fmt, issue.merge(issue[:fields]), @custom_tags)
+          bolden(issue, res)
         end
         keys.join("\n")
 
@@ -61,10 +61,12 @@ module JiraMule
             if col.kind_of? Hash then
               col = col.dup
               str = col[:value] or ""
-              col[:value] = JiraMule::IssueRender.render(str, issue, @custom_tags)
+              res = JiraMule::IssueRender.render(str, issue, @custom_tags)
+              col[:value] = bolden(issue, res)
               col
             else
-              JiraMule::IssueRender.render(col, issue, @custom_tags)
+              res = JiraMule::IssueRender.render(col, issue, @custom_tags)
+              bolden(issue, res)
             end
           end
         end
@@ -72,6 +74,23 @@ module JiraMule
           rows = rows.transpose
         end
         Terminal::Table.new :headings => (@headers or []), :rows=>rows
+      end
+    end
+
+    # If this issue should be bolded or not.
+    def bolden(issue, row, color=:bold)
+      bld = issue[@bolden_tag]
+      bld = @custom_tags[@bolden_tag] if bld.nil?
+      bld = bld.call(issue.dup) if bld.kind_of? Proc
+      # ? truthy other than Ruby default?
+      return row unless bld
+      if row.kind_of? Array then
+        row.map{|r| HighLine.color(r, color)}
+      elsif row.kind_of? Hash then
+        hsh={}
+        row.each_pair{|k,v| hsh[k] = HighLine.color(v, color)}
+      else
+        HighLine.color(row.to_s, color)
       end
     end
 
@@ -220,6 +239,12 @@ Description: {{description}}
     s.default_query = %{status = "In Progress"}
     s.suffix_query = %{ORDER BY Rank}
 
+    s.add_tag(:bolden) do |issue|
+      estimate = (issue[:aggregatetimeoriginalestimate] or 0)
+      progress = (issue[:aggregatetimespent] or 0)
+      due = issue[:duedate]
+      progress > estimate or (not due.nil? and Date.new >= Date.parse(due))
+    end
     s.add_tag(:estimate) do |issue|
       "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]
     end
