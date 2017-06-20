@@ -207,7 +207,7 @@ Description: {{description}}
     s.format [%{{{key}}},
               {:value=>%{{{estimate}}},:alignment=>:right},
               {:value=>%{{{progress}}},:alignment=>:right},
-              {:value=>%{{{percent}}},:alignment=>:right},
+              {:value=>%{{{percent}}%},:alignment=>:right},
               {:value=>%{{{duedate}}},:alignment=>:center},
     ]
     # Use lambda when there is logic that needs to be deferred.
@@ -238,7 +238,7 @@ Description: {{description}}
         end
       end
       if percent > 1000 then
-        ">1000%"
+        ">1000"
       else
         "%.1f"%[percent]
       end
