@@ -1,30 +1,6 @@
 require 'mustache'
 
 module JiraMule
-  module IRExtend
-    # Setup some defaults ones for progress output
-    def estimate
-      "%.2f"%[(issue[:aggregatetimeoriginalestimate] or 0) / 3600.0]
-    end
-    def progress
-      "%.2f"%[(issue[:aggregatetimespent] or 0) / 3600.0]
-    end
-    def percent
-      percent = issue[:workratio]
-      if percent < 0 then
-        estimate = (issue[:aggregatetimeoriginalestimate] or 0) / 3600.0
-        if estimate > 0 then
-          progress = (issue[:aggregatetimespent] or 0) / 3600.0
-          percent = (progress / estimate * 100).floor
-        else
-          percent = 100
-        end
-      end
-      percent = 100 if percent > 100
-      "%.1f"%[percent]
-    end
-  end
-
   class IssueRender < Mustache
     def initialize(hsh)
       hsh.each_pair do |k,v|
@@ -34,13 +10,62 @@ module JiraMule
       self.class.send(:define_method, :issue) {@issue}
     end
 
-    def self.render(tmpl, issue)
-      r = self.new(issue)
-      r.extend(IRExtend)
-      # TODO: also load user defined module. Or wait for DSL.
+    # We're not doing HTML, so never escape.
+    def escapeHTML(str)
+      str
+    end
+
+    def self.render(tmpl, issue, custom_tags={})
+      r = self.new(issue.dup)
+      custom_tags.each_pair do |name, blk|
+        r[name.to_sym] = lambda do
+          blk.call(issue.dup)
+        end
+      end
       r.render(tmpl)
     end
   end
 
+#  # something simpler than Mustache?
+#  class IssueRender2
+#    def initialize(hsh)
+#      @issue = hsh
+#    end
+#    def [](key)
+#      @issue[key]
+#    end
+#    def []=(key,value)
+#      @issue[key] = value
+#    end
+#    def render(tmpl)
+#      tmpl.to_s.gsub(/%(.*)%/) do
+#        if $& == '%%' then
+#          '%'
+#        elsif @issue.has_key?($1.to_sym) then
+#          v = @issue[$1.to_sym]
+#          pp v
+#          if v.kind_of?(Proc) then
+#            #v.call(@issue.dup)
+#            v[@issue.dup]
+#          else
+#            v.to_s
+#          end
+#        else
+#          # No replacements, just return what we found.
+#          $&
+#        end
+#      end
+#    end
+#
+#    def self.render(tmpl, issue, custom_tags={})
+#      r = self.new(issue)
+#      custom_tags.each_pair do |name, blk|
+#        r[name.to_sym] = blk
+#      end
+#      r.render(tmpl)
+#    end
+#
+#  end
 end
+
 #  vim: set ai et sw=2 ts=2 :
