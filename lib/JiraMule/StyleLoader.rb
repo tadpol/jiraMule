@@ -105,7 +105,7 @@ module JiraMule
       else
         prefix = @prefix_query.to_s
       end
-      args.unshift(prefix)
+      args.unshift(prefix) unless opts.has_key? :noprefix
 
       # Get suffix as a String.
       case @suffix_query
@@ -116,7 +116,7 @@ module JiraMule
       else
         suffix = @suffix_query.to_s
       end
-      args.push(suffix)
+      args.push(suffix) unless opts.has_key? :nosuffix
 
       args.flatten.compact.join(' ')
     end

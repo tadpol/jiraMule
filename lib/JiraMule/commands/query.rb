@@ -16,13 +16,18 @@ command :query do |c|
   c.option '--fields FIELDS', Array, 'Which fields to return.'
   c.option '--all_fields', 'Return all fields'
 
+  c.option '--[no-]prefix', %{Use the style's query prefix}
+  c.option '--[no-]suffix', %{Use the style's query suffix}
+
   c.option '-d', '--dump', 'Dump the style to STDOUT as yaml'
 
   c.action do |args, options|
     options.default(
       :json => false,
       :all_fields => false,
-      :style => 'basic'
+      :style => 'basic',
+      :prefix => true,
+      :suffix => true,
     )
 
     theStyle = JiraMule::Style.fetch(options.style).dup
@@ -45,6 +50,10 @@ command :query do |c|
     if args.count == 1 and not args.first.include?('=') then
       args = ["key=#{jira.expandKeys([args.first]).first}"]
     end
+    opts = {}
+    opts[:noprefix] = true unless options.prefix
+    opts[:nosuffix] = true unless options.suffix
+    args.push(opts) unless opts.empty?
     q = theStyle.build_query(*args)
     issues = jira.getIssues(q, fields)
 
