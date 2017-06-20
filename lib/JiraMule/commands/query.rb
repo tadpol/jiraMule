@@ -64,5 +64,6 @@ command :query do |c|
 end
 alias_command :q, :query
 alias_command :info, :query, '--style', 'info'
+alias_command :progress, :query, '--style', 'progress'
 
 #  vim: set sw=2 ts=2 :
