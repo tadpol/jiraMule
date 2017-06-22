@@ -229,7 +229,10 @@ Description: {{description}}
     s.prefix_query = lambda do
       r = []
       r << %{assignee = #{$cfg['user.name']}} unless $cfg['user.name'].nil?
-      r << %{project = #{$cfg['jira.project']}} unless $cfg['jira.project'].nil?
+      prjs = $cfg['jira.project']
+      unless prjs.nil? then
+        r << '(' + prjs.split(' ').map{|prj| %{project = #{prj}}}.join(' OR ') + ')'
+      end
       r.join(' AND ') + ' AND'
     end
     s.default_query = %{status = "In Progress"}
