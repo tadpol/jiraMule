@@ -272,7 +272,7 @@ Description: {{description}}
   Style.add(:todo) do |s|
     s.fields [:key, :summary]
     s.header = "## Todo\n"
-    s.format %{- {{key}} {{summary}}}
+    s.format %{- {{key}}\t{{summary}}}
 
     # Use lambda when there is logic that needs to be deferred.
     s.prefix_query = lambda do
@@ -284,7 +284,20 @@ Description: {{description}}
       end
       r.join(' AND ') + ' AND'
     end
-    s.default_query = %{status = "In Progress"}
+    s.default_query = '(' + [%{status = Open},
+                       %{status = Reopened},
+                       %{status = "On Deck"},
+                       %{status = "Waiting Estimation Approval"},
+                       %{status = "Reopened"},
+                       %{status = "Testing (Signoff)"},
+                       %{status = "Testing (Review)"},
+                       %{status = "Testing - Bug Found"},
+                       %{status = "Backlog"},
+                       %{status = "Ready For Dev"},
+                       %{status = "Ready For QA"},
+                       %{status = "To Do"},
+                       %{status = "Release Package"},
+    ].join(' OR ') + ')'
     s.suffix_query = %{ORDER BY Rank}
   end
 
