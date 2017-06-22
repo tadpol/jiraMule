@@ -5,7 +5,8 @@ module JiraMule
     def initialize(name, &block)
       @name = name.to_sym
       @fields = [:key, :summary]
-      @headers = [:key, :summary]
+      @header = [:key, :summary]
+      @footer = nil
       @format_type = :strings
       @format = %{{{key}} {{summary}}}
 
@@ -51,7 +52,7 @@ module JiraMule
           res = JiraMule::IssueRender.render(fmt, issue.merge(issue[:fields]), @custom_tags)
           bolden(issue, res)
         end
-        keys.join("\n")
+        (@header or '').to_s + keys.join("\n") + (@footer or '').to_s
 
       elsif [:table, :table_rows, :table_columns].include? @format_type then
         @format = [@format] unless @format.kind_of? Array
@@ -73,7 +74,9 @@ module JiraMule
         if @format_type == :table_columns then
           rows = rows.transpose
         end
-        Terminal::Table.new :headings => (@headers or []), :rows=>rows
+        header = (@header or [])
+        header = [header] unless header.kind_of? Array
+        Terminal::Table.new :headings => header, :rows=>rows
       end
     end
 
@@ -148,6 +151,7 @@ module JiraMule
     ######################################################
 
     attr_accessor :prefix_query, :suffix_query, :default_query
+    attr_accessor :header
 
     def name
       @name
@@ -167,14 +171,6 @@ module JiraMule
       @format_type = type
     end
     alias_method :format_type=, :format_type
-
-    def header(*args)
-      return @headers if args.empty?
-      @headers = args.flatten.compact.map{|i| i.to_sym}
-    end
-    alias_method :header=, :header
-    alias_method :headers=, :header
-    alias_method :headers, :header
 
     def format(*args)
       return @format if args.empty?
@@ -214,7 +210,7 @@ Description: {{description}}
   Style.add(:test_table) do |s|
     s.fields [:key, :assignee]
     s.format_type :table_columns
-    s.header nil
+    s.header = nil
     s.format [%{{{key}}}, %{{{assignee.displayName}}}]
   end
 
@@ -222,7 +218,7 @@ Description: {{description}}
     s.fields [:key, :workratio, :aggregatetimespent, :duedate,
               :aggregatetimeoriginalestimate]
     s.format_type :table_rows
-    s.header [:key, :estimated, :progress, :percent, :due]
+    s.header = [:key, :estimated, :progress, :percent, :due]
     s.format [%{{{key}}},
               {:value=>%{{{estimate}}},:alignment=>:right},
               {:value=>%{{{progress}}},:alignment=>:right},
