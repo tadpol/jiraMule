@@ -269,5 +269,24 @@ Description: {{description}}
     end
   end
 
+  Style.add(:todo) do |s|
+    s.fields [:key, :summary]
+    s.header = "## Todo\n"
+    s.format %{- {{key}} {{summary}}}
+
+    # Use lambda when there is logic that needs to be deferred.
+    s.prefix_query = lambda do
+      r = []
+      r << %{assignee = #{$cfg['user.name']}} unless $cfg['user.name'].nil?
+      prjs = $cfg['jira.project']
+      unless prjs.nil? then
+        r << '(' + prjs.split(' ').map{|prj| %{project = #{prj}}}.join(' OR ') + ')'
+      end
+      r.join(' AND ') + ' AND'
+    end
+    s.default_query = %{status = "In Progress"}
+    s.suffix_query = %{ORDER BY Rank}
+  end
+
 end
 #  vim: set ai et sw=2 ts=2 :
