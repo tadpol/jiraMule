@@ -235,7 +235,7 @@ Description: {{description}}
       end
       r.join(' AND ') + ' AND'
     end
-    s.default_query = %{status = "In Progress"}
+    s.default_query = %{(status = "In Progress" OR status = "In Design/Estimation")}
     s.suffix_query = %{ORDER BY Rank}
 
     s.add_tag(:bolden) do |issue|
