@@ -10,6 +10,7 @@ require 'JiraMule/commands/next'
 require 'JiraMule/commands/open'
 require 'JiraMule/commands/query'
 require 'JiraMule/commands/timesheet'
+require 'JiraMule/commands/spenton'
 require 'JiraMule/commands/statuses'
 
 #require 'JiraMule/commands/release'
