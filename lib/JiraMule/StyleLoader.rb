@@ -191,12 +191,14 @@ module JiraMule
   Style.add(:basic) do |s|
     s.fields [:key, :summary]
     s.format %{{{key}} {{summary}}}
+    s.header = nil
   end
 
   Style.add(:info) do |s|
     s.fields [:key, :summary, :description, :assignee, :reporter, :priority,
               :issuetype, :status, :resolution, :votes, :watches]
-    s.format %{{{key}}
+    s.header = nil
+    s.format %{        Key: {{key}}
     Summary: {{summary}}
    Reporter: {{reporter.displayName}}
    Assignee: {{assignee.displayName}}
