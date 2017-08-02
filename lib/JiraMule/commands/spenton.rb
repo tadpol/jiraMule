@@ -41,6 +41,7 @@ command :spenton do |c|
     selected = wls.select{|i| keys.include? i.access('issue.key')}
 
     total = selected.map{|k| k[:timeSpentSeconds] }.reduce(:+)
+    total = 0 if total.nil?
     ChronicDuration.hours_per_day = options.hours_in_day
     ChronicDuration.days_per_week = options.days_in_week
     total = ChronicDuration.output(total, :format=>:short)
