@@ -13,8 +13,8 @@ command :spenton do |c|
   }
   c.option '--start DATE', String, ''
   c.option '--end DATE', String, ''
-  c.option '--hours-in-day HOURS', Integer, 'How many hours are in a day (24)'
-  c.option '--days-in-week DAYS', Integer, 'How many days are in a week (24)'
+  c.option '--hours-in-day HOURS', Integer, 'How many hours are in a day (8)'
+  c.option '--days-in-week DAYS', Integer, 'How many days are in a week (5)'
   c.option '--[no-]list', 'Show all the days'
 
   c.action do |args, options|
