@@ -17,7 +17,7 @@ command :timesheet do |c|
 
   c.option '--project PROJECTS', Array, 'Limit results to specific projects'
 
-  #c.option '--prev COUNT', Integer, 'Look at previous weeks'
+  c.option '--prev COUNT', Integer, 'Look at previous weeks'
   c.option '--starts_on DAY', String, 'Which day does the week start on'
 
   c.action do |args, options|
@@ -38,6 +38,11 @@ command :timesheet do |c|
     end
     while not dayTo.wday == (7-dayShift) do
       dayTo = dayTo.next_day
+    end
+
+    if not options.prev.nil? then
+      dayFrom = dayFrom.prev_day(options.prev * 7)
+      dayTo = dayTo.prev_day(options.prev * 7)
     end
 
     # Get keys to get worklogs from
