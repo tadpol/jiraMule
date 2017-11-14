@@ -274,7 +274,7 @@ Description: {{description}}
   Style.add(:todo) do |s|
     s.fields [:key, :summary]
     s.header = "## Todo\n"
-    s.format %{- {{key}}\t{{summary}}}
+    s.format %{- {{fixkey}}\t{{summary}}}
 
     # Use lambda when there is logic that needs to be deferred.
     s.prefix_query = lambda do
@@ -301,6 +301,10 @@ Description: {{description}}
                        %{status = "Release Package"},
     ].join(' OR ') + ')'
     s.suffix_query = %{ORDER BY Rank}
+
+    s.add_tag(:fixkey) do |issue|
+      "%-10s" % issue[:key]
+    end
   end
 
 end
