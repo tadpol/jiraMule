@@ -307,5 +307,17 @@ Description: {{description}}
     end
   end
 
+
+  Style.add(:comments) do |s|
+    s.fields [:key, :comment]
+    s.header = nil
+    s.format %{{{#comment.comments}}
+---------------------------------------------
+> {{author.displayName}} {{created}}  {{editied}}
+{{body}}
+{{/comment.comments}}
+    }
+  end
+
 end
 #  vim: set ai et sw=2 ts=2 :
