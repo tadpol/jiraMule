@@ -3,6 +3,8 @@ require 'mustache'
 require 'yaml'
 require 'JiraMule/jiraUtils'
 
+# This takes the result of multiple queries and displays it.
+# `query` does this for a single.
 command :kanban do |c|
   extra_columns = []
   c.syntax = 'jm query [options] kanban'

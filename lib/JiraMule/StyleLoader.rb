@@ -1,6 +1,8 @@
 
 
 module JiraMule
+  # Style is a formula for formatting the results of a query.
+  # This currently only works with single queries.
   class Style
     def initialize(name, &block)
       @name = name.to_sym
@@ -186,7 +188,9 @@ module JiraMule
 
   end
 
-
+##############################################################################
+##############################################################################
+##############################################################################
 
   Style.add(:basic) do |s|
     s.fields [:key, :summary]
