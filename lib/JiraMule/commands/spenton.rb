@@ -17,7 +17,7 @@ command :spenton do |c|
   c.option '--days-in-week DAYS', Integer, 'How many days are in a week (5)'
 
   c.action do |args, options|
-    options.default :start => 'yesterday',
+    options.default :start => Date.new(Date.today.year,1,1),
       :end => 'today',
       :hours_in_day => 8,
       :days_in_week => 5
@@ -28,7 +28,6 @@ command :spenton do |c|
     # Get keys to get worklogs from
     keys = jira.expandKeys(args).map{|i| i.upcase}
     jira.printVars(:keys=>keys) if $cfg['tool.verbose']
-    # TODO: if multiple keys, build table columns
 
     dayFrom = Chronic.parse options.start
     dayTo = Chronic.parse options.end
