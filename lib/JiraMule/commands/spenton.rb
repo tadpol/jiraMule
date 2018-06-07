@@ -15,7 +15,6 @@ command :spenton do |c|
   c.option '--end DATE', String, ''
   c.option '--hours-in-day HOURS', Integer, 'How many hours are in a day (8)'
   c.option '--days-in-week DAYS', Integer, 'How many days are in a week (5)'
-  c.option '--[no-]list', 'Show all the days'
 
   c.action do |args, options|
     options.default :start => 'yesterday',
@@ -35,32 +34,51 @@ command :spenton do |c|
     dayTo = Chronic.parse options.end
     jira.printVars(:from=>dayFrom,:to=>dayTo) if $cfg['tool.verbose']
 
+    # Using tempo worklog API because it allows fetching just a range.
+    # gah.
+    # tempo worklog API lets you pick a date range, but not which tickets.
+    # Jira worklog is per ticket, but you get everything. (and likely be paginated.)
+    # JQL won't get worklogs. (?)
+    #
+    # So either way, we get too much and need to post filter.
     wls = tempo.workLogs(jira.username, dayFrom.iso8601, dayTo.iso8601)
 
     # filter out entries not in keys.
-    selected = wls.select{|i| keys.include? i.access('issue.key')}
+    wls = wls.select{|i| keys.include? i.access('issue.key')}
+    # Group by the keys
+    wls = wls.group_by{|i| i.access('issue.key')}
+    wls.transform_values! {|issues| issues.group_by {|i| Date.parse(i[:dateStarted]).mon / 3} } # by month
+    wls.transform_values! {|issues| issues.transform_values! {|groups| groups.map{|k| k[:timeSpentSeconds]}.reduce(:+)}}
 
-    total = selected.map{|k| k[:timeSpentSeconds] }.reduce(:+)
-    total = 0 if total.nil?
+    wls.transform_values! {|issues| issues.merge({:total=>issues.values.reduce(:+)})}
     ChronicDuration.hours_per_day = options.hours_in_day
     ChronicDuration.days_per_week = options.days_in_week
-    total = ChronicDuration.output(total, :format=>:short)
+    wls.transform_values! {|issues| issues.transform_values! {|worked| ChronicDuration.output(worked, :format=>:short)}}
 
-    unless options.list then
-      say total
-    else
-      lst = selected.map do |k|
-        [ Chronic.parse(k[:dateStarted]).strftime('%F'),
-          ChronicDuration.output(k[:timeSpentSeconds])]
-      end
-      tbl = Terminal::Table.new do |t|
-        t.rows = lst
-        t.add_separator
-        t.add_row ['TOTAL:', total]
-      end
-      puts tbl
-    end
+    # Now group by: Quarter, year, ?
+    # grped = selected.group_by do |i|
+    #   # if by <Quarter>, return date rounded down to <Quarter> start
 
+    #   by_year = Date.parse(i[:dateStarted]).year
+    #   by_month = Date.parse(i[:dateStarted]).mon
+    #   by_quarter = Date.parse(i[:dateStarted]).mon % 4
+    #   return by_quarter
+    # end
+
+
+    # want rows to be tickets, columns to be the groups.
+    headers = wls.values.map{|is| is.keys }.flatten.uniq
+    # make total the last one
+    headers.delete(:total)
+    headers.push(:total)
+
+    rows = []
+    wls.each {|k,v| rows << [k] + headers.map{|h| v[h]}}
+
+    headers.unshift(:issue)
+
+    tbl = Terminal::Table.new :headings => headers, :rows => rows
+    puts tbl
   end
 end
 
