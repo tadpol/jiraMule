@@ -46,7 +46,7 @@ command :spenton do |c|
     wls = wls.select{|i| keys.include? i.access('issue.key')}
     # Group by the keys
     wls = wls.group_by{|i| i.access('issue.key')}
-    wls.transform_values! {|issues| issues.group_by {|i| Date.parse(i[:dateStarted]).mon / 3} } # by month
+    wls.transform_values! {|issues| issues.group_by {|i| (Date.parse(i[:dateStarted]).mon - 1) / 3} } # by month
     wls.transform_values! {|issues| issues.transform_values! {|groups| groups.map{|k| k[:timeSpentSeconds]}.reduce(:+)}}
 
     wls.transform_values! {|issues| issues.merge({:total=>issues.values.reduce(:+)})}
