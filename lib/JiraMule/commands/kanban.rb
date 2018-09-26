@@ -184,7 +184,7 @@ Formatting is done with Mustash.
       cW = -1 if cW == 0
       cWR = cW
       if format[:usetable] and cW > 0 then
-        borders = 4 + (columns.count * 3);   # 2 on left, 2 on right, 3 for each internal
+        borders = 5 + (columns.count * 3);   # 2 on left, 3 on right, 3 for each internal
         cW = (cW - borders) / columns.count
         cWR = cW + ((cW - borders) % columns.count)
       end
@@ -196,9 +196,9 @@ Formatting is done with Mustash.
           line = Mustache.render(format[:item], issue.merge(issue[:fields]))
           #### Trim length?
           if format[:order].last == name
-            line[0..cWR]
+            line = line.split("\n").map{|l| l[0..cWR]}.join("\n")
           else
-            line[0..cW]
+            line = line.split("\n").map{|l| l[0..cW]}.join("\n")
           end
         end
       end
