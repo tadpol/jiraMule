@@ -18,6 +18,7 @@ command :query do |c|
   c.option '--[no-]suffix', %{Use the style's query suffix}
 
   c.option '-d', '--dump', 'Dump the style to STDOUT as yaml'
+  c.option '-p', '--print', 'Show actual query being used'
 
   c.action do |args, options|
     options.default(
@@ -53,6 +54,7 @@ command :query do |c|
     opts[:nosuffix] = true unless options.suffix
     args.push(opts) unless opts.empty?
     q = theStyle.build_query(*args)
+    puts q if options.print
     issues = jira.getIssues(q, fields)
 
     if options.json then
