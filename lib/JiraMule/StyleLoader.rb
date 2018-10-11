@@ -107,17 +107,18 @@ module JiraMule
       opts = {}
       opts = args.pop if args.last.kind_of? Hash
 
-      # If nothing from user, and there is a default, start with that.
-      if args.empty? and not @default_query.nil? then
+      # Add the default query, if there is one
+      if not @default_query.nil? then
+        # make sure there is an AND if working with a cmdline supplied part
+        args.push('AND') unless args.empty?
         case @default_query
         when Array
-          args = @default_query.join(' AND ')
+          args.push @default_query.join(' AND ')
         when Proc
-          args = @default_query.call()
+          args.push @default_query.call()
         else
-          args = @default_query.to_s
+          args.push @default_query.to_s
         end
-        args = [args] unless args.kind_of? Array
       end
 
       # Get prefix as a String.
@@ -290,19 +291,8 @@ Description: {{description}}
       end
       r.join(' AND ') + ' AND'
     end
-    s.default_query = '(' + [%{status = Open},
-                       %{status = Reopened},
+    s.default_query = '(' + [
                        %{status = "On Deck"},
-                       %{status = "Waiting Estimation Approval"},
-                       %{status = "Reopened"},
-                       %{status = "Testing (Signoff)"},
-                       %{status = "Testing (Review)"},
-                       %{status = "Testing - Bug Found"},
-                       %{status = "Backlog"},
-                       %{status = "Ready For Dev"},
-                       %{status = "Ready For QA"},
-                       %{status = "To Do"},
-                       %{status = "Release Package"},
     ].join(' OR ') + ')'
     s.suffix_query = %{ORDER BY Rank}
 
