@@ -11,11 +11,3 @@ require 'JiraMule/commands/query'
 require 'JiraMule/commands/timesheet'
 require 'JiraMule/commands/spenton'
 require 'JiraMule/commands/statuses'
-
-#require 'JiraMule/commands/release'
-#require 'JiraMule/commands/testReady'
-# difference between testReady and release is two things:
-# 1. testReady also assigns
-# 2. release also transitions
-#
-# So, merge all that into one command and have the parts be --options; maybe
