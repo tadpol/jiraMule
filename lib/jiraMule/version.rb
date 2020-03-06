@@ -1,3 +1,3 @@
 module JiraMule
-  VERSION = '0.2.1.alpha'.freeze
+  VERSION = '0.3.0'.freeze
 end
