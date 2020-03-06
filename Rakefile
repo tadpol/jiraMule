@@ -22,32 +22,29 @@ task :echo do
     puts builtGem
 end
 
-namespace :git do
-    desc "Push only develop, master, and tags to origin"
-    task :origin do
-        sh %{git push origin develop}
-        sh %{git push origin master}
-        sh %{git push origin --tags}
-    end
-
-#    desc "Push only develop, master, and tags to upstream"
-#    task :upstream do
-#        sh %{git push upstream develop}
-#        sh %{git push upstream master}
-#        sh %{git push upstream --tags}
-#    end
-
-    desc "Push to origin and upstream"
-    task :all => [:origin]
-end
-
 task :gemit do
-    mrt=Bundler::GemHelper.gemspec.version
-    sh %{git checkout v#{mrt}}
+    sh %{git checkout #{tagName}}
     Rake::Task[:build].invoke
-    Rake::Task[:bob].invoke
     Rake::Task['push:gem'].invoke
     sh %{git checkout develop}
+end
+
+namespace :release do
+    desc "Open a release branch"
+    task :open, [:version] do |t, args|
+        sh %{git checkout master}
+        sh %{git checkout -b release/v#{args[:version]}}
+        sh %{sed -i -e "s/VERSION = .*/VERSION = 'v#{args[:version]}'.freeze/" lib/JiraMule/version.rb}
+        sh %{git commit lib/JiraMule/version.rb}
+    end
+
+    desc "Close a release branch"
+    task :close, [:version] do |t, args|
+        sh %{git checkout develop && git merge release/v#{args[:version]}}
+        sh %{git checkout master && git merge release/v#{args[:version]}}
+        sh %{git tag "v#{args[:version]}" -m "Release v#{args[:version]}"}
+        sh %{git branch -d release/v#{args[:version]}}
+    end
 end
 
 namespace :push do
