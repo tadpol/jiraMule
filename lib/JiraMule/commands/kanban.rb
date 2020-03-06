@@ -3,6 +3,8 @@ require 'mustache'
 require 'yaml'
 require 'JiraMule/jiraUtils'
 
+# This takes the result of multiple queries and displays it.
+# `query` does this for a single.
 command :kanban do |c|
   extra_columns = []
   c.syntax = 'jm query [options] kanban'
@@ -57,25 +59,20 @@ Formatting is done with Mustash.
         :format => {
           :heading => "#### {{column}}",
           :item => "- {{key}} {{summary}}",
-          :order => [:Done, :Testing, :InProgress, :Todo],
+          :order => [:Done, :CodeReview, :InProgress, :Todo],
         },
         :columns => {
-          :Done => [%{status = 'Pending Release'}],
-          :Testing => [%{status = Testing}],
+          :Done => [%{(},
+            %{status = "Dev Complete" OR},
+            %{status = "Closed" OR},
+            %{status = "Ready for QA" OR},
+            %{status = "Ready for Release to Production" OR},
+            %{status = "Testing/QA"},
+            %{)}
+          ],
+          :CodeReview => [%{status = "Code Review"}],
           :InProgress => [%{status = "In Progress"}],
-          :Todo => [%{(status = Open OR},
-               %{status = Reopened OR},
-               %{status = "On Deck" OR},
-               %{status = "Waiting Estimation Approval" OR},
-               %{status = "Reopened" OR},
-               %{status = "Testing (Signoff)" OR},
-               %{status = "Testing (Review)" OR},
-               %{status = "Testing - Bug Found" OR},
-               %{status = "Backlog" OR},
-               %{status = "Ready For Dev" OR},
-               %{status = "Ready For QA" OR},
-               %{status = "To Do" OR},
-               %{status = "Release Package")},],
+          :Todo => [ %{status = "On Deck"}],
         },
 
       },
@@ -84,32 +81,21 @@ Formatting is done with Mustash.
         :format => {
           :heading => "{{column}}",
           :item => "{{key}}\n {{summary}}",
-          :order => [:Todo, :InProgress, :Done],
+          :order => [:Todo, :InProgress, :CodeReview, :Done],
           :usetable => true
         },
         :columns => {
-          :Done => [%{(status = Released OR status = "Not Needed - Closed")}],
-          :InProgress => [%{(status = "In Progress" OR},
-                          %{status = "In Dev" OR},
-                          %{status = "Pending Release" OR},
-                          %{status = "In QA" OR},
-                          %{status = "Integration QA" OR},
-                          %{status = "In Design")},
-                  ],
-          :Todo => [%{(status = Open OR},
-               %{status = Reopened OR},
-               %{status = "On Deck" OR},
-               %{status = "Waiting Estimation Approval" OR},
-               %{status = "Reopened" OR},
-               %{status = "Testing (Signoff)" OR},
-               %{status = "Testing (Review)" OR},
-               %{status = "Testing - Bug Found" OR},
-               %{status = "Backlog" OR},
-               %{status = "Ready For Dev" OR},
-               %{status = "Ready For QA" OR},
-               %{status = "To Do" OR},
-               %{status = "Release Package")},
-            ],
+          :Done => [%{(},
+            %{status = "Dev Complete" OR},
+            %{status = "Closed" OR},
+            %{status = "Ready for QA" OR},
+            %{status = "Ready for Release to Production" OR},
+            %{status = "Testing/QA"},
+            %{)}
+          ],
+          :InProgress => [%{status = "In Progress"}],
+          :Todo => [ %{(status = "On Deck")} ],
+          :CodeReview => [%{(status = "Code Review")}],
         },
       },
       :taskpaper => {
@@ -120,8 +106,7 @@ Formatting is done with Mustash.
         },
         :columns => {
           :InProgress => %{status = "In Progress"},
-          :Todo => [%{(status = Open OR},
-               %{status = "Testing - Bug Found")}],
+          :Todo => [%{status = "On Deck"}],
         }
       },
     }
@@ -199,7 +184,7 @@ Formatting is done with Mustash.
       cW = -1 if cW == 0
       cWR = cW
       if format[:usetable] and cW > 0 then
-        borders = 4 + (columns.count * 3);   # 2 on left, 2 on right, 3 for each internal
+        borders = 5 + (columns.count * 3);   # 2 on left, 3 on right, 3 for each internal
         cW = (cW - borders) / columns.count
         cWR = cW + ((cW - borders) % columns.count)
       end
@@ -211,9 +196,9 @@ Formatting is done with Mustash.
           line = Mustache.render(format[:item], issue.merge(issue[:fields]))
           #### Trim length?
           if format[:order].last == name
-            line[0..cWR]
+            line = line.split("\n").map{|l| l[0..cWR]}.join("\n")
           else
-            line[0..cW]
+            line = line.split("\n").map{|l| l[0..cW]}.join("\n")
           end
         end
       end

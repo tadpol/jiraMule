@@ -33,12 +33,13 @@ already.  Rather this is specific to things I need.
   s.add_runtime_dependency('mime-types-data', '~> 3.2016')
   s.add_runtime_dependency('multipart-post', '~> 2.0.0')
   s.add_runtime_dependency('mustache', '~> 1.0')
+  s.add_runtime_dependency('octokit', '~> 4.0')
   s.add_runtime_dependency('terminal-table', '~> 1.4.5')
   s.add_runtime_dependency('vine', '~> 0.2')
   s.add_runtime_dependency('zip', '~> 2.0.0')
 
-  s.add_development_dependency('bundler', '~> 1.12.0')
-  s.add_development_dependency('rspec', '~> 3.2')
+  s.add_development_dependency('bundler')
+  s.add_development_dependency('rspec')
   s.add_development_dependency('rake')
 end
 
