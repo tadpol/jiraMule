@@ -17,6 +17,10 @@ command :query do |c|
   c.option '--[no-]prefix', %{Use the style's query prefix}
   c.option '--[no-]suffix', %{Use the style's query suffix}
 
+  c.option '--[no-]current_user', %{Prefix a query for the current user}
+  c.option '--[no-]current_sprint', %{Prefix a query for the current sprint}
+  c.option '--[no-]current_projects', %{Prefix a query for the current projects}
+
   c.option '-d', '--dump', 'Dump the style to STDOUT as yaml'
   c.option '-p', '--print', 'Show actual query being used'
 
@@ -39,6 +43,10 @@ command :query do |c|
     fields = theStyle.fields
     fields = options.fields if options.fields
     fields = [] if options.all_fields
+
+    theStyle.current_user = options.current_user if options.__hash__.has_key?(:current_user)
+    theStyle.current_sprint = options.current_sprint if options.__hash__.has_key?(:current_sprint)
+    theStyle.current_projects = options.current_projects if options.__hash__.has_key?(:current_projects)
 
     if options.dump then
       puts theStyle.to_yaml
