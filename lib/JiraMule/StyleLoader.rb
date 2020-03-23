@@ -17,11 +17,23 @@ module JiraMule
       @prefix_query = nil
       @default_query = nil
       @suffix_query = nil
+      @current_user = false
+      @current_sprint = false
+      @current_projects = false
 
       @bolden_tag = :bolden
 
       block.call(self) if block_given?
     end
+    # TODO: Add support for having groups (columns or rows?) that are built from JSON 
+    # filters (JSONPath? (gem i jsonpath))
+    # Looking to implement/replace kanban.
+    #
+    # Groups is a map of group names => JSONPaths
+    # order is an array of group names.
+    # ?Also should add group_header and group_footer?
+    #
+    # Then in apply, if groups, first step collects by groups. Then format issues in each group.
 
     ######################################################
     def self.add(style, &block)
@@ -121,6 +133,16 @@ module JiraMule
         end
       end
 
+      # Apply 'standard' prefix queries. These are seperate from the style's prefix query.
+      args.unshift(%{assignee = currentUser() AND}) if @current_user
+      args.unshift(%{sprint in openSprints() AND sprint not in futureSprints() AND}) if @current_sprint
+      if @current_projects then
+          prjs = $cfg['jira.project']
+          unless prjs.nil? then
+            args.unshift('(' + prjs.split(' ').map{|prj| %{project = #{prj}}}.join(' OR ') + ') AND')
+          end
+      end
+
       # Get prefix as a String.
       case @prefix_query
       when Array
@@ -155,6 +177,7 @@ module JiraMule
 
     attr_accessor :prefix_query, :suffix_query, :default_query
     attr_accessor :header
+    attr_accessor :current_projects, :current_sprint, :current_user
 
     def name
       @name
@@ -238,16 +261,9 @@ Description: {{description}}
               {:value=>%{{{percent}}%},:alignment=>:right},
               {:value=>%{{{duedate}}},:alignment=>:center},
     ]
-    # Use lambda when there is logic that needs to be deferred.
-    s.prefix_query = lambda do
-      r = []
-      r << %{assignee = #{$cfg['user.name']}} unless $cfg['user.name'].nil?
-      prjs = $cfg['jira.project']
-      unless prjs.nil? then
-        r << '(' + prjs.split(' ').map{|prj| %{project = #{prj}}}.join(' OR ') + ')'
-      end
-      r.join(' AND ') + ' AND'
-    end
+    s.current_user = true
+    s.current_sprint = true
+    s.current_projects = true
     s.default_query = %{(status = "In Progress" OR status = "In Design/Estimation")}
     s.suffix_query = %{ORDER BY Rank}
 
@@ -286,17 +302,10 @@ Description: {{description}}
     s.fields [:key, :summary]
     s.header = "## Todo\n"
     s.format %{- {{fixkey}}\t{{summary}}}
+    s.current_user = true
+    s.current_sprint = true
+    s.current_projects = true
 
-    # Use lambda when there is logic that needs to be deferred.
-    s.prefix_query = lambda do
-      r = []
-      r << %{assignee = #{$cfg['user.name']}} unless $cfg['user.name'].nil?
-      prjs = $cfg['jira.project']
-      unless prjs.nil? then
-        r << '(' + prjs.split(' ').map{|prj| %{project = #{prj}}}.join(' OR ') + ')'
-      end
-      r.join(' AND ') + ' AND'
-    end
     s.default_query = '(' + [
                        %{status = "On Deck"},
     ].join(' OR ') + ')'
