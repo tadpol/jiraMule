@@ -1,5 +1,7 @@
 # jiraMule
 
+This has been archived in favor of https://github.com/tadpol/ucr
+
 ## Install
 
 ### From source
